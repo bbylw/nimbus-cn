@@ -1,103 +1,103 @@
 ---
-title: Components
-description: The components every page can use, and the MDX that renders each one.
+title: 组件
+description: 每个页面都能直接使用的组件，以及对应的 MDX 写法。
 sidebar:
-  order: 4
+  order: 3
 ---
 
-Every `.mdx` file can use these components without an import. Each one is a file in `src/components/ui/`, so you can change how it looks or works.
+每个 `.mdx` 文件都可以直接使用这些组件，无需导入。它们都是 `src/components/ui/` 里的文件，因此外观和行为都可以修改。
 
 ## Aside
 
-Set a note, tip, caution, or warning apart from the text around it.
+把笔记、提示、注意或警告与周围正文区分开。
 
 <Aside type="note">
-  Pages are validated at build time.
+  页面会在构建时校验。
 </Aside>
 
-<Aside type="caution" title="Before you deploy">
-  Set `site` in `astro.config.ts` to your production URL.
+<Aside type="caution" title="部署之前">
+  把 `astro.config.ts` 里的 `site` 改成你的生产环境 URL。
 </Aside>
 
 ```mdx
 <Aside type="note">
-  Pages are validated at build time.
+  页面会在构建时校验。
 </Aside>
 
-<Aside type="caution" title="Before you deploy">
-  Set `site` in `astro.config.ts` to your production URL.
+<Aside type="caution" title="部署之前">
+  把 `astro.config.ts` 里的 `site` 改成你的生产环境 URL。
 </Aside>
 ```
 
-| Prop | Value |
+| 属性 | 取值 |
 |---|---|
-| `type` | `note` (default), `tip`, `caution`, or `danger` |
-| `title` | Text above the content. Defaults to the type's name. |
-| `icon` | Any `ph:` icon name, in place of the type's icon. |
+| `type` | `note`（默认）、`tip`、`caution` 或 `danger` |
+| `title` | 内容上方的标题，默认为类型名称。 |
+| `icon` | 任意 `ph:` 图标名，用于替换类型自带的图标。 |
 
-For a title with formatting, pass it as a slot: `<Fragment slot="title">Uses <code>env</code></Fragment>`.
+需要带格式的标题时，可以用插槽传入：`<Fragment slot="title">使用 <code>env</code></Fragment>`。
 
 ## Steps
 
-Number a procedure. Each step has a title and its own content.
+把操作步骤编号。每一步都有自己的标题和内容。
 
 <Steps>
-  <Step title="Create the page">
-    Add `src/content/docs/deploy.mdx` with a `title`.
+  <Step title="创建页面">
+    新建 `src/content/docs/deploy.mdx`，并写入 `title`。
   </Step>
-  <Step title="Preview it">
-    Run `npm run dev` and open the page.
+  <Step title="预览页面">
+    运行 `bun run dev` 并打开页面。
   </Step>
 </Steps>
 
 ```mdx
 <Steps>
-  <Step title="Create the page">
-    Add `src/content/docs/deploy.mdx` with a `title`.
+  <Step title="创建页面">
+    新建 `src/content/docs/deploy.mdx`，并写入 `title`。
   </Step>
-  <Step title="Preview it">
-    Run `npm run dev` and open the page.
+  <Step title="预览页面">
+    运行 `bun run dev` 并打开页面。
   </Step>
 </Steps>
 ```
 
-| Prop | Value |
+| 属性 | 取值 |
 |---|---|
-| `start` on `Steps` | The first step's number. Defaults to 1. |
-| `title` on `Step` | The step's heading. Also accepts a `title` slot. |
+| `Steps` 上的 `start` | 起始步骤编号，默认为 1。 |
+| `Step` 上的 `title` | 步骤标题，也可以使用 `title` 插槽。 |
 
 ## Tabs
 
-Show the same content in several variants. Give tabs a `syncKey`, and the reader's choice carries over to every set of tabs with the same key.
+把同一内容的不同版本展示成标签页。给一组标签页设置 `syncKey` 后，读者的选择会同步到所有使用同一 key 的标签组。
 
 <Tabs syncKey="os">
   <TabItem label="macOS">
-    Press <kbd>⌘</kbd> <kbd>K</kbd> to search.
+    按 <kbd>⌘</kbd> <kbd>K</kbd> 搜索。
   </TabItem>
   <TabItem label="Windows">
-    Press <kbd>Ctrl</kbd> <kbd>K</kbd> to search.
+    按 <kbd>Ctrl</kbd> <kbd>K</kbd> 搜索。
   </TabItem>
 </Tabs>
 
 ```mdx
 <Tabs syncKey="os">
   <TabItem label="macOS">
-    Press <kbd>⌘</kbd> <kbd>K</kbd> to search.
+    按 <kbd>⌘</kbd> <kbd>K</kbd> 搜索。
   </TabItem>
   <TabItem label="Windows">
-    Press <kbd>Ctrl</kbd> <kbd>K</kbd> to search.
+    按 <kbd>Ctrl</kbd> <kbd>K</kbd> 搜索。
   </TabItem>
 </Tabs>
 ```
 
-| Prop | Value |
+| 属性 | 取值 |
 |---|---|
-| `syncKey` on `Tabs` | Tabs with the same key switch together, and remember the choice. |
-| `label` on `TabItem` | The tab's name. Required. |
+| `Tabs` 上的 `syncKey` | 相同 key 的标签组会一起切换，并记住选择。 |
+| `TabItem` 上的 `label` | 标签名称，必填。 |
 
-## Package managers
+## 包管理器
 
-Write an install command once and show it for npm, pnpm, Yarn, and Bun.
+写一次安装命令，就能同时展示 npm、pnpm、Yarn 和 Bun 的写法。
 
 <PackageManagers pkg="your-package" />
 
@@ -105,42 +105,42 @@ Write an install command once and show it for npm, pnpm, Yarn, and Bun.
 <PackageManagers pkg="your-package" />
 ```
 
-Add `dev` for a dev dependency, or `type="run" args="build"` for a script.
+加上 `dev` 表示开发依赖；用 `type="run" args="build"` 可以展示脚本命令。
 
-## Cards
+## 卡片
 
-Link readers to the next places to go, in a grid that stacks on small screens.
+用卡片把读者引导到下一步，小屏幕上会自动堆叠。
 
 <CardGrid>
-  <Card title="Write a page" icon="ph:pencil-simple">
-    Create an `.mdx` file in `src/content/docs/`.
+  <Card title="写一个页面" icon="ph:pencil-simple">
+    在 `src/content/docs/` 中创建 `.mdx` 文件。
   </Card>
-  <Card title="Change the theme" icon="ph:palette">
-    Edit the colour and type tokens in `src/styles/globals.css`.
+  <Card title="修改主题" icon="ph:palette">
+    编辑 `src/styles/globals.css` 里的颜色与排版变量。
   </Card>
 </CardGrid>
 
 ```mdx
 <CardGrid>
-  <Card title="Write a page" icon="ph:pencil-simple">
-    Create an `.mdx` file in `src/content/docs/`.
+  <Card title="写一个页面" icon="ph:pencil-simple">
+    在 `src/content/docs/` 中创建 `.mdx` 文件。
   </Card>
-  <Card title="Change the theme" icon="ph:palette">
-    Edit the colour and type tokens in `src/styles/globals.css`.
+  <Card title="修改主题" icon="ph:palette">
+    编辑 `src/styles/globals.css` 里的颜色与排版变量。
   </Card>
 </CardGrid>
 ```
 
-| Prop | Value |
+| 属性 | 取值 |
 |---|---|
-| `title` on `Card` | The card's heading. Also accepts a `title` slot. |
-| `icon` on `Card` | Any `ph:` icon name. Also accepts an `icon` slot. |
+| `Card` 上的 `title` | 卡片标题，也可以使用 `title` 插槽。 |
+| `Card` 上的 `icon` | 任意 `ph:` 图标名，也可以使用 `icon` 插槽。 |
 
-Icons come from [Phosphor](https://phosphoricons.com): use any name with the `ph:` prefix.
+图标来自 [Phosphor](https://phosphoricons.com)：使用任何带 `ph:` 前缀的名称。
 
-## Partials
+## 片段
 
-Write a passage once and include it on any page. Partials live in `src/content/partials/`.
+一段内容只写一次，就能被任意页面引用。片段放在 `src/content/partials/`。
 
 <Render file="example" />
 
@@ -148,9 +148,9 @@ Write a passage once and include it on any page. Partials live in `src/content/p
 <Render file="example" />
 ```
 
-## Restyle any part
+## 调整任意局部样式
 
-Every part of every component has a `data-slot` attribute, so you can restyle one piece from `src/styles/globals.css` without editing the component.
+每个组件的每个部件都带有 `data-slot` 属性，因此可以直接在 `src/styles/globals.css` 中修改某个局部，而不用改动组件本身。
 
 ```css title="src/styles/globals.css"
 [data-slot="card-title"] {
@@ -158,10 +158,10 @@ Every part of every component has a `data-slot` attribute, so you can restyle on
 }
 ```
 
-Corners come from two tokens in the same file: `--nb-radius` for cards, callouts, code blocks and buttons, and `--nb-radius-sm` for the small marks inside them. Change them to re-round the whole site.
+圆角由同一个文件中的两个变量控制：`--nb-radius` 用于卡片、提示框、代码块和按钮，`--nb-radius-sm` 用于它们内部的小元素。修改它们就能统一调整整个站点的圆角。
 
-## Add more
+## 安装更多组件
 
-Accordions, file trees, link cards, embeds, and more install from the registry when you need them. Each one lands as a file in `src/components/ui/`, like the components above.
+折叠面板、文件树、链接卡片、嵌入内容等都可以从注册表安装。安装后同样会成为 `src/components/ui/` 里的源码文件。
 
 <PackageManagers type="dlx" pkg="@cloudflare/nimbus-docs" args="add accordion" />

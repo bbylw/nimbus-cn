@@ -5,8 +5,8 @@
  * the title. This file is the cards' look; edit it freely.
  *
  * `@cloudflare/nimbus-docs/og` does the rest: it loads the fonts, fits text
- * to its lines by measuring it, and renders the PNG. To use another script,
- * such as Chinese or Japanese, add a font that covers it to `fonts`.
+ * to its lines by measuring it, and renders the PNG. Chinese titles need a
+ * font that covers CJK; this card ships Noto Sans SC (SIL OFL) beside Inter.
  *
  * The leading underscore keeps Astro from routing this file or `_fonts/`.
  */
@@ -26,8 +26,8 @@ const HEIGHT = 630;
 const LEFT = 80;
 const COLUMN = WIDTH - LEFT - 200;
 
-const TITLE: CardTypography = { fontFamily: "Inter", fontWeight: 500, letterSpacing: "-0.025em", lineHeight: 1.1, color: FOREGROUND };
-const SECTION: CardTypography = { fontFamily: "Inter", fontWeight: 400, lineHeight: 1.2, color: MUTED };
+const TITLE: CardTypography = { fontFamily: "Noto Sans SC", fontWeight: 500, letterSpacing: "-0.01em", lineHeight: 1.1, color: FOREGROUND };
+const SECTION: CardTypography = { fontFamily: "Noto Sans SC", fontWeight: 400, lineHeight: 1.2, color: MUTED };
 
 // Fonts sit beside this file, not in public/, so they never ship. Read from
 // the project so `astro build --root <site>` finds them.
@@ -38,6 +38,9 @@ const renderer = await createCardRenderer({
   fonts: [
     { name: "Inter", source: font("Inter-Regular.ttf"), weight: 400 },
     { name: "Inter", source: font("Inter-Medium.ttf"), weight: 500 },
+    // 中文标题需要覆盖 CJK 的字体；Noto Sans SC 采用 SIL OFL 许可。
+    { name: "Noto Sans SC", source: font("NotoSansSC-Regular.otf"), weight: 400 },
+    { name: "Noto Sans SC", source: font("NotoSansSC-Medium.otf"), weight: 500 },
   ],
   emoji: "strip",
 });

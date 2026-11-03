@@ -1,0 +1,82 @@
+---
+title: 部署
+description: 把静态站点发布到任意主机，或安装服务端适配器启用按请求渲染。
+sidebar:
+  order: 7
+---
+
+默认情况下，Nimbus 站点是纯静态的。执行一次构建，然后把输出目录交给任意静态托管服务即可。
+
+```sh
+bun run build
+```
+
+产物位于 `dist/`。
+
+## 静态部署
+
+静态站点不依赖服务器运行时，可以放在 Cloudflare Pages、Netlify、Vercel、GitHub Pages、对象存储或自己的 Web 服务器上。
+
+脚手架自带一份 Cloudflare 的 `wrangler.jsonc`。部署到 Cloudflare 时可以直接使用：
+
+```sh
+# 本地模拟 Cloudflare 环境
+bun run preview:cf
+
+# 构建并部署
+bun run deploy
+```
+
+<Aside type="note" title="搜索索引">
+  搜索索引在构建时生成。本地开发服务器中搜索不可用是正常现象；运行 `bun run build` 后，用 `bun run preview` 验证搜索。
+</Aside>
+
+## 服务端渲染
+
+按请求渲染页面、远程 MCP 服务器等功能需要服务端适配器。使用 CLI 安装对应适配器：
+
+```sh
+# Cloudflare
+bunx nimbus-docs add adapter-cloudflare
+
+# Netlify
+bunx nimbus-docs add adapter-netlify
+
+# Vercel
+bunx nimbus-docs add adapter-vercel
+
+# Node
+bunx nimbus-docs add adapter-node
+```
+
+安装后按需把 `output` 与 `rendering` 改为服务端模式：
+
+```ts title="astro.config.ts"
+export default defineConfig({
+  output: "server",
+  integrations: [nimbus(config, { /* … */ })],
+});
+```
+
+```ts title="astro.config.ts"
+const config = defineNimbusConfig({
+  // …
+  rendering: { default: "request" },
+});
+```
+
+<Aside type="caution" title="先设置 site">
+  部署前请把 `astro.config.ts` 中的 `site` 换成生产环境地址。它会影响 canonical URL、社交卡片、`robots.txt`、sitemap 和 `/llms.txt` 中的链接。
+</Aside>
+
+## 发布前检查
+
+```sh
+bun run typecheck
+bun run build
+bunx nimbus-docs check
+```
+
+`check` 会检查配置、结构、内容、类型与链接。构建后再运行一次，可以获得最完整的覆盖范围。
+
+更多部署细节见 [Nimbus 部署文档](https://nimbus-docs.com/deploy)。

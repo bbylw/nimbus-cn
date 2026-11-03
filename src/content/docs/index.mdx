@@ -1,50 +1,54 @@
 ---
-title: Introduction
-description: What your product does, who it's for, and where to start.
+title: 简介
+description: Nimbus 是什么、适合谁，以及从哪里开始。
 sidebar:
   order: 0
 ---
 
-Describe your product in two sentences: what it does, and who it's for. A reader should know within ten seconds whether they're in the right place.
+Nimbus 是一个基于 [Astro](https://astro.build) 构建的文档写作工具。它在你的仓库里创建一个文档站点，检查你和你的智能体写下的内容，并把它们发布为面向人的 HTML 和面向智能体的 Markdown。
 
-<Aside type="tip" title="This page is yours">
-  Edit `src/content/docs/index.mdx` and save. The page reloads with your changes.
+<Aside type="tip" title="本站就是 Nimbus">
+  这个中文站点的布局、组件、样式和页面都由 Nimbus 脚手架生成，全部是你可以直接修改的普通文件。编辑 `src/content/docs/index.mdx` 并保存，页面会立即刷新。
 </Aside>
 
-## What you can do
+## 为什么使用 Nimbus
 
-List the three things people come here to do, in the words they would use.
+- **内容属于你的仓库。** 布局、组件、路由和页面都以源码形式放在项目里，没有任何部分被锁在依赖中。
+- **为智能体而写。** 每个页面都有对应的 Markdown 版本，站点还会生成 `llms.txt`、`llms-full.txt` 和可选的远程 MCP 服务器。
+- **构建期校验。** 配置、frontmatter 和 MDX 组件都会在构建时检查；`nimbus-docs check` 还能在不构建的情况下提前发现问题。
+- **按需扩展。** 标签页、步骤、卡片、文件树等组件可以从组件注册表安装；API 参考、版本管理与搜索也可以逐步接入。
 
-- Something a reader can accomplish on day one.
-- Something they'll need once they're up and running.
-- Something that makes your product different.
-
-## Get started
-
-Show the shortest path to something working. Name the prerequisites first, then one command or one click at a time.
+## 开始使用
 
 <Steps>
-  <Step title="Install">
+  <Step title="创建站点">
     ```sh
-    npm install your-package
+    bun create @cloudflare/nimbus-docs@latest my-docs --yes
+    cd my-docs
     ```
   </Step>
-  <Step title="See it work">
-    Show the one result that proves the setup worked.
+  <Step title="启动开发服务器">
+    ```sh
+    bun run dev
+    ```
+  </Step>
+  <Step title="编辑首页">
+    打开 `src/content/docs/index.mdx`，修改标题并保存。页面会带着你的改动重新加载。
   </Step>
 </Steps>
 
-## Add your next page
+打开 [http://localhost:4321](http://localhost:4321)，你会看到带有侧边栏的文档站。
 
-Create a file beside this one. It joins the sidebar as soon as you save.
+## 接下来
 
-```mdx title="src/content/docs/quickstart.mdx"
----
-title: Quickstart
-description: From nothing to a working setup in five minutes.
----
-
-Your first guide starts here.
-```
-
-Before you publish, run `npx @cloudflare/nimbus-docs check` to catch mistakes before your readers do.
+<CardGrid>
+  <Card title="快速开始" icon="ph:rocket-launch" href="/quickstart/">
+    从创建站点到运行开发服务器，逐步了解每一步的作用。
+  </Card>
+  <Card title="写作与页面" icon="ph:pencil-simple" href="/writing-pages/">
+    新建页面、组织侧边栏，并用 Markdown 与 MDX 组件写作。
+  </Card>
+  <Card title="面向智能体" icon="ph:robot" href="/agents/">
+    了解 Markdown 版本、llms.txt 与 Agent Skills 的工作方式。
+  </Card>
+</CardGrid>

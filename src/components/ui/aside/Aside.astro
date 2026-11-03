@@ -23,10 +23,10 @@ interface Props extends HTMLAttributes<"aside"> {
 const { type = "note", title, icon, class: className, ...attrs } = Astro.props;
 
 const defaults: Record<string, { label: string; icon: string }> = {
-  note:    { label: "Note",    icon: "ph:info" },
-  tip:     { label: "Tip",     icon: "ph:lightbulb" },
-  caution: { label: "Caution", icon: "ph:warning" },
-  danger:  { label: "Danger",  icon: "ph:warning-circle" },
+  note:    { label: "笔记", icon: "ph:info" },
+  tip:     { label: "提示", icon: "ph:lightbulb" },
+  caution: { label: "注意", icon: "ph:warning" },
+  danger:  { label: "危险", icon: "ph:warning-circle" },
 };
 
 const d = defaults[type] ?? defaults.note;

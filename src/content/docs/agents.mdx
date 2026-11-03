@@ -1,0 +1,71 @@
+---
+title: 面向智能体
+description: Nimbus 如何把文档发布为 Markdown、llms.txt、Agent Skills 与 MCP 服务。
+sidebar:
+  order: 6
+---
+
+Nimbus 把每个页面同时发布为两种形态：面向人的 HTML，以及面向智能体的 Markdown。智能体不需要解析页面布局，就能直接拿到干净的内容。
+
+## 页面的 Markdown 版本
+
+任意页面 URL 后加上 `index.md`，就能看到它对应的 Markdown：
+
+```text
+/quickstart/          →  HTML 页面
+/quickstart/index.md  →  Markdown 版本
+```
+
+每个页面的 HTML `<head>` 中也会带有 `rel="alternate"` 链接，指向这份 Markdown。页面顶部的“查看 Markdown”与“复制本页”按钮用的也是它。
+
+<Aside type="note">
+  隐藏版本的内容不会出现在 Markdown 索引中，也不会被 `llms.txt` 收录。
+</Aside>
+
+## llms.txt 与 llms-full.txt
+
+站点构建时会生成两个面向大模型的索引：
+
+| 文件 | 内容 |
+| --- | --- |
+| `/llms.txt` | 文档站点的页面索引，适合先让模型了解站点结构。 |
+| `/llms-full.txt` | 全部文档的完整内容，适合一次性加载。 |
+
+多集合站点还会得到分区索引，例如 `/guides/llms.txt`，嵌套分区同样适用。
+
+## Agent Skills 与 WebMCP
+
+- **Agent Skills** 可以放在 `skills/<name>/SKILL.md`，随站点一起发布，供支持 Skills 的智能体发现。
+- **WebMCP** 让浏览器中的智能体直接使用站点的搜索能力。脚手架已经把 `<WebMCP />` 放在 `BaseLayout.astro` 中，保持它即可。
+
+## 远程 MCP 服务器
+
+需要在 `/mcp` 提供一个远程 MCP 服务器时，开启它：
+
+```ts title="astro.config.ts"
+agents: { mcp: true },
+```
+
+然后安装对应的依赖，并确保站点使用服务端适配器（Cloudflare、Netlify、Vercel 或 Node）：
+
+```sh
+bun add @modelcontextprotocol/server
+```
+
+服务器提供两个工具：
+
+- `list_pages`：列出站点中的页面。
+- `get_page`：按路径读取单个页面。
+
+<Aside type="caution" title="静态站点无法提供 MCP">
+  `output: "static"` 的站点没有可执行的服务端逻辑，因此不能运行远程 MCP 服务器。请先按[部署](/deploy/)安装服务端适配器。
+</Aside>
+
+## 智能体指令
+
+脚手架在 `BaseLayout.astro` 中渲染了 `<AgentDirective />`，它在页面里以隐藏文本指向本页的 Markdown 和 `/llms.txt`。除非你确定不需要，否则不要移除它。
+
+## 相关阅读
+
+- [Nimbus 配置](/configuration/)：`agents` 与 `rendering` 的完整字段。
+- [Nimbus 面向智能体文档](https://nimbus-docs.com/ai/docs-for-agents)：上游的完整说明。

@@ -6,19 +6,19 @@ import nimbus, {
 import { tableScroll } from "@cloudflare/nimbus-docs/markdown";
 
 const nimbusConfig = defineNimbusConfig({
-  // CHANGE_ME: your site's canonical origin (no trailing slash). Drives
-  // canonical URLs, absolute OG image URLs, robots.txt, sitemap, and the
-  // links in /llms.txt — leaving the placeholder breaks all of them.
-  site: "https://example.com",
-  // CHANGE_ME: your project's name — used for <title>, the home H1, and OG.
-  title: "Nimbus",
-  // CHANGE_ME: a one-line description of your docs — used for meta + OG.
-  description: "Nimbus, authoring tool for docs",
-  locale: "en",
-  // CHANGE_ME: your repository — shown as the GitHub link in the header.
+  // 上线前把这里换成站点的正式地址（结尾不要带斜杠）。它决定 canonical URL、
+  // OG 图片的绝对地址、robots.txt、sitemap 以及 /llms.txt 里的链接。
+  site: "https://nimbus.ndjp.net",
+  // 站点名称：用于 <title>、首页标题和社交卡片。
+  title: "Nimbus 中文文档",
+  // 一句话介绍，用于 meta 与社交卡片。
+  description: "Nimbus 文档写作工具的中文指南：用 Markdown 与 MDX 构建面向人与智能体的文档站点。",
+  locale: "zh-CN",
+  homeLabel: "首页",
+  // 页头显示的 GitHub 链接。
   github: "https://github.com/cloudflare/nimbus",
-  socialImageAlt: "Nimbus documentation preview",
-  // The home page leads the sidebar; every other page joins it automatically.
+  socialImageAlt: "Nimbus 中文文档预览",
+  // 首页排在最前，其余页面按 sidebar.order 自动加入。
   sidebar: {
     items: ["index", { autogenerate: { collection: "docs" } }],
   },

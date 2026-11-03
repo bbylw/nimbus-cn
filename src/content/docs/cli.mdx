@@ -1,0 +1,113 @@
+---
+title: CLI 与检查
+description: 用 nimbus-docs 添加组件、检查内容、追踪上游变更并安全升级。
+sidebar:
+  order: 5
+---
+
+在站点目录中运行 `nimbus-docs` 命令。使用 Bun 时通过 `bunx` 调用项目里安装的版本：
+
+```sh
+bunx nimbus-docs <command>
+```
+
+<Aside type="note" title="先安装依赖">
+  `bunx` / `npx` 会优先使用项目本地安装的 `nimbus-docs`。如果依赖还没安装，它可能临时下载最新版，结果会与站点当前版本不一致。
+</Aside>
+
+## 添加组件与功能
+
+`add` 会把组件及其依赖以源码形式复制到你的仓库。
+
+```sh
+# 列出可安装的项目
+bunx nimbus-docs add
+
+# 安装一个组件
+bunx nimbus-docs add tabs
+
+# 打印功能配方（不修改文件）
+bunx nimbus-docs add new-version --print
+```
+
+功能（feature）是写给编码智能体看的 Markdown 配方。运行 `add <feature> --print` 可以把它打印出来交给你或你的智能体执行。
+
+也可以直接从其他来源加载页面：
+
+```sh
+bunx nimbus-docs add source github --print
+bunx nimbus-docs add source notion --print
+```
+
+安装服务端适配器：
+
+```sh
+bunx nimbus-docs add adapter-cloudflare
+```
+
+## 检查内容
+
+`check` 不需要构建就能检查环境、结构、内容、类型和待升级项：
+
+```sh
+bunx nimbus-docs check
+bunx nimbus-docs check --fix
+bunx nimbus-docs check --json
+```
+
+- `--fix` 会应用安全的修复。
+- `--json` 输出结构化结果，方便智能体读取并逐条处理。
+
+`lint` 根据 `astro.config.ts` 中启用的规则报告写作问题，不会阻断构建：
+
+```sh
+bunx nimbus-docs lint
+bunx nimbus-docs lint --fix
+bunx nimbus-docs lint --format json
+```
+
+<Aside type="tip">
+  第一次构建后再运行 `lint`，它才有完整的链接映射可用来检查内部链接。
+</Aside>
+
+## 追踪上游变更
+
+站点里的布局、组件和路由都来自脚手架模板。模板会随 Nimbus 版本更新，你需要知道哪些文件已经落后于上游。
+
+```sh
+# 列出落后的起始模板文件、注册表组件和包变更
+bunx nimbus-docs outdated
+
+# 查看某个起始文件的上游改动
+bunx nimbus-docs diff src/layouts/DocsLayout.astro
+
+# 在你没有手动修改过该文件时，直接采用上游版本
+bunx nimbus-docs diff src/layouts/DocsLayout.astro --apply
+```
+
+## 升级 Nimbus
+
+升级前先备份或提交当前改动，然后按顺序执行：
+
+1. 用包管理器更新 `@cloudflare/nimbus-docs`。
+2. 预览完整的升级计划：`bunx nimbus-docs migrate --dry-run --diff`。
+3. 逐条审阅版本变更，处理被阻塞或需要手动完成的项。
+4. 应用安全的改动：`bunx nimbus-docs migrate --yes`，然后检查改动结果。
+5. 没有剩余迁移项时，再次运行 `bunx nimbus-docs migrate --yes`，在 `nimbus.json` 中记录本次审阅。
+6. 跑一遍类型检查与生产构建，再运行 `bunx nimbus-docs check` 做构建后的检查。
+
+<Aside type="caution" title="不要手改 nimbus.json">
+  `nimbus.json` 里的 `lastReviewedNimbusVersion` 是升级审阅的基线，不是依赖版本锁。不要手动编辑它，也不要通过修改它来跳过版本。
+</Aside>
+
+## 命令速查
+
+| 命令 | 作用 |
+| --- | --- |
+| `add` | 列出、安装组件，或打印功能配方。 |
+| `check` | 不构建的预检；`--fix` 修复，`--json` 供智能体读取。 |
+| `lint` | 按配置的写作规则检查页面。 |
+| `outdated` | 列出落后于上游的模板文件与组件。 |
+| `diff <file>` | 查看某个起始模板文件的上游改动。 |
+| `migrate` | 应用新版本要求的迁移。 |
+| `init` | 为旧站点补上 `nimbus.json`。 |

@@ -1,119 +1,119 @@
 ---
-title: Writing pages
-description: Create a page, organise the sidebar, and use Markdown and components to write it.
+title: 写作与页面
+description: 创建页面、组织侧边栏，并用 Markdown 与组件完成写作。
 sidebar:
-  order: 3
+  order: 2
 ---
 
-Every page is an `.mdx` file in `src/content/docs/`. The file path becomes the URL, so `src/content/docs/guides/deploy.mdx` is served at `/guides/deploy/`. Start from the [introduction](/) if you haven't opened the project yet.
+每个页面都是 `src/content/docs/` 里的一个 `.mdx` 文件。文件路径会变成 URL，所以 `src/content/docs/guides/deploy.mdx` 对应的地址是 `/guides/deploy/`。如果你还没有打开过项目，请先阅读[快速开始](/quickstart/)。
 
-## Create a page
+## 创建页面
 
-Add a file with a `title` in its frontmatter. The title becomes the page heading, so don't repeat it in the body.
+新建一个文件，并在 frontmatter 中写入 `title`。标题会渲染成页面的一级标题，因此正文中不要再重复它。
 
 ```mdx title="src/content/docs/guides/deploy.mdx" {2-3}
 ---
-title: Deploy
-description: Ship the site to production.
+title: 部署
+description: 把站点发布到生产环境。
 ---
 
-Run the build, then upload the output.
+运行构建，然后上传产物。
 ```
 
-Frontmatter is validated at build time. A missing title or a misspelled field fails the build with a message that names the file and the field.
+Frontmatter 会在构建时校验。缺少标题或字段拼写错误都会导致构建失败，报错信息会指出文件和字段名。
 
-- `title` is required. Everything else is optional.
-- `description` appears under the heading, in search results, and in social cards.
-- `sidebar` controls where the page sits in the navigation.
-  - `order` sorts pages within a group, lowest first.
-  - `badge` adds a short label next to the link.
+- `title` 是必填项，其余字段都是可选的。
+- `description` 会显示在标题下方，也会用于搜索结果和社交卡片。
+- `sidebar` 控制页面在导航中的位置。
+  - `order` 在同一个分组内排序，数字小的排前面。
+  - `badge` 在链接旁添加一个短标签。
 
-### Frontmatter fields
+### Frontmatter 字段
 
-| Field | Type | Description |
+| 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `title` | string | The page heading and the `<title>` tag. |
-| `description` | string | One-line summary for search, social cards, and the page header. |
-| `sidebar.order` | number | Position within the sidebar group. Lower numbers come first. |
-| `draft` | boolean | Builds the page in development only. It never reaches production. |
+| `title` | string | 页面标题，也是 `<title>` 标签的内容。 |
+| `description` | string | 一行摘要，用于搜索、社交卡片和页头。 |
+| `sidebar.order` | number | 在侧边栏分组内的位置，数字越小越靠前。 |
+| `draft` | boolean | 只在开发环境构建页面，永远不会进入生产环境。 |
 
-## Write with Markdown
+## 使用 Markdown
 
-Standard Markdown works everywhere: **bold**, *italic*, [links](/), `inline code`, lists, tables, and fenced code blocks. Press <kbd>⌘</kbd> <kbd>K</kbd> to search the site for anything else.
+标准 Markdown 在任何地方都可用：**粗体**、*斜体*、[链接](/)、`行内代码`、列表、表格和围栏代码块。按 <kbd>⌘</kbd> <kbd>K</kbd> 可以搜索站点的其他内容。
 
-> Write the page you would want to find. One topic per page, and a title that says what the reader will be able to do.
+> 写一个你自己愿意读到的页面。每页只讲一个主题，标题要说清楚读者能完成什么。
 
-Code blocks are highlighted at build time. Add a `title` to show a filename, and line numbers in braces to draw attention to specific lines.
+代码块会在构建时高亮。给代码块加上 `title` 可以显示文件名，用花括号标出行号可以突出特定行。
 
 ```ts title="astro.config.ts" {3}
 const nimbusConfig = defineNimbusConfig({
-  site: "https://docs.example.com",
-  title: "My docs",
-  description: "Guides and reference for My product.",
+  site: "http://localhost:4321",
+  title: "我的文档",
+  description: "我的产品指南与参考。",
 });
 ```
 
-<Aside type="tip" title="Preview as you write">
-  The dev server reloads the page on every save. Run `npm run dev` and keep the page open next to your editor.
+<Aside type="tip" title="边写边预览">
+  开发服务器会在每次保存后刷新页面。运行 `bun run dev`，把页面放在编辑器旁边即可。
 </Aside>
 
-### Organise the sidebar
+### 组织侧边栏
 
-Folders become sidebar groups. Inside a group, pages sort by `sidebar.order`, then by title.
+文件夹会变成侧边栏分组。在分组内部，页面先按 `sidebar.order` 排序，再按标题排序。
 
-1. Create a folder in `src/content/docs/`, for example `guides/`.
-2. Move related pages into it.
-3. Set `sidebar.order` on each page to fix the order.
+1. 在 `src/content/docs/` 下新建文件夹，例如 `guides/`。
+2. 把相关页面移动进去。
+3. 为每个页面设置 `sidebar.order`，固定顺序。
 
-## Use components
+## 使用组件
 
-Components are available in every `.mdx` file without an import. Install more from the registry when you need them.
+所有 `.mdx` 文件都可以直接使用内置组件，无需导入。需要更多组件时，可以从注册表安装。
 
 <Steps>
-  <Step title="Add a component">
-    Run `npx @cloudflare/nimbus-docs add accordion` to copy it into `src/components/ui/`.
+  <Step title="添加组件">
+    运行 `bunx @cloudflare/nimbus-docs add accordion`，组件源码会复制到 `src/components/ui/`。
   </Step>
-  <Step title="Register it">
-    Add it to `src/components.ts` so every page can use it.
+  <Step title="注册组件">
+    把它加入 `src/components.ts`，之后每个页面都能直接使用。
   </Step>
 </Steps>
 
 <Tabs>
+  <TabItem label="Bun">
+    ```sh
+    bunx @cloudflare/nimbus-docs add accordion
+    ```
+  </TabItem>
   <TabItem label="npm">
     ```sh
     npx @cloudflare/nimbus-docs add accordion
     ```
   </TabItem>
-  <TabItem label="pnpm">
-    ```sh
-    pnpm dlx @cloudflare/nimbus-docs add accordion
-    ```
-  </TabItem>
 </Tabs>
 
-#### What ships with the starter
+#### 起始模板自带的内容
 
 <dl>
   <dt>Aside</dt>
-  <dd>Notes, tips, cautions, and warnings that stand apart from the text.</dd>
+  <dd>与正文区分的提示、笔记、注意和警告。</dd>
   <dt>Steps</dt>
-  <dd>Numbered procedures, each with a title and its own content.</dd>
+  <dd>带编号的操作步骤，每一步都有自己的标题和内容。</dd>
   <dt>Tabs</dt>
-  <dd>The same content in several variants, such as one command per package manager.</dd>
+  <dd>把同一内容的不同版本放在一起，例如每个包管理器一条命令。</dd>
 </dl>
 
 <details>
-  <summary>Can I use plain Markdown files instead of MDX?</summary>
+  <summary>可以用普通 Markdown 文件代替 MDX 吗？</summary>
 
-  Yes. MDX is a superset of Markdown, so any `.md` content works unchanged in an `.mdx` file. You only need MDX syntax when you add a component.
+  可以。MDX 是 Markdown 的超集，任何 `.md` 内容都可以原样放进 `.mdx` 文件。只有在添加组件时才需要 MDX 语法。
 </details>
 
 ---
 
 <Aside type="note">
-  Every page also has a Markdown version for agents and readers who prefer plain text. Add `index.md` to any page URL to see it.
+  每个页面还有一个面向智能体和纯文本读者的 Markdown 版本。在页面 URL 后加上 `index.md` 即可查看。
 </Aside>
 
-Pages you write today keep working when you upgrade Nimbus[^1]. Use <mark>highlights</mark> sparingly; they lose their meaning when everything is marked.
+升级 Nimbus 时，你今天写的页面仍然可用[^1]。请谨慎使用 <mark>高亮</mark>；当所有内容都被标记时，重点就不再突出。
 
-[^1]: Changes that need your attention are listed by `npx @cloudflare/nimbus-docs migrate --dry-run`.
+[^1]: 需要你关注的变更会由 `bunx nimbus-docs migrate --dry-run` 列出。

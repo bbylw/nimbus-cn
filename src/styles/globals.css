@@ -110,10 +110,12 @@
 
 	/* Typography — self-hosted via @fontsource-variable in BaseLayout.astro */
 	--nb-font-sans:
-		"Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
-		sans-serif;
+		"Inter Variable", "Inter", "PingFang SC", "Hiragino Sans GB",
+		"Microsoft YaHei", "Noto Sans SC", system-ui, -apple-system, "Segoe UI",
+		Roboto, sans-serif;
 	--nb-font-mono:
-		"JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "Cascadia Code",
+		"JetBrains Mono Variable", "JetBrains Mono", "Sarasa Mono SC",
+		"Noto Sans Mono CJK SC", ui-monospace, "Cascadia Code",
 		"Source Code Pro", Menlo, Consolas, monospace;
 	/* Type scale: one ratio, √1.5, stepping up from the 16px body. Two steps
 	   make 1.5, so body → h2 → h1 is the same interval twice and lands on
