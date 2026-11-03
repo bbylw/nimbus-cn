@@ -1,0 +1,1965 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Logo from "../components/Logo.astro";
+import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
+import { SearchTrigger } from "../components/ui/search";
+import { ThemeToggle } from "../components/ui/theme-toggle";
+import { Aside } from "../components/ui/aside";
+import { Step, Steps } from "../components/ui/steps";
+import { TabItem, Tabs } from "../components/ui/tabs";
+import { PackageManagers } from "../components/ui/package-managers";
+
+const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
+---
+
+<BaseLayout
+  title="面向文档的写作工具"
+  description="Nimbus 是面向文档的写作工具：写一次，自动检查、评审，并发布为面向人与智能体的 HTML 与 Markdown。"
+>
+  <div class="lp-page">
+    <header class="lp-header">
+      <div class="lp-container lp-header-inner">
+        <a class="lp-brand" href="/" aria-label="Nimbus 中文文档首页">
+          <Logo class="h-6 w-10 shrink-0" />
+          <span class="lp-brand-name">Nimbus</span>
+          <span class="lp-brand-sub">中文文档</span>
+        </a>
+
+        <nav class="lp-nav" aria-label="主导航">
+          <a href="/quickstart/">文档</a>
+          <a href="/components/">组件</a>
+          <a href="/registry/">注册表</a>
+          <a href="/why-nimbus/">理念</a>
+        </nav>
+
+        <div class="lp-actions">
+          <SearchTrigger />
+          <ThemeToggle />
+          <a class="lp-icon-link" href="https://github.com/bbylw/nimbus-cn" target="_blank" rel="noopener" aria-label="GitHub">
+            <Icon name="ph:github-logo" class="h-4 w-4" />
+          </a>
+          <a class="lp-cta" href="/quickstart/">
+            <span>开始使用</span>
+            <Icon name="ph:arrow-right" class="h-3.5 w-3.5" />
+          </a>
+        </div>
+      </div>
+
+      <nav class="lp-mobile-nav" aria-label="移动端导航">
+        <a href="/quickstart/">文档</a>
+        <a href="/components/">组件</a>
+        <a href="/registry/">注册表</a>
+        <a href="/why-nimbus/">理念</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="lp-hero">
+        <div class="lp-container">
+          <div class="lp-eyebrow">
+            <span class="lp-avatars" aria-hidden="true">
+              <span class="lp-avatar lp-avatar-you">你</span>
+              <span class="lp-avatar lp-avatar-agent">AI</span>
+              <span class="lp-avatar lp-avatar-review">审</span>
+            </span>
+            <span>你、一个智能体、一位评审正在编辑</span>
+          </div>
+
+          <h1 class="lp-title">
+            <span class="lp-title-line">
+              认识
+              <span class="lp-title-strong">
+                Nimbus
+                <span class="lp-tag lp-tag-agent">智能体</span>
+              </span>
+            </span>
+            <span class="lp-title-line lp-title-muted">
+              面向文档的
+              <span class="lp-select">
+                写作工具
+                <span class="lp-tag lp-tag-you">你</span>
+              </span>
+            </span>
+          </h1>
+
+          <p class="lp-lede">
+            和你的团队一起写作，也和你的智能体一起。<br />
+            每一页都达到你的标准。
+          </p>
+
+          <div class="lp-command" data-copy-command data-copy-value={command}>
+            <span class="lp-command-prefix">$</span>
+            <code class="lp-command-text">{command}</code>
+            <button class="lp-command-copy" type="button" data-copy-trigger aria-label="复制安装命令">
+              <Icon name="ph:copy" class="h-3.5 w-3.5" />
+              <span data-copy-label>复制</span>
+            </button>
+          </div>
+
+          <p class="lp-note">需要 Node.js 22.12+ · MIT 许可 · 你的仓库，你的文件</p>
+        </div>
+      </section>
+
+      <section class="lp-section lp-pipeline">
+        <div class="lp-container">
+          <div class="lp-section-head">
+            <p class="lp-kicker">写一次，走完整个流程</p>
+            <h2 class="lp-h2">
+              你写一次。Nimbus <em>检查</em>它，留住它等待评审，然后把它发布给人和智能体。
+            </h2>
+          </div>
+
+          <div class="lp-workbench">
+            <div class="lp-wb-bar">
+              <span class="lp-wb-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="lp-wb-url">my-docs / alerts.mdx</span>
+              <span class="lp-wb-pill">预览</span>
+            </div>
+
+            <div class="lp-wb-grid">
+              <article class="lp-stage lp-stage-checks">
+                <p class="lp-stage-label">01 / 检查</p>
+                <h3>每一页都通过同一套检查。</h3>
+
+                <div class="lp-editor">
+                  <div class="lp-editor-head">
+                    <span class="lp-file">alerts.mdx</span>
+                    <span class="lp-chip">草稿</span>
+                  </div>
+                  <div class="lp-code">
+                    <div class="lp-code-line"><span class="lp-ln">1</span><span class="lp-cm">---</span></div>
+                    <div class="lp-code-line"><span class="lp-ln">2</span><span class="lp-key">title:</span> <span class="lp-str">天气预警</span></div>
+                    <div class="lp-code-line"><span class="lp-ln">3</span><span class="lp-cm">---</span></div>
+                    <div class="lp-code-line"><span class="lp-ln">4</span></div>
+                    <div class="lp-code-line"><span class="lp-ln">5</span>每小时天气，任意城市。</div>
+                    <div class="lp-code-line"><span class="lp-ln">6</span>见 <span class="lp-link">[配额](/docs/quota)</span>。</div>
+                  </div>
+                </div>
+
+                <ul class="lp-check-list">
+                  <li><Icon name="ph:check-circle" class="h-4 w-4" /> 链接可解析</li>
+                  <li><Icon name="ph:check-circle" class="h-4 w-4" /> 组件有效</li>
+                  <li><Icon name="ph:check-circle" class="h-4 w-4" /> 标题层级正确</li>
+                  <li><Icon name="ph:check-circle" class="h-4 w-4" /> 代码块已标注语言</li>
+                </ul>
+
+                <p class="lp-stage-foot"><span class="lp-dot lp-dot-green"></span> 4 项检查全部通过</p>
+              </article>
+
+              <article class="lp-stage lp-stage-review">
+                <p class="lp-stage-label">02 / 评审</p>
+                <h3>每一份草稿都等待签核。</h3>
+
+                <div class="lp-review">
+                  <div class="lp-review-top">
+                    <span class="lp-review-avatars" aria-hidden="true">
+                      <span class="lp-avatar lp-avatar-you">你</span>
+                      <span class="lp-avatar lp-avatar-agent">AI</span>
+                      <span class="lp-avatar lp-avatar-review">S</span>
+                    </span>
+                    <span class="lp-chip lp-chip-warn">等待 Sam</span>
+                  </div>
+                  <p class="lp-review-copy">无论谁写的，内容都要经过同一位评审。</p>
+                  <div class="lp-review-action">
+                    <span class="lp-button-dark">通过并发布</span>
+                    <span class="lp-review-meta">1 份草稿 · 0 条评论</span>
+                  </div>
+                </div>
+
+                <div class="lp-quiet-card">
+                  <Icon name="ph:seal-check" class="h-5 w-5" />
+                  <div>
+                    <strong>你的标准，不是建议。</strong>
+                    <span>评审通过后，内容才会离开草稿状态。</span>
+                  </div>
+                </div>
+
+                <p class="lp-stage-foot"><span class="lp-dot"></span> 评审记录随页面保存</p>
+              </article>
+
+              <article class="lp-stage lp-stage-ship">
+                <p class="lp-stage-label">03 / 发布</p>
+                <h3>一次发布，面向两种读者。</h3>
+
+                <ul class="lp-output-list">
+                  <li>
+                    <Icon name="ph:file-text" class="h-4 w-4" />
+                    <span class="lp-output-name">/docs/forecast</span>
+                    <span class="lp-output-meta">页面</span>
+                  </li>
+                  <li>
+                    <Icon name="ph:markdown-logo" class="h-4 w-4" />
+                    <span class="lp-output-name">/docs/forecast.md</span>
+                    <span class="lp-output-meta">Markdown</span>
+                  </li>
+                  <li>
+                    <Icon name="ph:list-magnifying-glass" class="h-4 w-4" />
+                    <span class="lp-output-name">/llms.txt</span>
+                    <span class="lp-output-meta">+1 行</span>
+                  </li>
+                  <li>
+                    <Icon name="ph:image-square" class="h-4 w-4" />
+                    <span class="lp-output-name">/og/forecast.png</span>
+                    <span class="lp-output-meta">分享卡片</span>
+                  </li>
+                  <li>
+                    <Icon name="ph:tree-structure" class="h-4 w-4" />
+                    <span class="lp-output-name">/sitemap.xml</span>
+                    <span class="lp-output-meta">+1 URL</span>
+                  </li>
+                </ul>
+
+                <p class="lp-stage-foot"><span class="lp-dot"></span> HTML 给人，Markdown 给智能体</p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-audience">
+        <div class="lp-container">
+          <div class="lp-section-head">
+            <p class="lp-kicker">把标准写进流程</p>
+            <h2 class="lp-h2">值得读的页面，智能体也能写。</h2>
+            <p class="lp-section-sub">你不需要在两套流程之间做选择。</p>
+          </div>
+
+          <div class="lp-audience-grid">
+            <article class="lp-audience-card">
+              <p class="lp-label">01 / 为读者</p>
+              <h3>值得读的页面。</h3>
+              <ul class="lp-check-list">
+                <li><Icon name="ph:check" class="h-4 w-4" /> 可交互的图表，读者可以自己探索</li>
+                <li><Icon name="ph:check" class="h-4 w-4" /> 可复用片段与个性化标签页</li>
+                <li><Icon name="ph:check" class="h-4 w-4" /> 在你内容原本所在的地方写作</li>
+                <li><Icon name="ph:check" class="h-4 w-4" /> 预览与生产环境一致</li>
+              </ul>
+
+              <div class="lp-mini-doc" aria-hidden="true">
+                <div class="lp-mini-doc-head">
+                  <span class="lp-mini-doc-brand">Sample Co</span>
+                  <span class="lp-mini-doc-chip">文档</span>
+                </div>
+                <p class="lp-mini-doc-title">天气预报</p>
+                <p class="lp-mini-doc-line">每小时天气，任意城市。</p>
+                <div class="lp-mini-doc-bars">
+                  <span style="width: 62%"></span>
+                  <span style="width: 84%"></span>
+                  <span style="width: 48%"></span>
+                </div>
+                <div class="lp-mini-doc-tags">
+                  <span>客户端</span><span>Worker</span><span>KV</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="lp-audience-card">
+              <p class="lp-label">02 / 为智能体</p>
+              <h3>智能体能写的页面。</h3>
+              <ul class="lp-check-list">
+                <li><Icon name="ph:check" class="h-4 w-4" /> 智能体可以跟随的写作配方</li>
+                <li><Icon name="ph:check" class="h-4 w-4" /> 像代码一样被检查、修复的写作错误</li>
+                <li><Icon name="ph:check" class="h-4 w-4" /> 动手前先了解你的约定</li>
+                <li><Icon name="ph:check" class="h-4 w-4" /> 没有你的签核，任何内容都不会发布</li>
+              </ul>
+
+              <div class="lp-mini-code" aria-hidden="true">
+                <div class="lp-mini-code-head">
+                  <span class="lp-file">rate-limits.mdx</span>
+                  <span class="lp-chip">智能体草稿</span>
+                </div>
+                <pre><code><span class="lp-cm">---</span>
+<span class="lp-key">title:</span> <span class="lp-str">速率限制</span>
+<span class="lp-cm">---</span>
+
+每个 API key 每分钟可以发起
+<span class="lp-str">1,000</span> 次请求。
+
+<span class="lp-tagcode">&lt;Diagram of="request-path" /&gt;</span></code></pre>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-theme">
+        <div class="lp-container lp-theme-grid">
+          <div class="lp-theme-copy">
+            <p class="lp-kicker">每个文件都属于你</p>
+            <h2 class="lp-h2">让它看起来像你的产品。</h2>
+            <p class="lp-section-sub">
+              脚手架一次，整个站点就是你的：布局、组件、样式、路由、内容。框架留在下面作为依赖，更新不会碰你的工作。
+            </p>
+
+            <ul class="lp-check-list">
+              <li><Icon name="ph:check" class="h-4 w-4" /> 组件以源码落地，不是黑盒</li>
+              <li><Icon name="ph:check" class="h-4 w-4" /> 设计令牌集中在 globals.css</li>
+              <li><Icon name="ph:check" class="h-4 w-4" /> 从第一次提交起，文件就是你的</li>
+            </ul>
+          </div>
+
+          <div class="lp-theme-panel" aria-hidden="true">
+            <div class="lp-theme-bar">
+              <span>globals.css</span>
+              <span class="lp-chip">主题</span>
+            </div>
+            <pre class="lp-theme-code"><code><span class="lp-theme-line">:root &#123;</span><span class="lp-theme-line">  <span class="lp-key">--nb-brand</span>: oklch(0.373 0.034 260.2);</span><span class="lp-theme-line">  <span class="lp-key">--nb-radius</span>: 0.75rem;</span><span class="lp-theme-line">  <span class="lp-key">--nb-font-sans</span>: "Inter", "PingFang SC", sans-serif;</span><span class="lp-theme-line">&#125;</span></code></pre>
+            <div class="lp-swatches">
+              <span class="lp-swatch lp-swatch-ink"></span>
+              <span class="lp-swatch lp-swatch-brand"></span>
+              <span class="lp-swatch lp-swatch-paper"></span>
+              <span class="lp-swatch lp-swatch-accent"></span>
+            </div>
+            <div class="lp-theme-preview">
+              <div class="lp-theme-preview-head">
+                <Logo class="h-4 w-7" />
+                <span>Sample Co</span>
+              </div>
+              <p>天气预报</p>
+              <span class="lp-theme-preview-line"></span>
+              <span class="lp-theme-preview-line short"></span>
+              <div class="lp-theme-preview-card">
+                <strong>每月 1,000 次</strong>
+                <span>免费额度 · 随时升级</span>
+              </div>
+            </div>
+            <p class="lp-theme-foot">docs.weather.example · 用 Nimbus 搭建</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-features">
+        <div class="lp-container">
+          <div class="lp-section-head">
+            <p class="lp-kicker">功能</p>
+            <h2 class="lp-h2">一个文档站需要的一切。</h2>
+            <p class="lp-section-sub">内置，或一条命令之遥。</p>
+          </div>
+
+          <div class="lp-feature-grid">
+            <article class="lp-feature">
+              <span class="lp-feature-icon"><Icon name="ph:magnifying-glass" class="h-5 w-5" /></span>
+              <h3>AI 搜索</h3>
+              <p>向文档提问，得到带来源的答案。</p>
+              <span class="lp-feature-foot">内置 Pagefind · 构建时索引</span>
+            </article>
+
+            <article class="lp-feature">
+              <span class="lp-feature-icon"><Icon name="ph:plugs-connected" class="h-5 w-5" /></span>
+              <h3>MCP 服务器</h3>
+              <p>把你的文档变成智能体可以调用的工具。</p>
+              <span class="lp-feature-foot">一条命令 · list_pages / get_page</span>
+            </article>
+
+            <article class="lp-feature">
+              <span class="lp-feature-icon"><Icon name="ph:list-checks" class="h-5 w-5" /></span>
+              <h3>功能配方</h3>
+              <p>智能体按配方把代码写进你的仓库。</p>
+              <span class="lp-feature-foot">纯 Markdown · 可审阅</span>
+            </article>
+
+            <article class="lp-feature">
+              <span class="lp-feature-icon"><Icon name="ph:database" class="h-5 w-5" /></span>
+              <h3>内容来源</h3>
+              <p>继续在 Notion、Git 或现有仓库里写作。</p>
+              <span class="lp-feature-foot">Notion · Git 仓库</span>
+            </article>
+
+            <article class="lp-feature">
+              <span class="lp-feature-icon"><Icon name="ph:brackets-curly" class="h-5 w-5" /></span>
+              <h3>API 参考</h3>
+              <p>从 OpenAPI 生成，每个端点都能试用。</p>
+              <span class="lp-feature-foot">OpenAPI 3.x · 多版本</span>
+            </article>
+
+            <article class="lp-feature">
+              <span class="lp-feature-icon"><Icon name="ph:squares-four" class="h-5 w-5" /></span>
+              <h3>组件注册表</h3>
+              <p>组件以源码落地，功能以配方交付。</p>
+              <span class="lp-feature-foot">31 个组件 · 可自由修改</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-components">
+        <div class="lp-container">
+          <div class="lp-section-head lp-section-head-split">
+            <div>
+              <p class="lp-kicker">需要什么，什么时候需要</p>
+              <h2 class="lp-h2">组件不是黑盒。</h2>
+            </div>
+            <a class="lp-text-link" href="/components/">查看全部组件 <Icon name="ph:arrow-right" class="h-3.5 w-3.5" /></a>
+          </div>
+
+          <div class="lp-component-grid">
+            <div class="lp-component-card">
+              <span class="lp-component-label">src/components/ui/aside/</span>
+              <Aside type="note" title="预报每 10 分钟刷新">
+                图片、代码、提示框，都是你仓库里的普通文件。
+              </Aside>
+            </div>
+
+            <div class="lp-component-card">
+              <span class="lp-component-label">src/components/ui/steps/</span>
+              <Steps>
+                <Step title="获取密钥">在控制台创建一个 API key。</Step>
+                <Step title="调用接口">向 `/forecast` 发送一次请求。</Step>
+              </Steps>
+            </div>
+
+            <div class="lp-component-card">
+              <span class="lp-component-label">src/components/ui/tabs/</span>
+              <Tabs>
+                <TabItem label="macOS">按 <kbd>⌘</kbd> <kbd>K</kbd> 搜索。</TabItem>
+                <TabItem label="Windows">按 <kbd>Ctrl</kbd> <kbd>K</kbd> 搜索。</TabItem>
+              </Tabs>
+            </div>
+
+            <div class="lp-component-card">
+              <span class="lp-component-label">src/components/ui/package-managers/</span>
+              <PackageManagers pkg="@cloudflare/nimbus-docs" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-section lp-faq">
+        <div class="lp-container lp-faq-grid">
+          <div>
+            <p class="lp-kicker">问题</p>
+            <h2 class="lp-h2">开始之前。</h2>
+          </div>
+
+          <div class="lp-faq-list">
+            <details>
+              <summary>能直接用在现有的 Markdown 上吗？<Icon name="ph:plus" class="h-4 w-4" /></summary>
+              <p>可以。把页面放进 `src/content/docs/`，补上 `title`，剩下的交给检查。缺少的字段和断掉的链接会被指出来。</p>
+            </details>
+            <details>
+              <summary>必须使用智能体吗？<Icon name="ph:plus" class="h-4 w-4" /></summary>
+              <p>不需要。所有功能都可以手动使用。智能体只是第一等作者，不是必需品。</p>
+            </details>
+            <details>
+              <summary>支持哪些智能体？<Icon name="ph:plus" class="h-4 w-4" /></summary>
+              <p>任何能读文件的智能体。配方是纯 Markdown，检查结果是 JSON，站点索引是一个固定地址的文本文件。</p>
+            </details>
+            <details>
+              <summary>可以部署到哪里？<Icon name="ph:plus" class="h-4 w-4" /></summary>
+              <p>任何能提供静态文件的地方。也可以在 Cloudflare、Netlify、Vercel 或 Node 上运行服务器。本站部署在 GitHub Pages。</p>
+            </details>
+            <details>
+              <summary>免费吗？<Icon name="ph:plus" class="h-4 w-4" /></summary>
+              <p>MIT 许可，没有必须使用的托管服务。组件注册表同样免费。</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-final">
+        <div class="lp-container lp-final-inner">
+          <p class="lp-kicker">开始</p>
+          <h2 class="lp-final-title">你的文档，五分钟后开始。</h2>
+          <p class="lp-section-sub">按 <kbd>Ctrl</kbd> <kbd>C</kbd> 复制命令，或点击按钮。</p>
+
+          <div class="lp-command lp-command-large" data-copy-command data-copy-value={command}>
+            <span class="lp-command-prefix">$</span>
+            <code class="lp-command-text">{command}</code>
+            <button class="lp-command-copy" type="button" data-copy-trigger aria-label="复制安装命令">
+              <Icon name="ph:copy" class="h-3.5 w-3.5" />
+              <span data-copy-label>复制</span>
+            </button>
+          </div>
+
+          <p class="lp-note">把它粘贴到终端。几个问题之后，站点就在你的仓库里。</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="lp-footer">
+      <div class="lp-container">
+        <div class="lp-footer-grid">
+          <div class="lp-footer-brand">
+            <a class="lp-brand" href="/">
+              <Logo class="h-6 w-10 shrink-0" />
+              <span class="lp-brand-name">Nimbus</span>
+            </a>
+            <p>面向文档的写作工具。写一次，检查、评审，然后发布给人和智能体。</p>
+          </div>
+
+          <div class="lp-footer-col">
+            <h3>产品</h3>
+            <a href="/quickstart/">快速开始</a>
+            <a href="/components/">组件</a>
+            <a href="/registry/">注册表</a>
+            <a href="/cli/">CLI</a>
+          </div>
+
+          <div class="lp-footer-col">
+            <h3>文档</h3>
+            <a href="/writing/">写作</a>
+            <a href="/reference/configuration/">配置</a>
+            <a href="/navigation/sidebar/">导航</a>
+            <a href="/api-reference/">API 参考</a>
+          </div>
+
+          <div class="lp-footer-col">
+            <h3>资源</h3>
+            <a href="/why-nimbus/">为什么选择 Nimbus</a>
+            <a href="/ai/">面向智能体</a>
+            <a href="/deploy/">部署</a>
+            <a href="https://github.com/bbylw/nimbus-cn" target="_blank" rel="noopener">GitHub</a>
+          </div>
+        </div>
+
+        <div class="lp-footer-bottom">
+          <span>© 2026 Nimbus 中文文档</span>
+          <span>基于 Nimbus · MIT 许可</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    import { mount } from "@cloudflare/nimbus-docs/client";
+
+    mount("[data-copy-command]", (root) => {
+      const button = root.querySelector("[data-copy-trigger]") as HTMLButtonElement | null;
+      const label = root.querySelector("[data-copy-label]") as HTMLElement | null;
+      if (!button || !label) return () => {};
+      const original = label.textContent;
+      const text = root.getAttribute("data-copy-value") ?? "";
+      let timer: number | undefined;
+
+      const onClick = async () => {
+        let copied = true;
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch {
+          const area = document.createElement("textarea");
+          area.value = text;
+          area.style.position = "fixed";
+          area.style.opacity = "0";
+          document.body.appendChild(area);
+          area.select();
+          copied = document.execCommand("copy");
+          area.remove();
+        }
+        label.textContent = copied ? "已复制" : "复制失败";
+        if (timer) window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          label.textContent = original;
+        }, 1600);
+      };
+
+      button.addEventListener("click", onClick);
+      return () => {
+        button.removeEventListener("click", onClick);
+        if (timer) window.clearTimeout(timer);
+      };
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .lp-page {
+    --lp-max: 1200px;
+    --lp-line: var(--nb-border);
+    --lp-soft: color-mix(in oklch, var(--nb-muted) 58%, transparent);
+    --lp-ink: var(--nb-foreground);
+    --lp-accent: #f08a3c;
+    background: var(--nb-background);
+    color: var(--nb-foreground);
+    overflow-x: hidden;
+  }
+
+  .lp-container {
+    width: min(100% - 3rem, var(--lp-max));
+    margin-inline: auto;
+  }
+
+  .lp-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid var(--lp-line);
+    background: color-mix(in oklch, var(--nb-background) 82%, transparent);
+    backdrop-filter: blur(16px);
+  }
+
+  .lp-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 4.25rem;
+  }
+
+  .lp-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+    color: var(--nb-foreground);
+    text-decoration: none;
+  }
+
+  .lp-brand-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .lp-brand-sub {
+    padding-left: 0.55rem;
+    border-left: 1px solid var(--lp-line);
+    color: var(--nb-muted-foreground);
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  .lp-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    margin-inline-start: 1.6rem;
+    margin-inline-end: auto;
+  }
+
+  .lp-nav a {
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .lp-nav a:hover {
+    color: var(--nb-foreground);
+  }
+
+  .lp-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .lp-icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.45rem;
+    color: var(--nb-muted-foreground);
+    transition: color 160ms ease, background-color 160ms ease;
+  }
+
+  .lp-icon-link:hover {
+    color: var(--nb-foreground);
+    background: var(--nb-accent);
+  }
+
+  .lp-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-inline-start: 0.45rem;
+    padding: 0.52rem 0.95rem;
+    border-radius: 0.55rem;
+    background: var(--nb-primary);
+    color: var(--nb-primary-foreground);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 160ms ease, opacity 160ms ease;
+  }
+
+  .lp-cta:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  .lp-mobile-nav {
+    display: none;
+    gap: 1.1rem;
+    padding: 0 1.5rem 0.75rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+
+  .lp-mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lp-mobile-nav a {
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .lp-hero {
+    position: relative;
+    padding: clamp(4rem, 10vw, 7.5rem) 0 clamp(4rem, 8vw, 6.5rem);
+  }
+
+  .lp-hero::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(70rem 32rem at 50% -10%, color-mix(in oklch, var(--nb-brand) 7%, transparent), transparent 70%),
+      linear-gradient(to bottom, transparent 65%, color-mix(in oklch, var(--nb-muted) 40%, transparent));
+    content: "";
+    pointer-events: none;
+  }
+
+  .lp-hero > .lp-container {
+    position: relative;
+    z-index: 1;
+  }
+
+  .lp-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+    animation: lp-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lp-avatars,
+  .lp-review-avatars {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .lp-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.45rem;
+    height: 1.45rem;
+    margin-inline-start: -0.35rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklch, var(--nb-background) 80%, transparent);
+    color: #fff;
+    font-size: 0.5625rem;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .lp-avatar:first-child {
+    margin-inline-start: 0;
+  }
+
+  .lp-avatar-you {
+    background: #1f1f1f;
+  }
+
+  .lp-avatar-agent {
+    background: var(--lp-accent);
+  }
+
+  .lp-avatar-review {
+    background: #6e8fd6;
+  }
+
+  .lp-title {
+    display: flex;
+    flex-direction: column;
+    margin-top: 2.6rem;
+    font-size: clamp(3.1rem, 7.4vw, 5.4rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+    animation: lp-rise 800ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lp-title-line {
+    display: block;
+  }
+
+  .lp-title-strong {
+    position: relative;
+    display: inline-block;
+    margin-inline-start: 0.16em;
+    font-weight: 600;
+  }
+
+  .lp-title-muted {
+    color: var(--nb-muted-foreground);
+    font-weight: 400;
+  }
+
+  .lp-select {
+    position: relative;
+    display: inline-block;
+    padding: 0 0.12em;
+    border-radius: 0.12em;
+    background: color-mix(in oklch, var(--nb-brand) 18%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--nb-brand) 18%, transparent);
+    color: var(--nb-foreground);
+  }
+
+  .lp-tag {
+    position: absolute;
+    z-index: 3;
+    padding: 0.16rem 0.4rem;
+    border-radius: 0.22rem;
+    background: #171717;
+    color: #f5f5f5;
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 3px 8px rgb(0 0 0 / 0.12);
+    animation: lp-float 4.5s ease-in-out infinite;
+  }
+
+  .lp-tag::after {
+    position: absolute;
+    width: 0.3rem;
+    height: 0.3rem;
+    background: inherit;
+    content: "";
+    rotate: 45deg;
+  }
+
+  .lp-tag-you {
+    right: -1.6rem;
+    bottom: 0.15em;
+  }
+
+  .lp-tag-you::after {
+    left: -0.12rem;
+    bottom: 0.18rem;
+  }
+
+  .lp-tag-agent {
+    top: -1.55rem;
+    right: 2.5rem;
+    animation-delay: -1.4s;
+  }
+
+  .lp-tag-agent::after {
+    right: 0.55rem;
+    bottom: -0.1rem;
+  }
+
+  .lp-lede {
+    max-width: 36rem;
+    margin-top: 2rem;
+    color: var(--nb-muted-foreground);
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    animation: lp-rise 800ms 160ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lp-command {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 2.2rem;
+    padding: 0.62rem 0.7rem 0.62rem 0.9rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.7rem;
+    background: color-mix(in oklch, var(--nb-card) 92%, transparent);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+    font-family: var(--nb-font-mono);
+    animation: lp-rise 800ms 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lp-command-prefix {
+    color: var(--nb-muted-foreground);
+    font-size: 0.75rem;
+  }
+
+  .lp-command-text {
+    min-width: 0;
+    color: var(--nb-foreground);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .lp-command-copy {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.3rem;
+    margin-inline-start: 0.4rem;
+    padding: 0.32rem 0.48rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.38rem;
+    background: var(--nb-muted);
+    color: var(--nb-muted-foreground);
+    cursor: pointer;
+    font-family: var(--nb-font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    transition: color 160ms ease, border-color 160ms ease;
+  }
+
+  .lp-command-copy:hover {
+    border-color: var(--nb-border-strong);
+    color: var(--nb-foreground);
+  }
+
+  .lp-note {
+    margin-top: 0.8rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.75rem;
+    animation: lp-rise 800ms 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lp-section {
+    padding: clamp(4rem, 9vw, 7rem) 0;
+    border-top: 1px solid var(--lp-line);
+  }
+
+  .lp-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .lp-kicker::before {
+    width: 0.55rem;
+    height: 1px;
+    background: var(--nb-muted-foreground);
+    content: "";
+  }
+
+  .lp-h2 {
+    max-width: 58rem;
+    color: var(--nb-foreground);
+    font-size: clamp(2rem, 4.4vw, 3.4rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.16;
+    text-wrap: balance;
+  }
+
+  .lp-h2 em {
+    color: var(--nb-brand);
+    font-style: normal;
+  }
+
+  .lp-section-sub {
+    max-width: 42rem;
+    margin-top: 1rem;
+    color: var(--nb-muted-foreground);
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .lp-section-head {
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .lp-section-head-split {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .lp-workbench {
+    overflow: hidden;
+    border: 1px solid var(--lp-line);
+    border-radius: 1.1rem;
+    background: color-mix(in oklch, var(--nb-card) 88%, var(--nb-muted));
+    box-shadow: 0 20px 60px -32px rgb(0 0 0 / 0.18);
+  }
+
+  .lp-wb-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    height: 2.75rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--lp-line);
+    background: color-mix(in oklch, var(--nb-card) 80%, transparent);
+  }
+
+  .lp-wb-dots {
+    display: inline-flex;
+    gap: 0.3rem;
+  }
+
+  .lp-wb-dots i {
+    display: block;
+    width: 0.44rem;
+    height: 0.44rem;
+    border-radius: 999px;
+    background: var(--nb-border-strong);
+  }
+
+  .lp-wb-url {
+    flex: 1;
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .lp-wb-pill {
+    padding: 0.22rem 0.5rem;
+    border-radius: 999px;
+    background: var(--nb-muted);
+    color: var(--nb-muted-foreground);
+    font-size: 0.625rem;
+    font-weight: 500;
+  }
+
+  .lp-wb-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .lp-stage {
+    display: flex;
+    min-height: 25rem;
+    flex-direction: column;
+    padding: 1.45rem;
+    border-inline-end: 1px solid var(--lp-line);
+  }
+
+  .lp-stage:last-child {
+    border-inline-end: 0;
+  }
+
+  .lp-stage-label {
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .lp-stage h3 {
+    margin-top: 0.65rem;
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.35;
+  }
+
+  .lp-editor,
+  .lp-review,
+  .lp-quiet-card,
+  .lp-mini-doc,
+  .lp-mini-code,
+  .lp-theme-panel {
+    border: 1px solid var(--lp-line);
+    border-radius: 0.8rem;
+    background: var(--nb-card);
+  }
+
+  .lp-editor {
+    margin-top: 1.1rem;
+    overflow: hidden;
+  }
+
+  .lp-editor-head,
+  .lp-mini-code-head,
+  .lp-theme-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--lp-line);
+    background: color-mix(in oklch, var(--nb-muted) 55%, transparent);
+  }
+
+  .lp-file {
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.6875rem;
+  }
+
+  .lp-chip {
+    padding: 0.16rem 0.4rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.25rem;
+    background: var(--nb-card);
+    color: var(--nb-muted-foreground);
+    font-size: 0.5625rem;
+    font-weight: 600;
+  }
+
+  .lp-chip-warn {
+    border-color: color-mix(in oklch, var(--nb-warning) 25%, transparent);
+    background: var(--nb-warning-muted);
+    color: var(--nb-warning-foreground);
+  }
+
+  .lp-code {
+    padding: 0.7rem 0;
+    overflow-x: auto;
+    font-family: var(--nb-font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.85;
+  }
+
+  .lp-code-line {
+    display: flex;
+    gap: 0.7rem;
+    padding: 0 0.8rem;
+    white-space: pre;
+  }
+
+  .lp-ln {
+    width: 0.9rem;
+    flex: none;
+    color: var(--nb-muted-foreground);
+    text-align: end;
+  }
+
+  .lp-cm {
+    color: var(--nb-muted-foreground);
+  }
+
+  .lp-key {
+    color: #7c8fb5;
+  }
+
+  .lp-str {
+    color: #9a8b6a;
+  }
+
+  .lp-link {
+    color: var(--nb-brand);
+  }
+
+  .lp-check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-top: 1.1rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+  }
+
+  .lp-check-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    margin: 0;
+  }
+
+  .lp-check-list :global(svg) {
+    flex: none;
+    margin-top: 0.12rem;
+    color: var(--nb-success);
+  }
+
+  .lp-stage-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: auto;
+    padding-top: 1.1rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.6875rem;
+  }
+
+  .lp-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--nb-border-strong);
+  }
+
+  .lp-dot-green {
+    background: var(--nb-success);
+  }
+
+  .lp-review {
+    margin-top: 1.1rem;
+    padding: 1rem;
+  }
+
+  .lp-review-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+
+  .lp-review-copy {
+    margin-top: 0.8rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .lp-review-action {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--lp-line);
+  }
+
+  .lp-button-dark {
+    padding: 0.42rem 0.7rem;
+    border-radius: 0.4rem;
+    background: var(--nb-primary);
+    color: var(--nb-primary-foreground);
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
+  .lp-review-meta {
+    color: var(--nb-muted-foreground);
+    font-size: 0.625rem;
+  }
+
+  .lp-quiet-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-top: 0.8rem;
+    padding: 0.85rem;
+    color: var(--nb-muted-foreground);
+  }
+
+  .lp-quiet-card :global(svg) {
+    flex: none;
+    color: var(--nb-brand);
+  }
+
+  .lp-quiet-card strong {
+    display: block;
+    color: var(--nb-foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .lp-quiet-card span {
+    display: block;
+    margin-top: 0.18rem;
+    font-size: 0.6875rem;
+    line-height: 1.5;
+  }
+
+  .lp-output-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 1.1rem;
+    border-top: 1px solid var(--lp-line);
+  }
+
+  .lp-output-list li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0;
+    padding: 0.62rem 0;
+    border-bottom: 1px solid var(--lp-line);
+    color: var(--nb-muted-foreground);
+    font-size: 0.6875rem;
+  }
+
+  .lp-output-list li :global(svg) {
+    color: var(--nb-brand);
+  }
+
+  .lp-output-name {
+    overflow: hidden;
+    color: var(--nb-foreground);
+    font-family: var(--nb-font-mono);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lp-output-meta {
+    color: var(--nb-muted-foreground);
+    font-size: 0.625rem;
+  }
+
+  .lp-audience {
+    background:
+      linear-gradient(to bottom, color-mix(in oklch, var(--nb-muted) 45%, transparent), transparent 55%),
+      var(--nb-background);
+  }
+
+  .lp-audience-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+  }
+
+  .lp-audience-card {
+    padding: 1.6rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 1rem;
+    background: var(--nb-card);
+  }
+
+  .lp-label {
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .lp-audience-card h3 {
+    margin-top: 0.7rem;
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .lp-mini-doc,
+  .lp-mini-code {
+    margin-top: 1.4rem;
+    overflow: hidden;
+  }
+
+  .lp-mini-doc {
+    padding: 0.9rem;
+  }
+
+  .lp-mini-doc-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--nb-muted-foreground);
+    font-size: 0.625rem;
+  }
+
+  .lp-mini-doc-brand {
+    font-weight: 600;
+    color: var(--nb-foreground);
+  }
+
+  .lp-mini-doc-chip {
+    padding: 0.14rem 0.35rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.2rem;
+  }
+
+  .lp-mini-doc-title {
+    margin-top: 1.3rem !important;
+    color: var(--nb-foreground);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .lp-mini-doc-line {
+    margin-top: 0.2rem !important;
+    color: var(--nb-muted-foreground);
+    font-size: 0.6875rem;
+  }
+
+  .lp-mini-doc-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.9rem;
+  }
+
+  .lp-mini-doc-bars span {
+    display: block;
+    height: 0.35rem;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--nb-brand) 16%, transparent);
+  }
+
+  .lp-mini-doc-tags {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.85rem;
+  }
+
+  .lp-mini-doc-tags span {
+    padding: 0.18rem 0.4rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.25rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.5625rem;
+  }
+
+  .lp-mini-code {
+    background: #171717;
+  }
+
+  .lp-mini-code-head {
+    border-bottom-color: #2c2c2c;
+    background: #1d1d1d;
+  }
+
+  .lp-mini-code .lp-file {
+    color: #b4b4b4;
+  }
+
+  .lp-mini-code .lp-chip {
+    border-color: #3a3a3a;
+    background: #242424;
+    color: #d8d8d8;
+  }
+
+  .lp-mini-code pre {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    overflow-x: auto;
+    color: #e6e6e6;
+    font-family: var(--nb-font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.8;
+  }
+
+  .lp-mini-code .lp-cm {
+    color: #8c8c8c;
+  }
+
+  .lp-mini-code .lp-key {
+    color: #9fb5e8;
+  }
+
+  .lp-mini-code .lp-str {
+    color: #e7c38f;
+  }
+
+  .lp-tagcode {
+    color: #b8a6e8;
+  }
+
+  .lp-theme-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+
+  .lp-theme-panel {
+    overflow: hidden;
+    padding: 0;
+    box-shadow: 0 20px 50px -30px rgb(0 0 0 / 0.16);
+  }
+
+  .lp-theme-bar span:first-child {
+    font-family: var(--nb-font-mono);
+    font-size: 0.6875rem;
+    color: var(--nb-muted-foreground);
+  }
+
+  .lp-theme-code {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.8;
+  }
+
+  .lp-theme-line {
+    display: block;
+  }
+
+  .lp-swatches {
+    display: flex;
+    gap: 0.45rem;
+    padding: 0 1rem 0.9rem;
+  }
+
+  .lp-swatch {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 0.28rem;
+    border: 1px solid var(--lp-line);
+  }
+
+  .lp-swatch-ink {
+    background: #171717;
+  }
+
+  .lp-swatch-brand {
+    background: #57647b;
+  }
+
+  .lp-swatch-paper {
+    background: #fafaf9;
+  }
+
+  .lp-swatch-accent {
+    background: var(--lp-accent);
+  }
+
+  .lp-theme-preview {
+    margin: 0 1rem 1rem;
+    padding: 0.9rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.8rem;
+    background: var(--nb-muted);
+  }
+
+  .lp-theme-preview-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.625rem;
+    font-weight: 600;
+  }
+
+  .lp-theme-preview p {
+    margin-top: 0.9rem !important;
+    color: var(--nb-foreground);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .lp-theme-preview-line {
+    display: block;
+    width: 70%;
+    height: 0.3rem;
+    margin-top: 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--nb-muted-foreground) 25%, transparent);
+  }
+
+  .lp-theme-preview-line.short {
+    width: 45%;
+  }
+
+  .lp-theme-preview-card {
+    margin-top: 0.9rem;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.45rem;
+    background: var(--nb-card);
+  }
+
+  .lp-theme-preview-card strong {
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
+  .lp-theme-preview-card span {
+    display: block;
+    margin-top: 0.1rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.5625rem;
+  }
+
+  .lp-theme-foot {
+    margin: 0;
+    padding: 0 1rem 1rem;
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.5625rem;
+  }
+
+  .lp-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+  }
+
+  .lp-feature {
+    padding: 1.35rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.9rem;
+    background: var(--nb-card);
+    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .lp-feature:hover {
+    transform: translateY(-2px);
+    border-color: var(--nb-border-strong);
+    box-shadow: 0 12px 32px -24px rgb(0 0 0 / 0.2);
+  }
+
+  .lp-feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.5rem;
+    color: var(--nb-brand);
+    background: var(--nb-muted);
+  }
+
+  .lp-feature h3 {
+    margin-top: 0.9rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .lp-feature p {
+    margin-top: 0.35rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  .lp-feature-foot {
+    display: block;
+    margin-top: 1rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--lp-line);
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.5625rem;
+  }
+
+  .lp-components {
+    background: var(--lp-soft);
+  }
+
+  .lp-text-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .lp-text-link:hover {
+    color: var(--nb-foreground);
+  }
+
+  .lp-component-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .lp-component-card {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.9rem;
+    background: var(--nb-card);
+  }
+
+  .lp-component-label {
+    display: block;
+    margin-bottom: 0.9rem;
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.5625rem;
+  }
+
+  .lp-component-card :global(.aside-card),
+  .lp-component-card :global(.steps-list),
+  .lp-component-card :global([data-nb-pm]) {
+    margin-block: 0;
+  }
+
+  .lp-faq-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+    gap: clamp(2rem, 6vw, 5rem);
+  }
+
+  .lp-faq-list {
+    border-top: 1px solid var(--lp-line);
+  }
+
+  .lp-faq-list details {
+    border-bottom: 1px solid var(--lp-line);
+  }
+
+  .lp-faq-list summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    color: var(--nb-foreground);
+    cursor: pointer;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    list-style: none;
+  }
+
+  .lp-faq-list summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .lp-faq-list summary :global(svg) {
+    flex: none;
+    color: var(--nb-muted-foreground);
+    transition: transform 180ms ease;
+  }
+
+  .lp-faq-list details[open] summary :global(svg) {
+    transform: rotate(45deg);
+  }
+
+  .lp-faq-list details p {
+    max-width: 42rem;
+    margin: 0 0 1.1rem !important;
+    color: var(--nb-muted-foreground);
+    font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .lp-final {
+    padding: clamp(5rem, 12vw, 9rem) 0;
+    border-top: 1px solid var(--lp-line);
+    background:
+      radial-gradient(50rem 20rem at 50% 0%, color-mix(in oklch, var(--nb-brand) 7%, transparent), transparent 70%),
+      var(--nb-background);
+  }
+
+  .lp-final-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .lp-final-title {
+    max-width: 50rem;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  .lp-command-large {
+    margin-top: 2rem;
+    padding: 0.7rem 0.75rem 0.7rem 1rem;
+  }
+
+  .lp-footer {
+    padding: 3.5rem 0 1.5rem;
+    border-top: 1px solid var(--lp-line);
+  }
+
+  .lp-footer-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) repeat(3, minmax(0, 1fr));
+    gap: 2rem;
+  }
+
+  .lp-footer-brand p {
+    max-width: 20rem;
+    margin-top: 1rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+    line-height: 1.65;
+  }
+
+  .lp-footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .lp-footer-col h3 {
+    margin-bottom: 0.3rem;
+    color: var(--nb-foreground);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .lp-footer-col a {
+    color: var(--nb-muted-foreground);
+    font-size: 0.75rem;
+    text-decoration: none;
+  }
+
+  .lp-footer-col a:hover {
+    color: var(--nb-foreground);
+  }
+
+  .lp-footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--lp-line);
+    color: var(--nb-muted-foreground);
+    font-size: 0.6875rem;
+  }
+
+  .lp-faq-list kbd,
+  .lp-section-sub kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    padding: 0.12rem 0.3rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.25rem;
+    background: var(--nb-muted);
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.625rem;
+    line-height: 1.2;
+  }
+
+  @keyframes lp-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes lp-float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .lp-nav {
+      display: none;
+    }
+
+    .lp-mobile-nav {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 1000px) {
+    .lp-wb-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-stage {
+      min-height: 0;
+      border-inline-end: 0;
+      border-bottom: 1px solid var(--lp-line);
+    }
+
+    .lp-stage:last-child {
+      border-bottom: 0;
+    }
+
+    .lp-audience-grid,
+    .lp-theme-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 760px) {
+    .lp-container {
+      width: min(100% - 2rem, var(--lp-max));
+    }
+
+    .lp-nav,
+    .lp-brand-sub {
+      display: none;
+    }
+
+    .lp-header-inner {
+      height: 3.75rem;
+    }
+
+    .lp-actions {
+      gap: 0.15rem;
+    }
+
+    .lp-cta {
+      padding: 0.45rem 0.65rem;
+    }
+
+    .lp-cta span {
+      display: none;
+    }
+
+    .lp-title {
+      margin-top: 2rem;
+      font-size: clamp(2.6rem, 12vw, 3.8rem);
+    }
+
+    .lp-tag,
+    .lp-tag-you,
+    .lp-tag-agent {
+      display: none;
+    }
+
+    .lp-lede {
+      font-size: 1rem;
+    }
+
+    .lp-command {
+      width: 100%;
+    }
+
+    .lp-command-text {
+      flex: 1;
+    }
+
+    .lp-feature-grid,
+    .lp-component-grid,
+    .lp-footer-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-section-head-split,
+    .lp-footer-bottom {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .lp-footer-grid {
+      gap: 1.6rem;
+    }
+
+    .lp-final-title {
+      font-size: clamp(2.1rem, 10vw, 3rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lp-eyebrow,
+    .lp-title,
+    .lp-lede,
+    .lp-command,
+    .lp-note,
+    .lp-tag {
+      animation: none;
+    }
+
+    .lp-feature,
+    .lp-cta {
+      transition: none;
+    }
+  }
+</style>
