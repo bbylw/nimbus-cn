@@ -2176,23 +2176,64 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     }
 
     .lp-feature-grid,
-    .lp-component-grid,
-    .lp-footer-grid {
+    .lp-component-grid {
       grid-template-columns: 1fr;
     }
 
-    .lp-section-head-split,
-    .lp-footer-bottom {
+    .lp-section-head-split {
       align-items: flex-start;
       flex-direction: column;
     }
 
+    .lp-footer {
+      padding: 2.5rem 0 1.25rem;
+    }
+
     .lp-footer-grid {
-      gap: 1.6rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
+      gap: 1.5rem 1rem;
+    }
+
+    .lp-footer-brand {
+      grid-column: 1 / -1;
+    }
+
+    .lp-footer-brand p {
+      max-width: 22rem;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    .lp-footer-col {
+      gap: 0.42rem;
+    }
+
+    .lp-footer-col h3 {
+      margin-bottom: 0.2rem;
+      font-size: 0.75rem;
+    }
+
+    .lp-footer-col a {
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .lp-footer-bottom {
+      flex-direction: row;
+      align-items: center;
+      margin-top: 1.75rem;
+      padding-top: 0.9rem;
+      font-size: 0.6875rem;
     }
 
     .lp-final-title {
       font-size: clamp(2.1rem, 10vw, 3rem);
+    }
+  }
+
+  @media (max-width: 359px) {
+    .lp-footer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
