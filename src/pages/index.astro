@@ -37,7 +37,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           <a class="lp-icon-link" href="https://github.com/cloudflare/nimbus" target="_blank" rel="noopener" aria-label="GitHub">
             <Icon name="ph:github-logo" class="h-4 w-4" />
           </a>
-          <a class="lp-cta" href="/quickstart/">
+          <a class="lp-cta" href="/quickstart/" aria-label="开始使用">
             <span>开始使用</span>
             <Icon name="ph:arrow-right" class="h-3.5 w-3.5" />
           </a>
@@ -52,7 +52,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
       </nav>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="lp-hero">
         <div class="lp-container">
           <div class="lp-eyebrow">
@@ -69,14 +69,14 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
               认识
               <span class="lp-title-strong">
                 Nimbus
-                <span class="lp-tag lp-tag-agent">智能体</span>
+                <span class="lp-tag lp-tag-agent" aria-hidden="true">智能体</span>
               </span>
             </span>
             <span class="lp-title-line lp-title-muted">
               面向文档的
               <span class="lp-select">
                 写作工具
-                <span class="lp-tag lp-tag-you">你</span>
+                <span class="lp-tag lp-tag-you" aria-hidden="true">你</span>
               </span>
             </span>
           </h1>
@@ -91,11 +91,18 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
             <code class="lp-command-text">{command}</code>
             <button class="lp-command-copy" type="button" data-copy-trigger aria-label="复制安装命令">
               <Icon name="ph:copy" class="h-3.5 w-3.5" />
-              <span data-copy-label>复制</span>
+              <span data-copy-label aria-live="polite">复制</span>
             </button>
           </div>
 
           <p class="lp-note">需要 Node.js 22.12+ · MIT 许可 · 你的仓库，你的文件</p>
+
+          <div class="lp-hero-links">
+            <a href="/quickstart/">快速开始 <Icon name="ph:arrow-right" class="h-3 w-3" /></a>
+            <a href="/writing/">写作指南</a>
+            <a href="/components/">组件</a>
+            <a href="/api-reference/">API 参考</a>
+          </div>
         </div>
       </section>
 
@@ -104,7 +111,10 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           <div class="lp-section-head">
             <p class="lp-kicker">写一次，走完整个流程</p>
             <h2 class="lp-h2">
-              你写一次。Nimbus <em>检查</em>它，留住它等待评审，然后把它发布给人和智能体。
+              <span class="lp-h2-line">你写一次。</span>
+              <span class="lp-h2-line">Nimbus <em>检查</em>它，</span>
+              <span class="lp-h2-line">留住它等待评审，</span>
+              <span class="lp-h2-line">再发布给人和智能体。</span>
             </h2>
           </div>
 
@@ -219,7 +229,10 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
         <div class="lp-container">
           <div class="lp-section-head">
             <p class="lp-kicker">把标准写进流程</p>
-            <h2 class="lp-h2">值得读的页面，智能体也能写。</h2>
+            <h2 class="lp-h2">
+              <span class="lp-h2-line">值得读的页面，</span>
+              <span class="lp-h2-line">智能体也能写。</span>
+            </h2>
             <p class="lp-section-sub">你不需要在两套流程之间做选择。</p>
           </div>
 
@@ -381,6 +394,49 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
         </div>
       </section>
 
+      <section class="lp-section lp-spotlight">
+        <div class="lp-container lp-spotlight-grid">
+          <div class="lp-spotlight-copy">
+            <p class="lp-kicker">内置搜索</p>
+            <h2 class="lp-h2">
+              <span class="lp-h2-line">问你的文档。</span>
+              <span class="lp-h2-line">得到带来源的答案。</span>
+            </h2>
+            <p class="lp-section-sub">
+              搜索索引在构建时生成，不需要额外的搜索服务。读者按下快捷键，就能从问题直接跳到具体页面和章节。
+            </p>
+            <ul class="lp-check-list">
+              <li><Icon name="ph:check" class="h-4 w-4" /> Pagefind 开箱即用</li>
+              <li><Icon name="ph:check" class="h-4 w-4" /> 构建时索引，零运行时服务</li>
+              <li><Icon name="ph:check" class="h-4 w-4" /> 可替换为自有搜索后端</li>
+            </ul>
+            <a class="lp-text-link" href="/navigation/search/">了解搜索 <Icon name="ph:arrow-right" class="h-3.5 w-3.5" /></a>
+          </div>
+
+          <div class="lp-search-demo" aria-hidden="true">
+            <div class="lp-search-bar">
+              <Icon name="ph:magnifying-glass" class="h-4 w-4" />
+              <span>如何提高速率限制？</span>
+              <kbd>⌘K</kbd>
+            </div>
+            <div class="lp-search-result">
+              <span class="lp-search-breadcrumb">参考 / 速率限制</span>
+              <p class="lp-search-title">提高你的速率限制</p>
+              <p class="lp-search-snippet">打开支持表单，附上你的账户 ID。大多数请求会在一天内批准。</p>
+              <span class="lp-search-url">/reference/rate-limits/</span>
+            </div>
+            <div class="lp-search-result lp-search-result-muted">
+              <span class="lp-search-breadcrumb">指南 / 配额</span>
+              <p class="lp-search-title">查看账户配额</p>
+            </div>
+            <div class="lp-search-foot">
+              <span class="lp-dot lp-dot-green"></span>
+              Pagefind · 108 页已索引
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="lp-section lp-components">
         <div class="lp-container">
           <div class="lp-section-head lp-section-head-split">
@@ -458,19 +514,22 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
       <section class="lp-final">
         <div class="lp-container lp-final-inner">
           <p class="lp-kicker">开始</p>
-          <h2 class="lp-final-title">你的文档，五分钟后开始。</h2>
-          <p class="lp-section-sub">按 <kbd>Ctrl</kbd> <kbd>C</kbd> 复制命令，或点击按钮。</p>
+          <h2 class="lp-final-title">
+            <span class="lp-h2-line">你的文档，</span>
+            <span class="lp-h2-line">五分钟后开始。</span>
+          </h2>
+          <p class="lp-section-sub">点击复制，粘贴到终端即可。</p>
 
           <div class="lp-command lp-command-large" data-copy-command data-copy-value={command}>
             <span class="lp-command-prefix">$</span>
             <code class="lp-command-text">{command}</code>
             <button class="lp-command-copy" type="button" data-copy-trigger aria-label="复制安装命令">
               <Icon name="ph:copy" class="h-3.5 w-3.5" />
-              <span data-copy-label>复制</span>
+              <span data-copy-label aria-live="polite">复制</span>
             </button>
           </div>
 
-          <p class="lp-note">把它粘贴到终端。几个问题之后，站点就在你的仓库里。</p>
+          <p class="lp-note">几个问题之后，站点就在你的仓库里。</p>
         </div>
       </section>
     </main>
@@ -531,10 +590,22 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
       let timer: number | undefined;
 
       const onClick = async () => {
-        let copied = true;
-        try {
-          await navigator.clipboard.writeText(text);
-        } catch {
+        const tryClipboard = async () => {
+          if (!navigator.clipboard) return false;
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch {
+            return false;
+          }
+        };
+
+        let copied = await Promise.race([
+          tryClipboard(),
+          new Promise<boolean>((resolve) => window.setTimeout(() => resolve(false), 800)),
+        ]);
+
+        if (!copied) {
           const area = document.createElement("textarea");
           area.value = text;
           area.style.position = "fixed";
@@ -544,6 +615,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           copied = document.execCommand("copy");
           area.remove();
         }
+
         label.textContent = copied ? "已复制" : "复制失败";
         if (timer) window.clearTimeout(timer);
         timer = window.setTimeout(() => {
@@ -570,6 +642,18 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     background: var(--nb-background);
     color: var(--nb-foreground);
     overflow-x: hidden;
+  }
+
+  .lp-page ::selection {
+    background: color-mix(in oklch, var(--nb-brand) 24%, transparent);
+    color: var(--nb-foreground);
+  }
+
+  .lp-page a:focus-visible,
+  .lp-page button:focus-visible {
+    outline: 2px solid var(--nb-ring);
+    outline-offset: 3px;
+    border-radius: 0.3rem;
   }
 
   .lp-container {
@@ -618,6 +702,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-nav a {
+    position: relative;
     color: var(--nb-muted-foreground);
     font-size: 0.8125rem;
     font-weight: 500;
@@ -625,8 +710,25 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     transition: color 160ms ease;
   }
 
+  .lp-nav a::after {
+    position: absolute;
+    right: 0;
+    bottom: -0.42rem;
+    left: 0;
+    height: 1px;
+    background: var(--nb-foreground);
+    content: "";
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 180ms ease;
+  }
+
   .lp-nav a:hover {
     color: var(--nb-foreground);
+  }
+
+  .lp-nav a:hover::after {
+    transform: scaleX(1);
   }
 
   .lp-actions {
@@ -747,7 +849,8 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-avatar-you {
-    background: #1f1f1f;
+    background: var(--nb-foreground);
+    color: var(--nb-background);
   }
 
   .lp-avatar-agent {
@@ -795,13 +898,24 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     color: var(--nb-foreground);
   }
 
+  .lp-select::after {
+    position: absolute;
+    top: 0.08em;
+    bottom: 0.08em;
+    right: -0.07em;
+    width: 2px;
+    background: var(--nb-foreground);
+    content: "";
+    animation: lp-caret 1.1s step-end infinite;
+  }
+
   .lp-tag {
     position: absolute;
     z-index: 3;
     padding: 0.16rem 0.4rem;
     border-radius: 0.22rem;
-    background: #171717;
-    color: #f5f5f5;
+    background: var(--nb-foreground);
+    color: var(--nb-background);
     font-size: 0.625rem;
     font-weight: 500;
     letter-spacing: 0;
@@ -909,6 +1023,29 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     animation: lp-rise 800ms 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  .lp-hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 1.3rem;
+    margin-top: 1.35rem;
+    animation: lp-rise 800ms 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lp-hero-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--nb-muted-foreground);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .lp-hero-links a:hover {
+    color: var(--nb-foreground);
+  }
+
   .lp-section {
     padding: clamp(4rem, 9vw, 7rem) 0;
     border-top: 1px solid var(--lp-line);
@@ -942,6 +1079,10 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     letter-spacing: -0.03em;
     line-height: 1.16;
     text-wrap: balance;
+  }
+
+  .lp-h2-line {
+    display: block;
   }
 
   .lp-h2 em {
@@ -1125,11 +1266,11 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-key {
-    color: #7c8fb5;
+    color: var(--nb-brand);
   }
 
   .lp-str {
-    color: #9a8b6a;
+    color: var(--nb-warning-foreground);
   }
 
   .lp-link {
@@ -1303,6 +1444,13 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border: 1px solid var(--lp-line);
     border-radius: 1rem;
     background: var(--nb-card);
+    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .lp-audience-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--nb-border-strong);
+    box-shadow: 0 14px 34px -28px rgb(0 0 0 / 0.2);
   }
 
   .lp-label {
@@ -1622,6 +1770,113 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     background: var(--lp-soft);
   }
 
+  .lp-spotlight-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: clamp(2rem, 6vw, 5rem);
+  }
+
+  .lp-spotlight-copy .lp-text-link {
+    margin-top: 1.2rem;
+  }
+
+  .lp-search-demo {
+    padding: 1.25rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 1.1rem;
+    background: var(--nb-card);
+    box-shadow: 0 20px 50px -32px rgb(0 0 0 / 0.18);
+  }
+
+  .lp-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.62rem 0.7rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.55rem;
+    background: var(--nb-muted);
+    color: var(--nb-muted-foreground);
+    font-size: 0.8125rem;
+  }
+
+  .lp-search-bar :global(svg) {
+    flex: none;
+    color: var(--nb-muted-foreground);
+  }
+
+  .lp-search-bar span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lp-search-bar kbd {
+    flex: none;
+    padding: 0.14rem 0.32rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.25rem;
+    background: var(--nb-card);
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.5625rem;
+  }
+
+  .lp-search-result {
+    margin-top: 0.6rem;
+    padding: 0.8rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.6rem;
+    background: var(--nb-card);
+  }
+
+  .lp-search-result-muted {
+    opacity: 0.62;
+  }
+
+  .lp-search-breadcrumb {
+    color: var(--nb-muted-foreground);
+    font-family: var(--nb-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.04em;
+  }
+
+  .lp-search-title {
+    margin-top: 0.35rem !important;
+    color: var(--nb-foreground);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .lp-search-snippet {
+    margin-top: 0.2rem !important;
+    color: var(--nb-muted-foreground);
+    font-size: 0.75rem;
+    line-height: 1.55;
+  }
+
+  .lp-search-url {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--nb-brand);
+    font-family: var(--nb-font-mono);
+    font-size: 0.5625rem;
+  }
+
+  .lp-search-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid var(--lp-line);
+    color: var(--nb-muted-foreground);
+    font-size: 0.625rem;
+  }
+
   .lp-text-link {
     display: inline-flex;
     align-items: center;
@@ -1649,6 +1904,13 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border: 1px solid var(--lp-line);
     border-radius: 0.9rem;
     background: var(--nb-card);
+    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .lp-component-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--nb-border-strong);
+    box-shadow: 0 14px 34px -28px rgb(0 0 0 / 0.2);
   }
 
   .lp-component-label {
@@ -1797,22 +2059,6 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     font-size: 0.6875rem;
   }
 
-  .lp-faq-list kbd,
-  .lp-section-sub kbd {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 1.35rem;
-    padding: 0.12rem 0.3rem;
-    border: 1px solid var(--lp-line);
-    border-radius: 0.25rem;
-    background: var(--nb-muted);
-    color: var(--nb-muted-foreground);
-    font-family: var(--nb-font-mono);
-    font-size: 0.625rem;
-    line-height: 1.2;
-  }
-
   @keyframes lp-rise {
     from {
       opacity: 0;
@@ -1830,6 +2076,15 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     }
     50% {
       transform: translateY(-4px);
+    }
+  }
+
+  @keyframes lp-caret {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
     }
   }
 
@@ -1860,6 +2115,10 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
     .lp-audience-grid,
     .lp-theme-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-spotlight-grid {
       grid-template-columns: 1fr;
     }
 
@@ -1943,11 +2202,18 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     .lp-lede,
     .lp-command,
     .lp-note,
+    .lp-hero-links,
     .lp-tag {
       animation: none;
     }
 
+    .lp-select::after {
+      animation: none;
+    }
+
     .lp-feature,
+    .lp-audience-card,
+    .lp-component-card,
     .lp-cta {
       transition: none;
     }
