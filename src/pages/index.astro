@@ -19,10 +19,9 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   <div class="lp-page">
     <header class="lp-header">
       <div class="lp-container lp-header-inner">
-        <a class="lp-brand" href="/" aria-label="Nimbus 中文文档首页">
+        <a class="lp-brand" href="/" aria-label="Nimbus 首页">
           <Logo class="h-6 w-10 shrink-0" />
           <span class="lp-brand-name">Nimbus</span>
-          <span class="lp-brand-sub">中文文档</span>
         </a>
 
         <nav class="lp-nav" aria-label="主导航">
@@ -513,7 +512,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
         </div>
 
         <div class="lp-footer-bottom">
-          <span>© 2026 Nimbus 中文文档</span>
+          <span>© 2026 Nimbus</span>
           <span>基于 Nimbus · MIT 许可</span>
         </div>
       </div>
@@ -608,14 +607,6 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     font-size: 0.9375rem;
     font-weight: 600;
     letter-spacing: -0.015em;
-  }
-
-  .lp-brand-sub {
-    padding-left: 0.55rem;
-    border-left: 1px solid var(--lp-line);
-    color: var(--nb-muted-foreground);
-    font-size: 0.75rem;
-    white-space: nowrap;
   }
 
   .lp-nav {
@@ -1882,8 +1873,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
       width: min(100% - 2rem, var(--lp-max));
     }
 
-    .lp-nav,
-    .lp-brand-sub {
+    .lp-nav {
       display: none;
     }
 
