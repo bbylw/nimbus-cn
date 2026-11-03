@@ -581,6 +581,32 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   <script>
     import { mount } from "@cloudflare/nimbus-docs/client";
 
+    mount(".lp-page", (root) => {
+      const targets = Array.from(
+        root.querySelectorAll<HTMLElement>("main > section:not(.lp-hero) > .lp-container"),
+      );
+      if (!("IntersectionObserver" in window) || targets.length === 0) return () => {};
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        },
+        { rootMargin: "0px 0px -12% 0px", threshold: 0.05 },
+      );
+
+      for (const el of targets) {
+        // 已在首屏内的区块不做动画，避免闪烁
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.9) continue;
+        el.classList.add("lp-reveal");
+        observer.observe(el);
+      }
+      return () => observer.disconnect();
+    });
+
     mount("[data-copy-command]", (root) => {
       const button = root.querySelector("[data-copy-trigger]") as HTMLButtonElement | null;
       const label = root.querySelector("[data-copy-label]") as HTMLElement | null;
@@ -707,7 +733,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     font-size: 0.8125rem;
     font-weight: 500;
     text-decoration: none;
-    transition: color 160ms ease;
+    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-nav a::after {
@@ -720,7 +746,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     content: "";
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform 180ms ease;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-nav a:hover {
@@ -741,11 +767,11 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2rem;
-    height: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border-radius: 0.45rem;
     color: var(--nb-muted-foreground);
-    transition: color 160ms ease, background-color 160ms ease;
+    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-icon-link:hover {
@@ -758,6 +784,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     align-items: center;
     gap: 0.4rem;
     margin-inline-start: 0.45rem;
+    min-height: 2.25rem;
     padding: 0.52rem 0.95rem;
     border-radius: 0.55rem;
     background: var(--nb-primary);
@@ -765,7 +792,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     font-size: 0.8125rem;
     font-weight: 600;
     text-decoration: none;
-    transition: transform 160ms ease, opacity 160ms ease;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-cta:hover {
@@ -833,13 +860,13 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.45rem;
-    height: 1.45rem;
+    width: 1.5rem;
+    height: 1.5rem;
     margin-inline-start: -0.35rem;
     border-radius: 999px;
     border: 1px solid color-mix(in oklch, var(--nb-background) 80%, transparent);
     color: #fff;
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
     font-weight: 600;
     line-height: 1;
   }
@@ -916,13 +943,12 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border-radius: 0.22rem;
     background: var(--nb-foreground);
     color: var(--nb-background);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0;
     line-height: 1.2;
     white-space: nowrap;
     box-shadow: 0 3px 8px rgb(0 0 0 / 0.12);
-    animation: lp-float 4.5s ease-in-out infinite;
   }
 
   .lp-tag::after {
@@ -1006,9 +1032,9 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     color: var(--nb-muted-foreground);
     cursor: pointer;
     font-family: var(--nb-font-sans);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    transition: color 160ms ease, border-color 160ms ease;
+    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-command-copy:hover {
@@ -1039,7 +1065,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     font-size: 0.75rem;
     font-weight: 500;
     text-decoration: none;
-    transition: color 160ms ease;
+    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-hero-links a:hover {
@@ -1058,7 +1084,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     margin-bottom: 1rem;
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -1144,7 +1170,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     flex: 1;
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   .lp-wb-pill {
@@ -1152,7 +1178,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border-radius: 999px;
     background: var(--nb-muted);
     color: var(--nb-muted-foreground);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     font-weight: 500;
   }
 
@@ -1176,7 +1202,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-stage-label {
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
@@ -1220,7 +1246,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-file {
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   .lp-chip {
@@ -1229,7 +1255,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border-radius: 0.25rem;
     background: var(--nb-card);
     color: var(--nb-muted-foreground);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
     font-weight: 600;
   }
 
@@ -1243,7 +1269,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     padding: 0.7rem 0;
     overflow-x: auto;
     font-family: var(--nb-font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     line-height: 1.85;
   }
 
@@ -1306,7 +1332,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     margin-top: auto;
     padding-top: 1.1rem;
     color: var(--nb-muted-foreground);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   .lp-dot {
@@ -1353,13 +1379,13 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border-radius: 0.4rem;
     background: var(--nb-primary);
     color: var(--nb-primary-foreground);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
   }
 
   .lp-review-meta {
     color: var(--nb-muted-foreground);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
   }
 
   .lp-quiet-card {
@@ -1386,7 +1412,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-quiet-card span {
     display: block;
     margin-top: 0.18rem;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     line-height: 1.5;
   }
 
@@ -1407,7 +1433,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     padding: 0.62rem 0;
     border-bottom: 1px solid var(--lp-line);
     color: var(--nb-muted-foreground);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   .lp-output-list li :global(svg) {
@@ -1424,7 +1450,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   .lp-output-meta {
     color: var(--nb-muted-foreground);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
   }
 
   .lp-audience {
@@ -1444,7 +1470,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border: 1px solid var(--lp-line);
     border-radius: 1rem;
     background: var(--nb-card);
-    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-audience-card:hover {
@@ -1456,7 +1482,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-label {
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
@@ -1483,7 +1509,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     align-items: center;
     justify-content: space-between;
     color: var(--nb-muted-foreground);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
   }
 
   .lp-mini-doc-brand {
@@ -1507,7 +1533,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-mini-doc-line {
     margin-top: 0.2rem !important;
     color: var(--nb-muted-foreground);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   .lp-mini-doc-bars {
@@ -1535,7 +1561,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border: 1px solid var(--lp-line);
     border-radius: 0.25rem;
     color: var(--nb-muted-foreground);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
   }
 
   .lp-mini-code {
@@ -1563,7 +1589,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     overflow-x: auto;
     color: #e6e6e6;
     font-family: var(--nb-font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     line-height: 1.8;
   }
 
@@ -1598,7 +1624,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   .lp-theme-bar span:first-child {
     font-family: var(--nb-font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: var(--nb-muted-foreground);
   }
 
@@ -1608,7 +1634,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     overflow-x: auto;
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     line-height: 1.8;
   }
 
@@ -1658,7 +1684,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     align-items: center;
     gap: 0.5rem;
     color: var(--nb-muted-foreground);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     font-weight: 600;
   }
 
@@ -1692,7 +1718,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   .lp-theme-preview-card strong {
     display: block;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
   }
 
@@ -1700,7 +1726,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     display: block;
     margin-top: 0.1rem;
     color: var(--nb-muted-foreground);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
   }
 
   .lp-theme-foot {
@@ -1708,7 +1734,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     padding: 0 1rem 1rem;
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
   }
 
   .lp-feature-grid {
@@ -1722,7 +1748,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border: 1px solid var(--lp-line);
     border-radius: 0.9rem;
     background: var(--nb-card);
-    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-feature:hover {
@@ -1763,7 +1789,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border-top: 1px solid var(--lp-line);
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
   }
 
   .lp-components {
@@ -1822,7 +1848,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     background: var(--nb-card);
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
   }
 
   .lp-search-result {
@@ -1840,7 +1866,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-search-breadcrumb {
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
     letter-spacing: 0.04em;
   }
 
@@ -1863,7 +1889,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     margin-top: 0.35rem;
     color: var(--nb-brand);
     font-family: var(--nb-font-mono);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
   }
 
   .lp-search-foot {
@@ -1874,7 +1900,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     padding-top: 0.7rem;
     border-top: 1px solid var(--lp-line);
     color: var(--nb-muted-foreground);
-    font-size: 0.625rem;
+    font-size: 0.75rem;
   }
 
   .lp-text-link {
@@ -1904,7 +1930,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border: 1px solid var(--lp-line);
     border-radius: 0.9rem;
     background: var(--nb-card);
-    transition: transform 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-component-card:hover {
@@ -1918,7 +1944,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     margin-bottom: 0.9rem;
     color: var(--nb-muted-foreground);
     font-family: var(--nb-font-mono);
-    font-size: 0.5625rem;
+    font-size: 0.75rem;
   }
 
   .lp-component-card :global(.aside-card),
@@ -1961,7 +1987,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-faq-list summary :global(svg) {
     flex: none;
     color: var(--nb-muted-foreground);
-    transition: transform 180ms ease;
+    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .lp-faq-list details[open] summary :global(svg) {
@@ -2056,7 +2082,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     padding-top: 1rem;
     border-top: 1px solid var(--lp-line);
     color: var(--nb-muted-foreground);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   @keyframes lp-rise {
@@ -2067,15 +2093,6 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     to {
       opacity: 1;
       transform: translateY(0);
-    }
-  }
-
-  @keyframes lp-float {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-4px);
     }
   }
 
@@ -2145,7 +2162,23 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     }
 
     .lp-cta {
+      min-width: 2.5rem;
+      justify-content: center;
+      min-height: 2.5rem;
       padding: 0.45rem 0.65rem;
+    }
+
+    .lp-icon-link {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+
+    .lp-command-copy {
+      min-height: 2.25rem;
+    }
+
+    .lp-mobile-nav a {
+      padding-block: 0.5rem;
     }
 
     .lp-cta span {
@@ -2223,7 +2256,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
       align-items: center;
       margin-top: 1.75rem;
       padding-top: 0.9rem;
-      font-size: 0.6875rem;
+      font-size: 0.75rem;
     }
 
     .lp-final-title {
@@ -2237,14 +2270,35 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     }
   }
 
+  .lp-page p {
+    text-wrap: pretty;
+  }
+
+  /* 滚动进入视口时淡入上浮，只播放一次；由下方脚本按需添加类名 */
+  .lp-reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition:
+      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lp-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .lp-reveal {
+      transform: none;
+    }
+
     .lp-eyebrow,
     .lp-title,
     .lp-lede,
     .lp-command,
     .lp-note,
-    .lp-hero-links,
-    .lp-tag {
+    .lp-hero-links {
       animation: none;
     }
 
