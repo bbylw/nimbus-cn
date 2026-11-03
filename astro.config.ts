@@ -16,7 +16,7 @@ const nimbusConfig = defineNimbusConfig({
   locale: "zh-CN",
   homeLabel: "首页",
   // 页头显示的 GitHub 链接。
-  github: "https://github.com/bbylw/nimbus-cn",
+  github: "https://github.com/cloudflare/nimbus",
   socialImageAlt: "Nimbus 中文文档预览",
   // 首页排在最前，其余条目按上游文档站的顺序显式排列。
   sidebar: {
