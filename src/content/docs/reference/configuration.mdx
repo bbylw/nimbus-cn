@@ -1,0 +1,168 @@
+---
+title: "配置"
+description: "astro.config.ts 中的全部 Nimbus 配置选项、渲染策略、智能体服务与集成选项。"
+sidebar:
+  order: 1
+---
+
+Nimbus 在 `astro.config.ts` 中配置。`@cloudflare/nimbus-docs` 导出的 `defineConfig` 用于定义站点配置，为了不与 Astro 自己的 `defineConfig` 冲突，通常重命名为 `defineNimbusConfig`；`nimbus()` 集成接收这份配置，以及构建期选项。
+
+```ts title="astro.config.ts"
+import { defineConfig } from "astro/config";
+import nimbus, {
+  defineConfig as defineNimbusConfig,
+} from "@cloudflare/nimbus-docs";
+
+const config = defineNimbusConfig({
+  site: "https://docs.example.com",
+  title: "Acme",
+  description: "Build with Acme.",
+  github: "https://github.com/acme/docs",
+  editPattern: "https://github.com/acme/docs/edit/main/{path}",
+  sidebar: { items: [/* … */] },
+});
+
+export default defineConfig({
+  integrations: [nimbus(config, {/* options */})],
+});
+```
+
+## 站点配置 {#site-config}
+
+| 字段 | 类型 | 说明 |
+| -------------------------------- | ----------------- | ----------------------------------------------------------------------------- |
+| `site` | string | **必填。** 站点正式 URL。会桥接给 Astro 的 `site`。 |
+| `title` | string | **必填。** 站点标题，也是元数据的兜底标题。 |
+| `description` | string | 默认的 meta 描述。 |
+| `locale` | string | 文档语言（例如 `"en"`）。 |
+| `homeLabel` | string | “首页”面包屑的文案。 |
+| `github` | string \| null | 页头链接使用的仓库 URL；`null` 会隐藏它。 |
+| `editPattern` | string \| null | 编辑链接模板；`{path}` 是页面路径。 |
+| `socialImage` / `socialImageAlt` | string | OG 兜底图片及其 alt。参见 [元数据与 SEO](/publish/metadata-and-seo/)。 |
+| `head` | array | 全站范围的 `<head>` 元素。 |
+| `sidebar` | object | 侧边栏配置——参见[侧边栏](/navigation/sidebar/)。 |
+| `features` | object | `sidebar` / `tableOfContents` 的开关。参见[布局](/styling/layouts/)。 |
+| `search` | object \| `false` | 搜索后端。参见[搜索](/navigation/search/)。 |
+| `versions` | object | 版本清单——每个版本都是独立的内容集合。 |
+| `rendering` | object | 规范内容集合路由的构建或按请求渲染策略。 |
+| `agents` | object | 智能体服务与发现。`agents.mcp` 提供远程 MCP 服务器；`agents.discovery: false` 会把域名根的发现文件留给另一个站点。 |
+| `sources` | object | 读取的 Git 仓库集合与 API 规范。参见[来自其他来源的内容](/content-sources/git/)。 |
+| `api` | array | 由规范文件生成的 API 参考，每项一个。参见 [OpenAPI 选项](/api-reference/openapi/options/)。 |
+| `apiReferences` | array | 本站引用的、位于其他 Nimbus 站点上的 API 参考。参见[引用 API 页面](/api-reference/citations/)。 |
+
+### 内容来源 {#content-sources}
+
+`sources` 按名称声明 Git 仓库；`docsCollection({ source, base })` 与 `api[].spec: { source, path }` 会读取它们。
+
+| 键 | 类型 | 说明 |
+| --- | --- | --- |
+| `repo` | string | **必填。** 一个 `https` 或 `ssh` URL，或本地路径。带 token 或密码的 URL 会被拒绝；请把凭据交给 git。 |
+| `ref` | string | **必填。** 40 个字符的 commit，或分支名、标签名。 |
+| `path` | string | 要检出的文件夹，相对于仓库根目录。默认 `""`，即整个仓库。 |
+| `editPattern` | string | 该来源页面的编辑链接：`{path}` 是仓库相对路径，`{ref}` 是配置中的 ref。 |
+
+`nimbus-docs check` 会把分支或标签形式的 `ref` 报告为 `nimbus/source-floating-ref`，把没有任何内容读取的来源报告为 `nimbus/source-unreferenced`，两者都是警告。`NIMBUS_SOURCES_RESOLVE_TIMEOUT` 与 `NIMBUS_SOURCES_FETCH_TIMEOUT` 以秒为单位设置解析与获取的超时（默认分别为 30 与 600）。
+
+### 渲染策略 {#rendering-policy}
+
+`rendering` 控制 Nimbus 管理的路由：文档、API 参考与其他已注册集合的兜底路由，以及为它们提供内容的 Markdown 与 `llms.txt` 路由。`src/pages/` 下的其他文件保留各自的渲染设置。
+
+| 模式 | 行为 | 部署要求 |
+| --- | --- | --- |
+| `"build"` | 在 `astro build` 时预渲染该路由。这是默认值。 | 任意静态或服务端部署。 |
+| `"request"` | 在访客请求时渲染该路由。 | 带适配器的 Astro 服务端输出。生成的 API 请求渲染目前需要 Cloudflare。 |
+
+`"build"` 就是 Astro 所说的预渲染，`"request"` 则是按需渲染。其他所有路由，例如 404 页面、Open Graph 图片或 `robots.txt`，都保留自己的 `prerender` 导出。
+
+不设置 `rendering` 时，Nimbus 会提前构建它管理的每个路由，包括每个页面集合。一旦设置了 `rendering`，`default` 覆盖文档、版本与 API 集合，而其他每个页面集合都需要在 `rendering.collections` 中单独配置（见下文）。
+
+| 字段 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `rendering.default` | `"build"` \| `"request"` | `"build"` | `docs`、版本集合、API 集合，以及全站 `llms.txt` 与 `llms-full.txt` 的模式。每个集合的 Markdown 与分区 `llms.txt` 路由跟随该集合的模式。 |
+| `rendering.collections` | `Record<string, "build" \| "request">` | — | 按 Astro 集合名称（而非 URL 或版本）设置模式。每个名称都必须是已注册集合，并且有自己的兜底路由；一旦设置 `rendering`，其他每个带有兜底路由的页面集合（例如 `blog`）都必须列出。 |
+
+要搭建服务端并选择模式，参见[选择构建或按请求渲染](/reference/rendering/)。
+
+### 智能体 {#agents}
+
+`agents` 开启站点为智能体运行的服务，并控制它为智能体发布的发现文件：
+
+| 键 | 类型 | 说明 |
+| --- | --- | --- |
+| `mcp` | boolean | 在 `/mcp` 提供远程 MCP 服务器，包含 `list_pages` 与 `get_page`。需要服务端适配器与 `@modelcontextprotocol/server` 包。默认 `false`。 |
+| `discovery` | boolean | 设为 `false` 时，不发布任何域名根发现文件（`/.well-known/ard.json`、`ai-catalog.json`、`api-catalog`），首页也不链接它们，适用于托管在别人拥有的域名上的站点。参见[共享域名](/ai/docs-for-agents/)。默认 `true`。 |
+
+```ts
+agents: { mcp: true },
+```
+
+关于它提供的内容以及客户端如何连接，参见[远程 MCP 服务器](/ai/remote-mcp/)。
+
+## 链接与结尾斜杠 {#links-and-trailing-slashes}
+
+Nimbus 会读取 Astro 的 [`trailingSlash`](https://docs.astro.build/en/reference/configuration-reference/#trailingslash) 与 [`build.format`](https://docs.astro.build/en/reference/configuration-reference/#buildformat)，并让它生成的每个 URL（从侧边栏链接到 sitemap）都采用 Astro 提供的形态。
+
+使用默认值时，页面 URL 以斜杠结尾，例如 `/guides/`。设置 `trailingSlash: "never"` 或 `build.format: "file"` 时则不以斜杠结尾。
+
+你写的链接保持你写下的路径；Nimbus 只添加 Astro 的 `base`，因此不要在链接中写 base。请按站点实际提供的形态书写，例如默认值下写成 `[Guides](/guides/)`。
+
+使用 `trailingSlash: "always"` 或 `"never"` 时，另一种形态会在 `astro dev` 中返回 404，在生产环境中通常是重定向或 404。`nimbus/internal-link` 不检查结尾斜杠。
+
+在 Cloudflare 上，使用 `trailingSlash: "always"` 与 `build.format: "file"` 的静态站点会写出 `guides.html`，却链接到 `/guides/`，而 Cloudflare 默认会把 `/guides/` 重定向到 `/guides`。构建与 `nimbus-docs check` 会对此发出警告；在 `wrangler.jsonc` 中设置 `"assets": { "html_handling": "force-trailing-slash" }` 即可直接提供 `/guides/`。
+
+## 集成选项 {#integration-options}
+
+`nimbus()` 的第二个参数控制构建行为：
+
+| 选项 | 默认值 | 说明 |
+| -------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `validateMdx` | `true` | PascalCase 标签校验。`false` 跳过；传对象可覆盖路径。参见 [Markdown 与 MDX](/writing/markdown-and-mdx/)。 |
+| `admonitions` | `true` | Sätteri 原生 MDX 指令 → `<Aside>`；传对象可添加 `typeAliases`、`contentDirs` 与 `skip`。使用不兼容的自定义处理器时设为 `false`。 |
+| `markdown` | Sätteri 处理器 | 配置手写 Markdown 的处理与生成 Markdown 的定制。`markdown.features` 开启 Sätteri 语法，例如 `{ headingAttributes: true }` 支持 `{#id}` 标题 id，或 `{ math: true }`。参见 [Markdown 与 MDX](/writing/markdown-and-mdx/)。 |
+| `markdown.processor` | Sätteri | 自定义 Astro Markdown 处理器。使用它时，下列选项除 `componentMap` 与 `partialResolver` 外都会被忽略。 |
+| `markdown.features` | — | Sätteri 语法特性，例如 `{ headingAttributes: true }` 或 `{ math: true }`。Nimbus 的每一遍处理都用它们读取 Markdown。 |
+| `markdown.mdastPlugins` | `[]` | Sätteri mdast 插件，按顺序运行。 |
+| `markdown.hastPlugins` | `[]` | Sätteri hast 插件，在 Shiki 之后按顺序运行。现成插件见[包 API](/styling/package-api/)。 |
+| `markdown.componentMap` | — | 自定义 MDX 组件在生成的 Markdown 中如何出现。参见下文“定制生成的 Markdown”。 |
+| `markdown.partialResolver` | — | 在生成的 Markdown 中把静态 `<Render>` 属性映射为 partial ID。 |
+| `sitemap` | 设置了 `site` 时启用 | 设为 `false` 可禁用。 |
+| `mdx` | — | 转发给 Astro MDX 集成的选项。其行为仍由处理器决定。 |
+| `icons` | `true` | 内置图标系统。`true` 会自动检测 `@iconify-json/*` 包（Phosphor、Material Icons 等）以及本地 `src/icons/*.svg`。`false` 禁用。传对象可显式配置（`iconDir`、`include`、`svgoOptions`）。参见[图标](/components/icon/)。 |
+| `rules` | `off`（需主动开启） | 写作 lint 的严重级别——每条规则在你启用之前都是关闭的。参见 [Lint](/writing/linting/)。 |
+| `redirectsFile` | — | 一个 `_redirects` 语法的重定向文件，你的部署会以另一个名称读取它。链接检查会遵循它。参见 [Lint](/writing/linting/)。 |
+| `collections` | — | 按集合覆盖 lint 设置。 |
+
+```ts
+nimbus(config, {
+  validateMdx: true,
+  rules: { "nimbus/single-h1": "error", "nimbus/bare-url": "warn" },
+});
+```
+
+### 定制生成的 Markdown {#customize-generated-markdown}
+
+使用 `markdown.componentMap` 定义项目特定 MDX 组件在生成的 Markdown 中如何出现。当 `<Render>` 属性需要映射到自定义 partial ID 时，使用 `markdown.partialResolver`：
+
+```ts title="astro.config.ts"
+nimbus(config, {
+  markdown: {
+    componentMap: {
+      ProductName: {
+        revision: "product-name-v1",
+        render: ({ children }) => children,
+      },
+    },
+    partialResolver: {
+      revision: "product-partials-v1",
+      resolve: ({ file, product }) =>
+        product ? `${product}/${file}` : file,
+    },
+  },
+});
+```
+
+`<ProductName>Acme</ProductName>` 在干净 Markdown 中会变成 `Acme`。Nimbus 会在转换运行前规范化手写的静态 `href` 值，请直接校验并渲染这些值。转换还会接收当前生效的 `base`，供它自行构造目标地址。
+
+每个转换都需要非空的 `revision`。只要输出发生变化就递增它，这样 Nimbus 才会让生成的 Markdown 缓存失效。
+
+按请求渲染的 HTML 会消费预处理好的条目与标题。生成 Markdown/MDX 备用版本、`llms.txt` 索引、`llms-full.txt`、可复用片段展开以及语法高亮仍属于构建期工作。它们的端点可以预渲染，也可以按请求提供这些载荷。修改这些选项后请运行生产构建；开发模式不会校验最终的 Worker 包。

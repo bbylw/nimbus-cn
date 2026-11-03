@@ -1,0 +1,82 @@
+---
+title: "故障排查"
+description: "按错误原文整理最常见错误的修复方法。"
+sidebar:
+  order: 5
+---
+
+每个条目都以 Nimbus 或你的工具打印的消息开头。在本页搜索错误中的某个短语。
+
+## GitHub 对模板下载进行了速率限制（HTTP 403）
+
+```text
+GitHub rate-limited the template download (HTTP 403).
+```
+
+脚手架、`nimbus-docs outdated` 和 `diff` 会从 GitHub 下载起始模板文件，GitHub 对每个地址每小时允许 60 次匿名请求。共享网络和 CI 很快会达到该限制。请在运行时把 `GIGET_AUTH` 设为 GitHub token：
+
+```sh
+GIGET_AUTH=<your-github-token> npm create @cloudflare/nimbus-docs@latest
+```
+
+该 token 不需要任何权限范围。要在无网络环境下工作，传入 `--template-dir <path>`，指向模板的本地副本。
+
+## 未知的 frontmatter 键 "…"
+
+```text
+lastVerified: Unknown frontmatter key "lastVerified".
+```
+
+页面 frontmatter 中存在 docs schema 不认识的键。删除它，或在 `src/content.config.ts` 中用 `schemaFields` 声明它：
+
+```ts title="src/content.config.ts"
+docs: defineCollection(
+  docsCollection({
+    schemaFields: { lastVerified: z.coerce.date().optional() },
+  }),
+),
+```
+
+由 `content-*` 注册表配方创建的页面可能包含 `lastVerified`；按上面的方式声明它，或删除该行。[Frontmatter](/reference/frontmatter/)列出了 schema 已知的每个键。
+
+## 未知的 MDX 组件标签
+
+```text
+[nimbus-docs] Unknown MDX component tag:
+  src/content/docs/guide.mdx:12:1  <Callout />  →  Register it in src/components.ts, or add an explicit `import` at the top of this file.
+```
+
+MDX 只会渲染它认识的组件。把它添加到 `src/components.ts` 即可在每个页面使用，或在页面顶部导入它。注册表中的组件需要先用 `nimbus-docs add <slug>` 安装；参见[添加组件与功能](/styling/add-components/)。
+
+## 搜索无法加载
+
+```text
+Search could not load. Check your connection and reload the page. If it persists, ask the site owner to rebuild and deploy the search index.
+```
+
+搜索索引在生产构建结束时写入 `dist/pagefind/`。如果部署后的站点缺少它，请检查构建是否完成，以及 `dist/` 是否整体上传。在 `astro dev` 中，搜索会提示 "Search is available after a production build."；请运行构建和 `astro preview` 试用。参见[搜索](/navigation/search/)。
+
+## 页面无论带不带结尾斜杠都 404
+
+在 `astro.config.ts` 中设置 `trailingSlash: "always"` 或 `"never"` 时，`astro dev` 只响应每个 URL 的匹配形式，Nimbus 生成的链接也使用该形式。以另一种形式手写的链接会在开发环境中 404，在生产环境的某些主机上也会 404。请与设置保持一致，或让 `trailingSlash` 使用默认值。[链接与结尾斜杠](/reference/configuration/#links-and-trailing-slashes)介绍了每种设置。
+
+## 这是浅克隆，因此页面没有 git 日期
+
+```text
+this is a shallow clone, so pages get no git dates (sitemap lastmod, "Last updated"). Run git fetch --unshallow, or set fetch-depth: 0 in CI, to restore them.
+```
+
+"最后更新"行和 sitemap 的日期来自 git 历史，而 CI 通常只克隆最新提交。在 checkout 步骤设置 `fetch-depth: 0`，或在构建前运行 `git fetch --unshallow`。
+
+## 忽略的构建脚本：esbuild、sharp
+
+pnpm 10 在运行依赖的安装脚本前会询问。脚手架的 `pnpm-workspace.yaml` 已经拒绝为 esbuild、sharp 以及 Cloudflare 上的 workerd 运行这些脚本，因为每个都提供可用的预构建二进制文件。该警告可以安全忽略，用 `pnpm approve-builds` 批准它们也没问题。
+
+## 仍然卡住？
+
+请在 [GitHub Discussions](https://github.com/cloudflare/nimbus/discussions) 中提问；如果看起来是 bug，请[提交 issue](https://github.com/cloudflare/nimbus/issues)。请包含：
+
+- 来自锁文件的 `@cloudflare/nimbus-docs` 和 `astro` 版本，以及 Node 版本（`node --version`），
+- 完整错误信息（以文本形式复制），
+- 你运行的命令和包管理器，
+- 你期望发生的结果。

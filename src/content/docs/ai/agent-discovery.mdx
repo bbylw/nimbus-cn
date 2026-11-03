@@ -1,0 +1,78 @@
+---
+title: "智能体发现"
+description: "智能体在你的域名上查找的发现清单、API 目录、Skills 索引、Link 响应头与 robots.txt。"
+sidebar:
+  order: 5
+---
+
+进入你域名的智能体在阅读任何页面之前，会先查看几个固定位置。Nimbus 默认会发布所有这些内容。智能体找到站点后能读取的全部内容，见[面向智能体的文档](/ai/docs-for-agents/)。
+
+| 路径 | 内容 | 发布条件 |
+| --- | --- | --- |
+| `/.well-known/ard.json` | 发现清单 | 始终发布，除非发现功能已关闭 |
+| `/.well-known/ai-catalog.json` | 同一清单，使用第二个名称 | 始终发布，除非发现功能已关闭 |
+| `/.well-known/api-catalog` | API 目录（RFC 9727） | 站点有 OpenAPI 参考时，除非发现功能已关闭 |
+| `/.well-known/agent-skills/index.json` | Agent Skills 索引 | 项目有 `skills/` 文件夹时 |
+| 主页 `Link` 响应头 | 指向上述文件的指针 | 始终发布，除非发现功能已关闭 |
+| `/robots.txt` | 爬虫规则与 Content Signals | 设置了 `site` 时 |
+| `/llms.txt` | 文档 Markdown 版本的索引 | 始终发布 |
+
+## 发现清单
+
+**路径：** `/.well-known/ard.json` 与 `/.well-known/ai-catalog.json` · **类型：** `application/json` · **CORS：** `Access-Control-Allow-Origin: *`
+
+列出 `/llms.txt`、主页 Markdown 文件 `/index.md`、每个可见的已发布 API 规范、Agent Skills 索引，以及站点运行[远程 MCP 服务器](/ai/remote-mcp/)时的 Server Card。两个文件内容相同。如果项目在任一路径上已有文件或路由，构建会失败，直到你移动它——除非发现功能已关闭。
+
+## API 目录
+
+**路径：** `/.well-known/api-catalog` · **类型：** `application/linkset+json` · **标准：** [RFC 9727](https://www.rfc-editor.org/rfc/rfc9727)
+
+每个可见的 API 参考与版本对应一个条目。每个条目链接参考页面、其 Markdown 与已发布的规范，例如 `/api/openapi.json`。该文件没有扩展名，因此忽略 `_headers` 的主机需要自行设置规则来指定媒体类型。要让某个规范不被发布，参见[已发布的规范](/api-reference/openapi/options/#published-spec)。
+
+## Agent Skills 索引
+
+**路径：** `/.well-known/agent-skills/index.json` · **类型：** `application/json`
+
+列出项目 `skills/` 文件夹中的每个技能，并为每个文件给出 SHA-256 摘要。参见[发布 Agent Skills](/ai/agent-skills/)。
+
+## 主页 `Link` 响应头
+
+**适用：** 请求时渲染的主页，以及会读取 `_headers` 的主机上的静态构建（包括 Cloudflare）
+
+公布发现清单（`rel="ard"`）、API 目录（`rel="api-catalog"`），以及每个 API 族群的默认参考与规范。你自己的 `_headers` 规则优先：它们已为某个路径设置的响应头不会出现在生成的规则中。在不支持 `_headers` 的主机上，请在主机自身的配置中设置相同的响应头。
+
+## Content Signals
+
+**文件：** `src/pages/robots.txt.ts` · **默认：** `Content-Signal: ai-train=yes, search=yes, ai-input=yes`
+
+告诉爬虫它们可以如何使用你的内容：训练、搜索索引与回答问题。修改脚手架路由中的值以符合你的策略；如果把某一项设为 `no`，请在其上方加上 [contentsignals.org](https://contentsignals.org/) 提供的策略说明。这些信号是请求，不是访问控制；私有文档需要身份验证。
+
+## `agents.discovery`
+
+**类型：** `boolean` · **默认：** `true`
+
+当域名归另一个站点所有时（例如文档位于 `example.com/docs`，主站位于 `example.com`），将其设为 `false`：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  // …
+  agents: { discovery: false },
+});
+```
+
+- 移除发现清单、API 目录、它们在 `Link` 响应头中的条目，以及它们的 `_headers` 规则。
+- 保留 `llms.txt`、Markdown 版本、Markdown 协商、远程 MCP 服务器和 Agent Skills。
+- 保留你在 `public/.well-known/` 中的自有文件。
+
+切换后，请清除缓存的主页，因为它的 `Link` 响应头仍列出旧文件。
+
+## 在 base 路径下
+
+发现文件应位于源站根目录。使用 `/docs` 这样的 `base` 时，Cloudflare 适配器会替你放到那里。在其他主机上，请把生成的 `.well-known` 文件夹部署到根目录、与站点目录并列：
+
+```text
+host-root/
+├── .well-known/   # 发现文件与 Skills 文件
+├── docs/          # 站点
+└── _headers       # 主机支持时
+```

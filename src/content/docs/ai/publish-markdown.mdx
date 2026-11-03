@@ -1,0 +1,152 @@
+---
+title: "发布 Markdown 与 llms.txt"
+description: "每个 Nimbus 站点发布的 Markdown 版本与 llms.txt 索引，以及如何为较早的站点添加这些路由。"
+sidebar:
+  order: 2
+---
+
+每个 Nimbus 站点都会为智能体和其他工具发布一份纯文本副本。新站点已经带有这些路由。
+
+## 每个站点发布的内容
+
+| 路径 | 内容 |
+| --- | --- |
+| `/<slug>/index.md` | 页面作为干净的 Markdown，组件已转换为文本。链接到其 `.mdx` 源文件。 |
+| `/<slug>/index.mdx` | 页面的撰写源码，包含 import、JSX 和指令。API 页面不发布。 |
+| `/llms.txt` | 当前文档的索引：顶层页面，以及指向每个分区索引的链接。 |
+| `/<section>/llms.txt` | 每个顶层分组和集合、以及其下每个文件夹的索引，由上级索引链接。 |
+| `/llms-full.txt` | 当前所有页面合成一个 Markdown 文档。超过 25 MiB 时，它变成每个分区一个 `llms-full.txt` 的索引。 |
+| `/<version>/llms.txt` | 每个较早文档版本的索引，站点索引不列出它们。 |
+
+在带版本的站点上，每个 Markdown 版本的 frontmatter 都带 `version:` 键，智能体因此可以锁定版本。每个页面的 head 也带有 JSON-LD 结构化数据。设置 `draft: true` 或 `noindex: true` 的页面不会出现在索引中；完整规则见[面向智能体的文档](/ai/docs-for-agents/#how-pages-are-indexed)。
+
+## 添加自己的 frontmatter
+
+每个页面的 Markdown 版本都带 `title`、`description`、`image`，以及页面存在时的 `version`。要添加其他字段，在 `schemaFields` 中声明它们，并在 `markdownFields` 中命名：
+
+```ts title="src/content.config.ts"
+changelog: defineCollection(
+  docsCollection({
+    base: "changelog",
+    schemaFields: {
+      date: z.coerce.date(),
+      tags: z.array(z.string()).default([]),
+    },
+    markdownFields: ["date", "tags"],
+  }),
+),
+```
+
+这些字段在 `index.md` 和 `index.mdx` 中都遵循 Nimbus 自身的键顺序，即你列出的顺序。值可以是字符串、数字、布尔值、日期或它们的数组；页面留空的字段会被省略。
+
+UTC 午夜的日期写为 `2026-07-02`，其他时间以完整格式并带 `Z` 写出。请写不带时间的日期，或带偏移量的时间（`2026-07-02T09:30:00+02:00`）：不带偏移量的时间会按构建机器的时区解读。
+
+## 为较早的站点添加路由
+
+在这些路由发布之前创建的站点需要添加五个端点。Nimbus 集成必须已存在于 `astro.config.ts` 中。
+
+### 1. 添加页面备用版本
+
+创建干净的 Markdown 版本：
+
+```ts title="src/pages/[...slug]/index.md.ts"
+import { markdownRoute } from "@cloudflare/nimbus-docs/agent-endpoints";
+
+export const { GET, getStaticPaths } = markdownRoute();
+```
+
+创建 MDX 源文件版本：
+
+```ts title="src/pages/[...slug]/index.mdx.ts"
+import { markdownSourceRoute } from "@cloudflare/nimbus-docs/agent-endpoints";
+
+export const { GET, getStaticPaths } = markdownSourceRoute();
+```
+
+这两个路由服务所有集合，包括文档版本、位于 `/blog` 的博客以及 API 参考。API 页面有 `.md` 版本，但没有 `.mdx` 源文件。隐藏版本中的页面两者都没有。之后添加的集合不需要新的路由文件。要为部分或全部页面自定义输出，参见[覆盖默认输出](/ai/override-markdown/)。
+
+在静态站点上，这些路由会提前构建。使用 [`rendering` 策略](/reference/rendering/)时，页面的 Markdown 会自动遵循其集合的渲染模式：请求时渲染的集合会通过这些相同的路由按请求提供 Markdown 和 MDX 版本，预渲染集合则保留其静态文件。更改策略后运行 `nimbus-docs check --fix`，把每个路由的模式写入文件。
+
+### 2. 添加站点索引
+
+创建站点范围的发现索引：
+
+```ts title="src/pages/llms.txt.ts"
+import { llmsRoute } from "@cloudflare/nimbus-docs/agent-endpoints";
+
+export const { GET } = llmsRoute();
+```
+
+### 3. 添加 llms-full.txt
+
+创建包含所有可发现文档的文件：
+
+```ts title="src/pages/llms-full.txt.ts"
+import { llmsFullRoute } from "@cloudflare/nimbus-docs/agent-endpoints";
+
+export const { GET } = llmsFullRoute();
+```
+
+该文件是可选的。没有它时，Nimbus 不会构建 `llms-full.txt`，`llms.txt` 也不会链接到它。
+
+当文档超过 25 MiB（Cloudflare 的单文件上限）时，`/llms-full.txt` 会变成每个分区一个 `llms-full.txt` 的索引，例如 `/reference/llms-full.txt`。Nimbus 通过它自己的路由在这些文件旁边提供它们，因此无需额外添加。包装此路由的 `GET` 不会改变分区文件。
+
+- 未超过上限的分区会完整保留其页面，与 `llms-full.txt` 一样。索引会给出其大小。
+- 超过上限的分区本身就是一个索引：它链接各子文件夹的文件，并在再次拆分处标记“进一步拆分”，同时链接其自身每个页面的 Markdown。超过上限且没有子文件夹的文件夹是一组指向其页面的链接，标记为“链接到其页面”。
+- 站点顶层的页面由 `/llms-full.txt` 链接，而不收录其中。
+
+构建日志会列出它写入的文件。在 Cloudflare 上（使用适配器或 `wrangler` 文件），构建会对任何超过 25 MiB 的智能体文件发出警告，包括单个页面的 Markdown，因为该文件会导致部署失败。服务器构建还会暂存 `_nimbus/agent-endpoint-assets/manifest.json`，即所有智能体文件的清单，并在请求时读取它，而不是把它打包进 Worker；如果这个文件超过上限，构建会失败。
+
+### 4. 添加分区索引
+
+为 `/writing/llms.txt` 和 `/reference/functions/llms.txt` 这类路径创建路由：
+
+```ts title="src/pages/[...section]/llms.txt.ts"
+import { llmsSectionRoute } from "@cloudflare/nimbus-docs/agent-endpoints";
+
+export const { GET, getStaticPaths } = llmsSectionRoute();
+```
+
+每个分区索引先列出其文件夹中的页面，然后在“Sections”下列出每个子文件夹的 `llms.txt`，使智能体逐层向下查找。只有 `index.mdx` 的文件夹是其父级的一个页面。
+
+分区名称依次取自其索引页面的 `sidebar.group.label`、其标题，最后是文件夹名。
+
+每个 `GET` 对未知分区返回 `404`。在请求时渲染时，如果索引无法读取，它会返回不带详情的 `500`，并记录错误。要改变路由提供的内容，参见[覆盖默认输出](/ai/override-markdown/#override-an-llmstxt-index)。
+
+`llms.txt` 端点同样遵循渲染策略：站点索引和 `llms-full.txt` 使用 `rendering.default`，分区索引使用其集合的模式。
+
+当某个预渲染集合的 Markdown 或 `llms.txt` 没有对应路由时，构建会发出警告，并指明需要添加的路由。
+
+### 验证
+
+运行生产构建，然后启动 Astro 的生产预览：
+
+```sh
+pnpm build
+pnpm preview
+```
+
+在另一个终端中，把 `guides/install` 和 `writing` 替换为项目中实际存在的路由。如果 Astro 配置了部署 base，请给每个路径加上该前缀：
+
+```sh
+curl --fail http://localhost:4321/guides/install/index.md
+curl --fail http://localhost:4321/guides/install/index.mdx
+curl --fail http://localhost:4321/llms.txt
+curl --fail http://localhost:4321/llms-full.txt
+curl --fail http://localhost:4321/writing/llms.txt
+```
+
+每条命令都应返回内容并带成功状态。返回 `404` 表示路由文件缺失，或该集合不是页面集合；请用 [`withNimbusMarkdown()`](/writing/collections/#add-a-collection) 包装自定义加载器。
+
+如果缺少分区索引，请检查该分区是否有可发现页面，并且出现在 `/llms.txt` 中。
+
+## 直接渲染
+
+`renderEntryAsMarkdown()` 和 `getEntryMarkdown()` 仍可用于不包含 `<Render>` 的条目正文。传入包含 `<Render>` 的正文会抛出错误。请使用上面的端点获取备用撰写 Markdown 版本和 `llms.txt` 索引。`getEntryMarkdown()` 还会加载 API 引用数据，适用于预渲染路由。
+
+## 后续步骤
+
+- [了解面向智能体的文档](/ai/docs-for-agents/)
+- [覆盖生成的 Markdown](/ai/override-markdown/)
+- [自定义生成的 Markdown](/reference/configuration/#customize-generated-markdown)
+- [配置自定义内容加载器](/writing/collections/#add-a-collection)

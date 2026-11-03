@@ -18,9 +18,30 @@ const nimbusConfig = defineNimbusConfig({
   // 页头显示的 GitHub 链接。
   github: "https://github.com/cloudflare/nimbus",
   socialImageAlt: "Nimbus 中文文档预览",
-  // 首页排在最前，其余页面按 sidebar.order 自动加入。
+  // 首页排在最前，其余条目按上游文档站的顺序显式排列。
   sidebar: {
-    items: ["index", { autogenerate: { collection: "docs" } }],
+    overviewLabel: "概览",
+    items: [
+      "index",
+      "quickstart",
+      "why-nimbus",
+      "project-structure",
+      "cli",
+      "registry",
+      { label: "写作", autogenerate: { directory: "writing" } },
+      { label: "内容风格指南", autogenerate: { directory: "style-guide" } },
+      { label: "配置", autogenerate: { directory: "reference" } },
+      { label: "内容来源", autogenerate: { directory: "content-sources" } },
+      { label: "API 参考", autogenerate: { directory: "api-reference" } },
+      { label: "导航", autogenerate: { directory: "navigation" } },
+      { label: "定制", autogenerate: { directory: "styling" } },
+      { label: "AI 智能体", autogenerate: { directory: "ai" } },
+      { label: "部署", autogenerate: { directory: "deploy" } },
+      { label: "发布与维护", autogenerate: { directory: "publish" } },
+      { label: "组件", autogenerate: { directory: "components" } },
+      "glossary",
+      "changelog",
+    ],
   },
 });
 

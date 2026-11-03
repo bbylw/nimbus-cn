@@ -1,0 +1,70 @@
+---
+title: "组件"
+description: "可在 MDX 中使用的组件清单，含安装命令与各自参考页。"
+sidebar:
+  order: 0
+  group:
+    label: 组件
+---
+
+Nimbus 的组件既是页面构件，也是可以修改的源码。内置组件已经注册好，可以直接写进 `.mdx`；其余组件先用 CLI 安装，再按需注册。
+
+## 组件清单
+
+| 组件 | 用途 | 引入方式 |
+|---|---|---|
+| [`Accordion`](/components/accordion/) | 折叠卡片，展开后显示内容 | `nimbus-docs add accordion` |
+| [`Aside`](/components/aside/) | `note`、`tip`、`caution`、`danger` 提示框 | 默认可用 |
+| [`Badge`](/components/badge/) | 状态或分类小标签 | `nimbus-docs add badge` |
+| [`Banner`](/components/banner/) | 站点公告条，可关闭并记住选择 | `nimbus-docs add banner` |
+| [`Breadcrumbs`](/components/breadcrumbs/) | 指向当前页面的层级路径 | `nimbus-docs add breadcrumbs` |
+| [`Button`](/components/button/) | 操作按钮，含变体、尺寸与形状 | `nimbus-docs add button` |
+| [`Card`](/components/card/) | 带图标、标题与内容的卡片 | 默认可用 |
+| [`CardGrid`](/components/card-grid/) | 卡片的自适应网格 | 默认可用 |
+| [`Code`](/components/code/) | 从字符串渲染语法高亮代码块 | `nimbus-docs add code` |
+| [`CodeGroup`](/components/code-group/) | 带标签页的代码块组 | `nimbus-docs add code-group` |
+| [`Collapsible`](/components/collapsible/) | 单个可折叠面板 | `nimbus-docs add collapsible` |
+| [`CopyPrompt`](/components/copy-prompt/) | 带复制按钮的一行提示词 | `nimbus-docs add copy-prompt` |
+| [`Dialog`](/components/dialog/) | 基于原生 `<dialog>` 的模态框 | `nimbus-docs add dialog` |
+| [`Embed`](/components/embed/) | 锁定比例的 iframe 容器 | `nimbus-docs add embed` |
+| [`FileTree`](/components/file-tree/) | 用嵌套列表书写的目录树 | `nimbus-docs add file-tree` |
+| [`Frame`](/components/frame/) | 截图与媒体的带边框容器 | `nimbus-docs add frame` |
+| [`Icon`](/components/icon/) | 站点图标系统 | 从 `@cloudflare/nimbus-docs/components/Icon.astro` 引入 |
+| [`Image zoom`](/components/image-zoom/) | 点击放大图片 | `nimbus-docs add image-zoom` |
+| [`LayerCard`](/components/layer-card/) | 带层级的卡片容器 | `nimbus-docs add layer-card` |
+| [`LinkButton`](/components/link-button/) | 链接样式的按钮 | `nimbus-docs add link-button` |
+| [`LinkCard`](/components/link-card/) | 链接卡片 | `nimbus-docs add link-card` |
+| [`PackageManagers`](/components/package-managers/) | 多包管理器安装命令 | 默认可用 |
+| [`PageActions`](/components/page-actions/) | 页面操作栏 | `nimbus-docs add page-actions` |
+| [`Pagination`](/components/pagination/) | 上一页 / 下一页 | `nimbus-docs add pagination` |
+| [`Popover`](/components/popover/) | 弹出层 | `nimbus-docs add popover` |
+| [`Search`](/components/search/) | 站内搜索 | `nimbus-docs add search` |
+| [`Sidebar`](/components/sidebar/) | 侧边栏导航 | `nimbus-docs add sidebar` |
+| [`Steps`](/components/steps/) | 编号步骤 | 默认可用 |
+| [`Tabs`](/components/tabs/) | 标签页 | 默认可用 |
+| [`ThemeToggle`](/components/theme-toggle/) | 明暗主题切换 | `nimbus-docs add theme-toggle` |
+| [`TOC`](/components/toc/) | 本页内容目录 | `nimbus-docs add toc` |
+
+`Steps`、`Tabs`、`PackageManagers`、`Render` 等组件也已默认注册，可直接使用。
+
+## 安装
+
+```bash
+nimbus-docs add accordion
+```
+
+命令会把组件源码写入 `src/components/ui/<slug>/`，并补齐注册表依赖。安装后的组件和其他源码一样，可以直接修改外观与行为。
+
+## 注册
+
+组件只有在 `src/components.ts` 中列出后，才能在任意 `.mdx` 里免导入使用：
+
+```ts title="src/components.ts"
+import { Badge } from "./components/ui/badge";
+
+export const components = {
+  Badge,
+};
+```
+
+也可以只在单个文件顶部导入。未注册、也未导入的 PascalCase 标签会让构建失败，详见 [Markdown 与 MDX](/writing/markdown-and-mdx/)。

@@ -1,0 +1,115 @@
+---
+title: "内容检查"
+description: "用 lint 规则在发布前发现写作问题，并配置严重级别与链接检查。"
+sidebar:
+  order: 7
+---
+
+内容质量不断下滑的文档站会损害自身产品。Nimbus 像代码 linter 对待源码那样对待写作质量——一组按需运行的规则。
+
+## 两层机制
+
+构建前的**校验器**自动运行，只在问题会破坏站点时才拦截构建——配置结构、frontmatter schema、[MDX 组件](/writing/markdown-and-mdx/)、重复路由。
+
+**lint 引擎**是按需运行的写作质量层。规则拥有稳定的 id，例如 `nimbus/single-h1` 和 `nimbus/bare-url`。构建**从不**被 lint 结果拦截——草稿仍会渲染，警告虽然醒目但不阻塞。
+
+## 运行
+
+```sh
+npx @cloudflare/nimbus-docs lint
+yarn nimbus-docs lint
+pnpm nimbus-docs lint
+bunx @cloudflare/nimbus-docs lint
+```
+
+它会遍历 `src/content/`，运行你启用的每条写作规则，并在仍有 `error` 级别的结果时以非零状态退出。[CLI](/cli/#nimbus-docs-lint) 列出了它的参数，例如 `--fix` 和 `--format=json`。
+
+Lint 读取 `.mdx` 文件，并说明因此遗漏了多少 `.md` 页面。它也会读取从其他文件夹加载的集合，例如[内容来源](/content-sources/git/)：
+
+- 来源中的问题会在来源仓库的路径处报告，例如 `sdk: docs/guides/intro.mdx:12`。`--fix` 不会改动来源。
+- 磁盘上没有文件的集合（例如 Notion 数据库）会被标记为未检查。
+
+## 配置严重级别
+
+严重级别覆盖与集成配置放在一起。把规则映射为 `"error"`、`"warn"` 或 `"off"`：
+
+```ts title="astro.config.ts"
+nimbus(config, {
+  rules: {
+    "nimbus/single-h1": "error",
+    "nimbus/bare-url": "warn",
+  },
+  collections: {
+    partials: { rules: { "nimbus/single-h1": "off" } },
+  },
+});
+```
+
+按集合的 `rules` 会浅合并到顶层设置。写作规则**默认关闭**——完全省略 `rules` 就不会运行任何写作规则；需要逐条启用。
+
+## 检查链接
+
+`nimbus/internal-link` 报告无法到达站点所提供 URL 的内部链接。它会基于 `.nimbus/routes.json` 检查，该文件由 `astro build` 在构建结束时写入。文件列出构建产出的每个页面和其他文件，例如 `/llms.txt`、feed、`.md` 替代版本，以及来自 `public/` 的文件。按请求渲染的页面也会包含在内。
+
+请在 `nimbus-docs lint` 之前运行 `astro build`。如果 `.nimbus/routes.json` 缺失、无效或来自另一个 Nimbus 版本，lint 会针对它报告一个错误并以 `1` 退出，无论规则严重级别如何。
+
+每次构建开始时都会删除上一个文件，因此构建失败后 lint 永远不会信任它。如果该文件无法删除或修改，构建会失败，直到你修复其权限。
+
+写链接时不要带 Astro 的 `base`。Nimbus 在页面渲染时添加 base，因此在 `base: "/docs"` 下，链接 `[Guide](/guide)` 会指向 `/docs/guide`。写成 `[Guide](/docs/guide)` 会渲染为 `/docs/docs/guide`，lint 会报告并提供应使用的路径。规则的 `ignore` 选项中的模式同样不带 base。
+
+图片是例外：base 下的行内图片要写出 base，`nimbus/image-ref` 会报告遗漏 base 的行内图片。见[部署 base 下的图片](/writing/markdown-and-mdx/#images-under-a-deployment-base)。它的 `ignore` 模式仍和链接一样不带 base。
+
+在 Nimbus 之后完成的集成所写入的文件不在列表中。请把它们添加到 `ignore`。
+
+### 重定向
+
+经过有效重定向的链接可以通过。Lint 会跟随重定向，只有当重定向指向不存在的页面、形成循环或超过 20 次重定向时，链接才算失效。临时重定向（`302`、`303`、`307`）也会被跟随。
+
+Lint 按你的平台方式匹配重定向。项目中存在 `netlify.toml` 时应用 Netlify 规则，否则应用 Cloudflare 规则：
+
+| | Cloudflare | Netlify |
+|---|---|---|
+| 没有状态码的行 | `302` | `301` |
+| 结尾斜杠 | 属于源的一部分：`/old` 不匹配针对 `/old/` 的规则。Lint 会说明哪种写法能匹配。 | 忽略：`/old` 和 `/old/` 匹配同一条规则。 |
+| 源处存在文件 | 重定向仍然生效。 | 只有用 `!` 强制指定的规则生效。 |
+
+在两者上，查询都会传递给未设置自身查询的目标，且 `/guide /guide/ 301` 是重定向，不是循环。
+
+Nimbus 无需配置就会从构建的 `_redirects` 文件和 Astro 的 `redirects` 配置读取重定向。如果你的部署从另一个名称的文件读取重定向（例如某个 Worker 加载的文件），请把 Nimbus 指向它。该文件使用 `_redirects` 语法：
+
+```ts title="astro.config.ts"
+nimbus(config, { redirectsFile: "public/__redirects" });
+```
+
+要找出经过永久重定向（`301`、`308`）的链接，请开启 `nimbus/redirected-link`。它会报告每一条，并给出应改为链接的 URL（不带 `base`）。目标位于 `base` 之外时，会建议写为 `site` 上的完整 URL。它使用 `nimbus/internal-link` 的 `ignore` 判断目标是否有效，无效时保持静默。
+
+### 由其他系统提供的路径
+
+你的域名上有些路径可能由本次构建之外的东西提供，例如单独部署的 API 参考。构建看不到它们，请把它们加入 `ignore`：
+
+```ts title="astro.config.ts"
+rules: {
+  "nimbus/internal-link": ["error", { ignore: ["/api/**"] }],
+},
+```
+
+Lint 不检查这些路径下的链接。要发现其中的失效链接，请用链接检查器检查已部署的站点。
+
+### 在 CI 中把关链接
+
+在同一个任务中运行构建和 lint：
+
+```sh
+astro build
+nimbus-docs lint
+```
+
+如果要在单独的任务中 lint，请把整个 `.nimbus/` 目录作为构建任务的产物传递。Lint 还需要 `.nimbus/lint.json`，其中保存你的 `rules`。
+
+`nimbus-docs check` 不执行构建。如果早先的构建留下了 `.nimbus/routes.json`，它会据此检查链接；文件缺失时则跳过该规则并留下提示，而不是失败。要在 CI 中把关链接，请运行 `astro build`，再运行 `lint`。
+
+## 文件内关闭规则
+
+无需配置，用 `nimbusDisableRules` frontmatter 或行内注释即可为单个文件关闭规则。
+
+`astro build` 和 `astro dev` 会把你的严重级别写入 `.nimbus/lint.json`，CLI 会读取它。没有该文件时，`nimbus-docs lint` 会以 `1` 退出并要求先构建；`--rule` 仍会运行它指定的规则。

@@ -1,0 +1,53 @@
+---
+title: "重定向"
+description: "页面迁移后，通过 previousSlug 与主机级规则保持旧链接可用。"
+sidebar:
+  order: 4
+---
+
+有两种机制覆盖常见场景：跨版本重命名页面，以及主机级 URL 重定向。如果只想改变侧边栏条目的链接位置、而不做重定向，参见 [`external_link`](/navigation/sidebar/#hide-or-change-one-pages-entry)。
+
+## 跨版本重命名页面
+
+当页面的 slug 在不同版本间发生变化时，在新页面上声明旧 slug，使两者被视为同一个逻辑页面，并输出规范链接：
+
+```yaml
+---
+title: Configuration
+previousSlug: config        # was /config in v1, now /reference/configuration
+---
+```
+
+`previousSlug` 接受字符串或数组（用于跨多个版本的重命名）。对于 slug 已不存在的旧版本 URL，Nimbus 还会自动生成指向其当前版本对应页面的重定向。
+
+## 主机级重定向
+
+对于永久的 URL 迁移，使用 Astro 内置的 `redirects` 配置。Nimbus 会把自己的版本重定向与你的配置合并，冲突时以你手写的条目为准：
+
+```ts title="astro.config.ts"
+export default defineConfig({
+  redirects: {
+    "/old-path": "/new-path",
+  },
+});
+```
+
+在静态主机上，这些配置会编译成重定向文件；在 Cloudflare 及其他适配器上，它们会成为原生重定向规则。
+
+当你把集合移动到另一个文件夹时（参见 [集合 URL](/writing/collections/#collection-urls)），用一条动态条目重定向它的旧 URL：
+
+```ts title="astro.config.ts"
+export default defineConfig({
+  redirects: {
+    "/sdk/[...slug]": "/products/sdk/[...slug]",
+  },
+});
+```
+
+Astro 会为每个旧页面 URL 写出一个重定向页面。它不会重定向旧的 Markdown 与 `llms.txt` URL，且存在 `base` 时也无法重定向这些页面。对于这些情况，请在 `public/_redirects` 中添加主机规则（Cloudflare 或 Netlify），并在两个路径中都带上 `base`：
+
+```text title="public/_redirects"
+/docs/sdk/* /docs/products/sdk/:splat 301
+```
+
+如果再次移动该集合，也要把已有条目指向新文件夹；Astro 会拒绝指向没有任何路由提供服务的文件夹的重定向。

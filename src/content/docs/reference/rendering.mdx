@@ -1,0 +1,91 @@
+---
+title: "渲染策略"
+description: "选择在构建时预渲染集合，还是按请求渲染，并完成服务端配置与验证。"
+sidebar:
+  order: 4
+---
+
+除非另行设置，每个集合的页面都在构建时预渲染。Nimbus 配置中的渲染策略可以把某个集合切换为按请求渲染，这需要服务端。
+
+## 选择模式 {#pick-a-mode}
+
+| 模式 | 页面渲染时机 | 适用场景 |
+| --- | --- | --- |
+| `"build"`（默认） | 在 `astro build` 时渲染一次 | 站点是静态的，或构建速度足够快 |
+| `"request"` | 读者请求时渲染 | 构建缓慢，或需要[页面 URL 上的 Markdown](/ai/markdown-negotiation/) 或[远程 MCP 服务器](/ai/remote-mcp/) |
+
+该策略覆盖 Nimbus 为集合提供服务的路由，以及为它们提供内容的 Markdown 与 `llms.txt` 路由。你在 `src/pages/` 下的自有文件保留自己的 `prerender` 设置。
+
+## 前提条件 {#prerequisites}
+
+- 一个带 Astro 服务端适配器的主机：Cloudflare、Netlify、Node 或 Vercel
+
+## 步骤 {#steps}
+
+1. **添加服务端适配器**
+
+   在项目根目录安装适用于你的主机的适配器：
+
+   ```sh
+   npx @cloudflare/nimbus-docs add adapter-cloudflare
+   yarn nimbus-docs add adapter-cloudflare
+   pnpm nimbus-docs add adapter-cloudflare
+   bunx @cloudflare/nimbus-docs add adapter-cloudflare
+   ```
+
+   其他主机使用 `adapter-netlify`、`adapter-node` 或 `adapter-vercel`。安装器会设置 `output: "server"` 并接好适配器。在 Cloudflare 上，如果配置中还没有策略，它还会添加 `rendering: { default: "request" }`。
+2. **设置策略**
+
+   在 `astro.config.ts` 的 Nimbus 配置中设置 `rendering`。`default` 应用于文档、它们的版本与 API 参考；`collections` 按集合名称设置模式：
+
+   ```ts title="astro.config.ts"
+   const nimbusConfig = defineNimbusConfig({
+     // …
+     rendering: {
+       default: "request",
+       collections: {
+         archive: "build",
+       },
+     },
+   });
+   ```
+
+   如果只想让一个集合按请求渲染、站点其余部分保持预渲染，可以反过来设置：`default: "build"`，并把该集合设为 `"request"`。
+3. **构建站点**
+
+   ```sh
+   npm run build
+   ```
+
+   Nimbus 会按策略设定的模式渲染每个路由，并在路由文件声明不同模式时发出警告。运行 `nimbus-docs check --fix` 可更新这些文件：它会设置每个路由的 `prerender` 行，只在构建路由上保留 `getStaticPaths`，并在集合路由的页面辅助函数中写明集合名称，例如 `getCollectionPage(Astro, "sdk")`。`add adapter-*` 与脚手架会替你更新它们。
+
+## 验证 {#verify}
+
+按请求渲染的页面在构建产物中没有 HTML 文件。对于 `/guide/` 页面：
+
+```sh
+ls dist/client/guide/index.html
+```
+
+```text
+ls: dist/client/guide/index.html: No such file or directory
+```
+
+如果文件存在，说明该页面的集合仍设为 `"build"`：检查 `rendering.collections` 中的集合名称。然后部署并加载页面，确认服务器确实渲染了它。
+
+## 仍属于构建产物的内容 {#what-stays-build-output}
+
+按请求渲染改变的是 HTML 的生成时机，而不是哪些内容可被发现。sitemap、搜索索引、`llms.txt` 以及每个页面的 Markdown 版本仍在构建期间准备好，因此搜索与智能体能找到每个页面。
+
+## 构建强制执行的规则 {#rules-the-build-enforces}
+
+- `rendering.collections` 中的每个名称都必须是已注册集合，并拥有自己的兜底路由。未知名称会让构建失败。
+- `default` 覆盖 `docs`、版本集合、API 集合，以及全站 `llms.txt` 与 `llms-full.txt`；每个集合的 Markdown 与分区 `llms.txt` 路由跟随该集合的模式。不设置 `rendering` 时，Nimbus 管理的每个路由都会提前构建，无论其 `prerender` 行写了什么。一旦设置了 `rendering`，其他任何带有兜底路由的页面集合（例如 `blog`）都必须在 `collections` 中列出。
+- 带动态段的构建路由，例如 `[...slug].astro`，必须导出 `getStaticPaths`。否则 Astro 无法构建它，构建会失败并指出文件名。
+- 生成的 API 参考只在 Cloudflare 上按请求渲染，但设置了 [`bundle: false`](/api-reference/large-apis/) 的除外，它在 Node 上也可用。在其他适配器上，请让 API 集合保持 `"build"`。大型 API 与多版本场景参见[大型 API](/api-reference/large-apis/)。
+
+## 后续步骤 {#next-steps}
+
+- [部署到 Cloudflare](/deploy/cloudflare/) 或[其他主机](/deploy/other-hosts/)：发布服务端。
+- [在页面 URL 提供 Markdown](/ai/markdown-negotiation/)：按请求渲染解锁的功能。
+- [配置](/reference/configuration/)：`rendering` 的全部字段。

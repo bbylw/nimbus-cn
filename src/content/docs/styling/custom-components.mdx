@@ -1,0 +1,78 @@
+---
+title: "自定义组件"
+description: "编写自己的 Astro 组件，在 MDX 中导入或全局注册，并用 mount 为它添加交互行为。"
+sidebar:
+  order: 6
+---
+
+当[组件目录](/components/)中没有合适的东西时，就自己写一个。Nimbus 组件只是你仓库中的普通 Astro 组件；本页说明如何让它在 MDX 中可用，以及如何赋予它行为。假定你已阅读[Markdown 与 MDX](/writing/markdown-and-mdx/)。
+
+## 编写组件
+
+把它放在 `src/components/`，用 Tailwind 类和站点令牌设置样式，使其在浅色和深色模式下都跟随主题：
+
+```astro title="src/components/Stat.astro"
+---
+interface Props {
+  label: string;
+  value: string;
+}
+const { label, value } = Astro.props;
+---
+
+<div class="my-4 rounded-lg border border-border bg-card p-4">
+  <p class="text-sm text-muted-foreground">{label}</p>
+  <p class="text-2xl font-semibold text-foreground">{value}</p>
+</div>
+```
+
+## 在 MDX 中使用
+
+在使用它的页面顶部导入：
+
+```mdx title="src/content/docs/limits.mdx"
+import Stat from "@/components/Stat.astro";
+
+<Stat label="Requests a minute" value="1,000" />
+```
+
+或在 `src/components.ts` 中注册，以便在每个页面无需导入即可使用：
+
+```ts title="src/components.ts"
+import Stat from "./components/Stat.astro";
+
+export const components = {
+  // …the components already listed
+  Stat,
+};
+```
+
+构建会检查 MDX 中每个首字母大写的标签。既未导入也未注册的标签会中止构建并给出行号和文件名，而不是作为文本渲染。
+
+## 赋予行为
+
+组件中的脚本每次页面加载运行一次。Nimbus 站点切换页面时不会整页刷新，因此请用 `@cloudflare/nimbus-docs/client` 的 `mount` 来初始化组件：它会在每个页面上为所有匹配元素运行，并在读者离开时清理：
+
+```astro title="src/components/Counter.astro"
+<button type="button" data-counter>Clicked 0 times</button>
+
+<script>
+  import { mount } from "@cloudflare/nimbus-docs/client";
+
+  mount("[data-counter]", (button) => {
+    let count = 0;
+    const onClick = () => {
+      count += 1;
+      button.textContent = `Clicked ${count} times`;
+    };
+    button.addEventListener("click", onClick);
+    return () => button.removeEventListener("click", onClick);
+  });
+</script>
+```
+
+对于交互式图表，请从图表组件起步；参见[图表与交互内容](/writing/interactive-content/)。
+
+## 分享组件
+
+其他站点可能用到的组件应放入注册表，`nimbus-docs add` 会将其作为文件安装。[注册表](/registry/)描述了格式。

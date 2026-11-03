@@ -1,0 +1,34 @@
+---
+title: "ThemeToggle"
+description: "亮色与暗色主题切换按钮，选择写入 localStorage，预绘制脚本避免闪烁。"
+sidebar:
+  order: 30
+---
+
+ThemeToggle 是页头的亮色／暗色切换按钮：点击后把选择写入 `localStorage`，由基础布局的预绘制脚本把 `data-mode` 应用到 `<html>`，因此切换不会出现闪烁；其他标签页和系统主题的变化也会同步。
+
+## 安装
+
+```bash
+nimbus-docs add theme-toggle
+```
+
+源码位于 `src/components/ui/theme-toggle/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+ThemeToggle 没有公开属性，其余属性会透传给内部的 `<button>`。
+
+## 用法
+
+放进页头即可：
+
+```astro title="src/components/Header.astro"
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+
+<ThemeToggle />
+```
+
+按钮的 `aria-pressed` 反映当前是否为暗色，图标随 `data-mode` 在太阳与月亮之间切换。主题令牌与默认配色见[主题与令牌](/styling/theme-and-tokens/)。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

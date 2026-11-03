@@ -1,0 +1,217 @@
+---
+title: "Markdown 与 MDX"
+description: "页面中可用的 Markdown 语法、MDX 组件、提示框、数学公式与扩展方式。"
+sidebar:
+  order: 3
+---
+
+内容可以用 Markdown（`.md`）或 MDX（`.mdx`）编写。MDX 让你把组件直接放进正文——卡片、标签页、步骤、提示框，以及你自己构建的任何组件。
+
+## 组件注册表
+
+在 `src/components.ts` 中列出的组件，在每个 MDX 文件中都**无需导入**即可使用：
+
+```ts title="src/components.ts"
+import { Aside } from "./components/ui/aside";
+import { Card } from "./components/ui/card";
+import { CardGrid } from "./components/ui/card-grid";
+
+export const components = {
+  Aside,
+  Card,
+  CardGrid,
+};
+```
+
+```mdx
+<CardGrid>
+  <Card title="Fast">Built on Astro.</Card>
+</CardGrid>
+```
+
+不在注册表中的组件必须在文件顶部导入：
+
+```mdx
+import { FileTree } from "@/components/ui/file-tree";
+
+<FileTree>
+- src/
+</FileTree>
+```
+
+## 构建时校验
+
+构建前的内容检查会把 `src/content/**/*.mdx` 中每个 PascalCase 标签与注册表及各文件导入进行比对。未知组件、小写用法和缺失导入会**导致构建失败**，而不是在部署后的页面上静默渲染为普通文本。可在集成选项中用 `validateMdx: false` 关闭该检查。
+
+## 提示框
+
+在 `.mdx` 文件中，Sätteri 解析围栏式 `:::` 指令，Nimbus 用 `<Aside>` 渲染：
+
+```mdx
+:::tip
+This becomes an Aside.
+:::
+```
+
+### 渲染示例
+
+以下提示框使用指令语法编写，并通过 Sätteri 渲染。
+
+<Aside type="note">
+
+默认 note，包含**粗体文本**、一个[链接](#admonitions)和 `行内代码`。
+
+</Aside>
+
+<Aside type="tip" title="值得了解">
+
+用标题描述提示框中的建议。
+
+</Aside>
+
+<Aside type="caution" title='Say "hello"'>
+
+带引号的标题保持为纯字符串。`warning` 别名使用 caution 变体。
+
+</Aside>
+
+<Aside type="danger" title="`Cache-Control` header">
+
+标题中的格式保持字面值；正文中的格式如**这样**仍然生效。
+
+</Aside>
+
+<Aside type="note" title="嵌套说明">
+
+外层 note 包含一个 tip 和一个源码示例。
+
+<Aside type="tip">
+
+嵌套的提示框使用同一个 Aside 组件。
+
+</Aside>
+
+```mdx
+:::note
+这个围栏示例保持为代码。
+:::
+```
+
+</Aside>
+
+### 语法与行为
+
+内置类型：`note`、`info`、`tip`、`caution`、`warning`、`important`、`danger`。用 `admonitions: { typeAliases: { heads: "tip" } }` 添加同义词。`Aside` 必须在组件注册表中（默认起始模板已导出它）。
+
+标题使用现有的纯 `title` 属性。Sätteri 输出字符串属性；引号和看起来像表达式的内容不会被求值。标题中的标记仍保持为字面文本。指令标题仍必须是合法的 MDX 语法，因为 Sätteri 会在 AST 处理之前解析文档。对于未闭合的 `<T>` 或 `{` 这类任意文本，请使用直接组件的字符串属性：
+
+```mdx
+<Aside title="Use <T>">Body content.</Aside>
+```
+
+Sätteri 解析指令及其正文；Nimbus 把识别出的指令节点映射为 Aside。正文缩进不会被重写。代码示例、frontmatter、表达式和 JSX 属性仍受保护。
+
+嵌套与围栏终止遵循 Sätteri 的原生语法。嵌套提示框时，外层使用更长的围栏：
+
+```mdx
+::::note
+Outer content.
+
+:::tip
+Inner content.
+:::
+::::
+```
+
+未知指令默认保持为字面文本。如果你的 Sätteri 处理器显式启用了原生指令，未识别的节点仍然可供你自己的 AST 插件使用。包含独立回车符的文件也保持为字面文本；请使用 LF 或 CRLF 行尾。
+
+此功能需要 Nimbus 的原生 Sätteri MDX 管道。兼容的显式 Sätteri 处理器受支持。对于 unified 或其他自定义处理器，请设置 `admonitions: false`，并保留该处理器原有的提示框实现。`.md` 文件、原始导入和 `admonitions.contentDirs` 之外的文件不受影响。用 `admonitions.skip` 按文件关闭。
+
+## 标题 id 与数学公式
+
+用 `markdown.features` 开启额外的 Markdown 语法。新站点默认开启标题 id。数学公式需要添加 `math()` 插件和 `math: true`：
+
+```ts title="astro.config.ts"
+import { math, tableScroll } from "@cloudflare/nimbus-docs/markdown";
+
+nimbus(config, {
+  markdown: {
+    hastPlugins: [tableScroll(), math()],
+    features: { headingAttributes: true, math: true },
+  },
+});
+```
+
+启用 `headingAttributes` 后，`## Install the CLI {#install}` 会获得 id `install`，因此指向 `#install` 的链接在标题改动后仍然有效。
+
+以其他 `{…}` 文本结尾的标题（例如 `## GET /accounts/{account_id}`）也会被当作属性读取；如果你的标题以这种方式结尾，请不要开启该功能。
+
+页面、生成的 Markdown、可复用片段和 `nimbus-docs lint` 都以相同的功能读取 Markdown。
+
+### 数学公式
+
+启用 `features.math` 和 `math()` 插件后，可以用 TeX 编写公式。数学公式默认关闭，因此不使用它的站点上，含 `$` 的正文不会被误读：
+
+```md
+The energy is $E = mc^2$.
+
+$$
+x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$
+```
+
+`` ```math `` 围栏与 `$$` 等价。公式在构建时排版为 MathML，所有现代浏览器都能原生渲染，因此页面不会加载数学公式 JavaScript。每个公式都在页面中携带其 TeX 源码供工具使用，页面的 Markdown 版本则为智能体保留 `$…$` 源码。
+
+- **价格与 shell 变量。** 单个 `$` 会开启行内公式，因此正文中的 "costs $5 and $10" 或 `$HOME` 可能变成公式。如果文档中有这些内容，请使用 `math: { singleDollarTextMath: false }`，并以 `$$x^2$$` 编写行内公式。
+- **宏。** 用 `math({ macros: { "\\R": "\\mathbb{R}" } })` 为所有公式提供相同的快捷方式。
+- **公式编号。** `\begin{equation}` 为公式编号，`\label{eq:name}` 配合 `\eqref{eq:name}` 引用它。
+- **错误。** 无法排版的公式会显示为源码并带有标记，构建会警告并指出文件和行号。
+- **自己的渲染器。** 移除 `math()`。公式随后会以 `<code class="language-math">` 元素到达页面，并带上 `math-inline` 或 `math-display`。如果你改为在自己的插件或处理器中调用 `math()`，请在布局中添加 `import "@cloudflare/nimbus-docs/styles/math.css"`，以便公式获得字体和间距。
+
+## 扩展 Markdown
+
+用 `markdown.mdastPlugins` 扩展 Sätteri 做 Markdown AST 转换，用 `markdown.hastPlugins` 做 HTML AST 转换。Nimbus 通过 `@cloudflare/nimbus-docs/markdown` 提供原生插件：
+
+```ts title="astro.config.ts"
+import { externalLinks } from "@cloudflare/nimbus-docs/markdown";
+
+nimbus(config, {
+  markdown: { hastPlugins: [externalLinks()] },
+});
+```
+
+传给 `mdx()` 的 Remark 和 rehype 插件会静默失效，因为 Nimbus 使用 Sätteri 而非 unified 解析 Markdown。请改用 `markdown.mdastPlugins` 和 `markdown.hastPlugins`。
+
+如果要保留无法替换的 unified 插件，请把 `markdown.processor` 设为某个 unified 处理器，并关闭需要 Sätteri 的功能，例如提示框。
+
+## 部署 base 下的链接
+
+站点链接请写成逻辑根路径，不要带 Astro 的部署 base。如果站点以 `base: "/docs"` 部署，请写 `[Install](/guides/install)`，而不是 `[Install](/docs/guides/install)`。Nimbus 会在构建时添加 `/docs`。
+
+这适用于 Markdown 链接、引用式链接定义、原生 `<a href>` 属性和静态组件的 `href` 字符串。相对链接、外部 URL、片段、查询字符串、代码和动态 JSX 表达式保持不变。
+
+对于在组件或路由代码中计算的链接，从 `@cloudflare/nimbus-docs/runtime` 导入 `withBase` 并应用一次：
+
+```ts
+import { withBase } from "@cloudflare/nimbus-docs/runtime";
+
+const href = withBase("/quickstart", import.meta.env.BASE_URL);
+```
+
+不要向 `withBase` 传入已经带 base 的路径；在 `base` 为 `/docs` 时，`withBase("/docs/guides/install", "/docs")` 会故意生成 `/docs/docs/guides/install`。
+
+## 部署 base 下的图片
+
+优先使用相对图片路径（`./architecture.png`）或 `src/assets` 中的文件。Astro 会优化它们，且在任何 base 下都能工作。
+
+`public/` 中的文件在 base 下提供，图片遵循 Astro 的规则而非上面的链接规则：Nimbus 会给引用式链接定义添加 base，但不会给行内图片添加。在 `base: "/docs"` 且文件为 `public/architecture.png` 时：
+
+```md
+![Architecture](/docs/architecture.png)
+
+![Architecture][arch]
+
+[arch]: /architecture.png
+```
+
+行内图片或 `<img src>` 中要写出 base，引用式定义中则不要写。`nimbus-docs lint` 会用 `nimbus/image-ref` 报告这两种错误，`nimbus-docs lint --fix` 会在文件位于 `public/` 时修复行内图片和引用式定义。

@@ -1,0 +1,40 @@
+---
+title: "ImageZoom"
+description: "用单个原生 dialog 全尺寸查看正文图片，支持键盘操作与读屏软件。"
+sidebar:
+  order: 18
+---
+
+ImageZoom 在文档布局中渲染一个原生 `<dialog>`，客户端脚本把正文里值得放大的图片包成按钮，点击后在对话框中按视口尺寸显示原图。放大入口可用键盘聚焦，Esc、关闭按钮或点击任意位置都能关闭，关闭后焦点回到触发元素。
+
+## 安装
+
+```bash
+nimbus-docs add image-zoom
+```
+
+源码位于 `src/components/ui/image-zoom/`。
+
+## 属性
+
+ImageZoom 没有公开属性，每个页面渲染一次即可。
+
+## 用法
+
+在文档布局里渲染一次，不需要在每张图片旁单独调用：
+
+```astro title="src/layouts/DocsLayout.astro"
+import { ImageZoom } from "@/components/ui/image-zoom";
+
+<ImageZoom />
+```
+
+脚本会跳过放进链接或按钮里的图片，也会跳过放大后不足当前显示尺寸 1.2 倍的图片，避免给本已铺满栏宽的截图加无意义的入口。要让某张图片退出放大，在图片或外层容器上加 `data-nb-zoom="off"`：
+
+```mdx
+<img src="/screenshots/sidebar.png" alt="侧边栏" data-nb-zoom="off" />
+```
+
+打开对话框时会克隆原图并使用最大的候选源，因此响应式图片在高分屏上仍然清晰。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

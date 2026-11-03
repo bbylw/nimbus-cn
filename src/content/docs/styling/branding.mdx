@@ -1,0 +1,54 @@
+---
+title: "品牌"
+description: "用名称、Logo、favicon、强调色和分享卡片让站点呈现你的产品形象。"
+sidebar:
+  order: 2
+---
+
+五项改动让 Nimbus 站点看起来像你的产品。每一项都是你拥有的文件或选项。
+
+## 名称
+
+在 `astro.config.ts` 的 Nimbus 配置中设置 `title` 和 `description`。标题会出现在每个页面的 `<title>`、分享卡片和 `llms.txt` 中；描述是站点的默认 meta description。
+
+## Logo
+
+Logo 只在一处绘制：`src/components/logo.ts` 中的盒子与 SVG 路径。页头、手机菜单（`Logo.astro`）和所有分享卡片都读取它。把路径替换为你的标志即可统一换品牌。请保持单色标志，因为各处会用自己的文本颜色填充它。
+
+如需多色 Logo 或图片，修改 `Logo.astro` 来渲染它：
+
+```astro title="src/components/Logo.astro"
+---
+interface Props { class?: string }
+const { class: cls = "h-5 w-auto" } = Astro.props;
+---
+<img src="/logo.svg" alt="" class={cls} />
+```
+
+分享卡片仍会绘制 `logo.ts`，因此也要替换它，或按[自定义 OG 卡片](/ai/override-markdown/#customize-og-cards)所述修改卡片。
+
+页头将站点标题作为链接的可访问名称，因此 Logo 本身无需文字。若要在标志旁显示名称，请在 `Logo.astro` 内添加。
+
+## Favicon
+
+将 `favicon.svg`、`favicon.ico` 或 `favicon.png` 放入 `public/`。Nimbus 会按此顺序链接找到的第一个。
+
+## 颜色
+
+强调色是 `src/styles/globals.css` 中的两个令牌，一个用于浅色模式，一个用于深色：
+
+```css title="src/styles/globals.css"
+:root {
+  --nb-brand: oklch(0.55 0.2 265);
+}
+
+[data-mode="dark"] {
+  --nb-brand: oklch(0.8 0.12 265);
+}
+```
+
+`--nb-brand` 用于侧边栏当前页面和卡片中的图标着色。请检查两种模式下品牌色文本与背景的对比度仍达到 4.5:1。[主题与令牌](/styling/theme-and-tokens/)列出了所有令牌，包括中性色、圆角和字体。
+
+## 分享卡片
+
+Nimbus 在构建时为每个页面绘制分享卡片：Logo、页面所属分区和标题。其颜色、字体和布局位于 `src/pages/og/_card.ts`；参见[自定义 OG 卡片](/ai/override-markdown/#customize-og-cards)。页面的 `socialImage` frontmatter 会用你自己的图片替换其卡片。参见[元数据与 SEO](/publish/metadata-and-seo/)。

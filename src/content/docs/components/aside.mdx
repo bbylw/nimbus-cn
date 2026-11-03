@@ -1,0 +1,43 @@
+---
+title: "Aside"
+description: "带边框的行内提示框，内置 note、tip、caution、danger 四种类型。"
+sidebar:
+  order: 2
+---
+
+Aside 把笔记、提示、注意或警告与周围正文区分开：带边框的方框、明确的类型色和图标。
+
+## 安装
+
+```bash
+nimbus-docs add aside
+```
+
+源码位于 `src/components/ui/aside/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `type` | `"note"` \| `"tip"` \| `"caution"` \| `"danger"` | `"note"` | 否 | 传达提示意图的视觉样式。 |
+| `title` | string | 类型名称 | 否 | 标题覆盖，默认为大写的类型名；需要格式时改用 `title` 插槽。 |
+| `icon` | string | 类型图标 | 否 | 用 Iconify 名称（如 `ph:rocket`）替换类型自带的图标，也可以使用 `icon` 插槽。 |
+
+## 示例
+
+```mdx
+<Aside type="tip" title="部署之前">
+  把 `astro.config.ts` 里的 `site` 改成你的生产环境 URL。
+</Aside>
+```
+
+标题需要格式时，用插槽传入：
+
+```mdx
+<Aside type="note">
+  <Fragment slot="title">使用 <code>env</code> 校验</Fragment>
+  正文内容。
+</Aside>
+```
+
+Aside 已在 `src/components.ts` 中默认注册，可直接在任何 `.mdx` 中使用。

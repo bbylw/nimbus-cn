@@ -1,0 +1,48 @@
+---
+title: "搜索"
+description: "使用构建时生成的 Pagefind 索引，控制收录范围，或替换为自定义搜索后端。"
+sidebar:
+  order: 2
+---
+
+搜索默认开启，由 [Pagefind](https://pagefind.app/) 提供支持：这是一个静态的、在构建时建立索引的引擎。新建站点已包含 Pagefind，无需任何配置。
+
+## 索引
+
+`astro build` 之后，Nimbus 会对输出的 `dist/` 运行 Pagefind，并在页面旁边写入搜索索引。索引以静态方式提供，因此搜索可在任何主机上运行，不需要后端。
+
+如果站点创建时未包含 Pagefind，将其添加为开发依赖：
+
+```sh
+npm i pagefind
+yarn add pagefind
+pnpm add pagefind
+bun add pagefind
+```
+
+## 控制收录内容
+
+除非显式设置 `searchable`，页面是否进入搜索由 `noindex` 决定：
+
+```yaml
+---
+title: Internal note
+noindex: true        # out of search engines…
+searchable: true     # …but still findable in site search
+---
+```
+
+`draft: true` 的页面永远不会被索引。参见 [Frontmatter](/reference/frontmatter/)。
+
+## 禁用或替换搜索
+
+完全关闭框架的搜索机制：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  // …
+  search: false,
+});
+```
+
+或者保留界面，但提供自己的后端（例如托管搜索服务）：实现 `SearchProvider` 接口并设置 `search: { provider: "custom" }`。此时 Nimbus 会跳过 Pagefind 构建步骤，由你的代码渲染结果。

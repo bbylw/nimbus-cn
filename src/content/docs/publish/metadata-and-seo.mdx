@@ -1,0 +1,94 @@
+---
+title: "元数据与 SEO"
+description: "控制标题、描述、Open Graph 图片、sitemap 与 canonical URL。"
+sidebar:
+  order: 1
+---
+
+Nimbus 自动处理元数据基线，并在需要时提供页面级和站点级控制。
+
+## 标题与描述
+
+`title` 和 `description` frontmatter 会填充 `<title>` 和 `<meta name="description">`，并用于搜索摘要和 `llms.txt` 索引。站点级回退值来自 Nimbus 配置：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  site: "https://docs.example.com",
+  title: "Acme",
+  description: "Build with Acme.",
+});
+```
+
+## Open Graph 图片
+
+设置站点级回退卡片和替代文本，然后按页面覆盖：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  // …
+  socialImage: "/og.png",
+  socialImageAlt: "Acme documentation",
+});
+```
+
+```yaml
+---
+title: Pricing
+socialImage: /og/pricing.png
+---
+```
+
+Nimbus 还提供 OG 图片路由，因此没有显式图片的页面会得到生成的卡片：站点 logo、页面所属分区及其标题。参见[自定义 OG 卡片](/ai/override-markdown/#customize-og-cards)。
+
+文档页面使用其 frontmatter 中的 `socialImage`，否则使用生成的卡片 `/og/<page>.png`。
+
+其他页面（如 404 页面和手写路由）使用第一个存在的项：`config.socialImage`、`public/opengraph.png` 或 `public/logo.png`，然后是生成的 `/og.png` 卡片。
+
+图片路径是不含 Astro 部署 base 的逻辑路径。对于部署在 `/docs` 的站点，保留 `socialImage: "/og.png"`；Nimbus 会生成 `/docs/og.png`。绝对 URL 和协议相对 URL 会原样保留。
+
+### 图片尺寸
+
+仅当尺寸已知时才写入 `og:image:width` 和 `og:image:height`，因此链接预览不会被裁剪成错误的形状：
+
+- 生成的卡片（`/og.png` 和 `/og/<page>.png`）为 1200 × 630。
+- `config.socialImage`、自动检测到的 `public/opengraph.png` 或 `public/logo.png`，以及 `public/og/` 下的每个图片，都会在构建时测量。
+- 其他任何图片（例如远程 URL 或 `public/` 其他位置中的页面级文件）不会获得尺寸标签。在知道尺寸时传入它，作为 `NimbusHead` 或起始模板 `BaseLayout` 上的 `socialImageSize`：
+
+```astro
+<NimbusHead title={title} socialImage="/diagrams/cover.png" socialImageSize={{ width: 1600, height: 900 }} />
+```
+
+## Sitemap 与 robots
+
+设置 `site` 后，会自动接入 sitemap 集成和 `/robots.txt`。可在集成选项中用 `sitemap: false` 禁用 sitemap。
+
+sitemap 会写为 `sitemap-index.xml` 加 `sitemap-0.xml`，而 `/sitemap.xml` 是该索引的副本，供只尝试该名称的工具使用。若站点自行提供 `/sitemap.xml`（如 `public/` 中的文件、`sitemap.xml` 路由，或根目录下的动态 `[name].xml` 路由），则保留站点自己的版本。
+
+文档页面的 `<lastmod>` 是其 frontmatter 中的 `lastUpdated`，否则是其文件最后一次提交的日期，与页面的"最后更新"行一致。没有内容文件的页面（例如 API 页面）没有该值。
+
+`sitemap` 中的 `serialize` 选项会在之后运行，因此它可以修改或删除该值。
+
+Git 日期需要仓库的完整历史。在浅克隆中（大多数 CI 系统默认如此），构建会提示一次，并省略所有 git 日期：sitemap 的 `lastmod` 和页面上的"最后更新"行。要恢复它们，请获取完整历史：在 GitHub Actions 中使用 `fetch-depth: 0`，或运行 `git fetch --unshallow`。
+
+## 页面级与站点级 head
+
+通过 `config.head` 在站点级添加 `<head>` 元素，或通过 frontmatter 按页面添加——两者会合并：
+
+```yaml
+---
+title: Analytics-tracked page
+head:
+  - tag: meta
+    attrs: { name: "robots", content: "noindex" }
+  - tag: link
+    attrs: { rel: "canonical", href: "https://example.com/canonical" }
+---
+```
+
+有效标签：`meta`、`link`、`script`、`style`、`title`、`noscript`、`base`。若不想手写标签就把页面排除在爬虫之外，使用 `noindex: true`。
+
+## Canonical URL
+
+在带版本的站点上，Nimbus 会输出 `<link rel="canonical">`，将旧版本指向当前版本，并在同级页面之间输出 `<link rel="alternate">`——由 `previousSlug` 驱动。
+
+要把页面的 canonical 指向别处，请向其 `head` 添加 canonical 链接，如上面的示例。它会替换 Nimbus 输出的那个，`og:url` 和结构化数据也会跟随它。绝对 URL 按原样使用；站点路径（书写时不带 `base`）会像 `socialImage` 一样基于 `site` 解析。

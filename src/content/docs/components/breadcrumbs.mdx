@@ -1,0 +1,39 @@
+---
+title: "Breadcrumbs"
+description: "指向当前页面的层级路径，路径过长时用省略号折叠。"
+sidebar:
+  order: 5
+---
+
+Breadcrumbs 显示读者从站点根走到当前页面的层级路径，路径过长时会把中间几级折叠成一个省略号，点开后列出被折叠的项。
+
+## 安装
+
+```bash
+nimbus-docs add breadcrumbs
+```
+
+源码位于 `src/components/ui/breadcrumbs/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `items` | `Array<{ label: string; href: string }>` | — | 是 | 按文档顺序排列的路径项；最后一项渲染为当前页面。 |
+| `maxVisible` | number | `4` | 否 | 折叠前的可见项上限，超出后中间项收进省略号菜单。 |
+
+## 示例
+
+```mdx
+<Breadcrumbs
+  items={[
+    { label: "首页", href: "/" },
+    { label: "组件", href: "/components/" },
+    { label: "Breadcrumbs", href: "/components/breadcrumbs/" },
+  ]}
+/>
+```
+
+`href` 会经过 `withBase` 处理，写根路径即可，不需要自己拼 `base`。当前页那一项不带链接，并标记 `aria-current="page"`。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

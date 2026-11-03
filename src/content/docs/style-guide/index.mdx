@@ -1,0 +1,35 @@
+---
+title: "内容风格指南"
+description: "每种文档类型对应的写作配方：适用场景、标题写法、阈值与自检清单。"
+sidebar:
+  order: 0
+  group:
+    label: 内容风格指南
+---
+
+每个文档页面都回答某一类读者的问题。Nimbus 为每种内容类型都提供一份**配方**：它用来做什么、不做什么、标题语法、阈值，以及一份自检清单。每份配方都是**指南，而不是闸门** —— 只作建议，永不导致构建失败。
+
+本分区的每个页面讲解一种内容类型。要脚手架生成某类型的页面，安装对应配方 —— 你的编码智能体会读取完整骨架和清单，并根据你的产品做调整：
+
+```sh
+npx @cloudflare/nimbus-docs add content-how-to
+yarn nimbus-docs add content-how-to
+pnpm nimbus-docs add content-how-to
+bunx @cloudflare/nimbus-docs add content-how-to
+```
+
+所有示例共用一个虚构产品：**Hookline**，一个 webhook 投递服务。
+
+| 内容类型 | 读者的问题 | 标志性做法 | 安装 |
+|---|---|---|---|
+| [概览](/style-guide/overview/) | “这是什么，我从哪里开始？” | 一段话，然后纯路由 | `content-overview` |
+| [快速开始](/style-guide/quickstart/) | “多快能看到它跑起来？” | 展示输出；零决策 | `content-quickstart` |
+| [教程](/style-guide/tutorial/) | “教我做出一个真实的东西。” | 每一部分都以可见结果结束 | `content-tutorial` |
+| [操作指南](/style-guide/how-to/) | “我怎么做 X？” | 验证把关不可逆步骤 | `content-how-to` |
+| [概念](/style-guide/concept/) | “X 到底是什么？” | 先给定义；以边界结尾 | `content-concept` |
+| [参考](/style-guide/reference/) | “精确的取值是什么？” | 答案优先的表格；完整或明确范围 | `content-reference` |
+| [示例](/style-guide/example/) | “给我看 X 的可运行代码。” | 完整且可运行的代码 | `content-example` |
+| [故障排查](/style-guide/troubleshooting/) | “我为什么看到这个报错？” | 以原文报错作为标题 | `content-troubleshooting` |
+| [变更日志](/style-guide/changelog/) | “改了什么 —— 会影响我吗？” | 破坏性标记放在条目开头 | `content-changelog` |
+
+要写新页面？按读者的问题选类型，而不是按你想写什么。后续扩展（迁移指南、术语表、错误目录……）遵循同一条规则：只有当现有配方的契约无法在不被破坏的前提下覆盖时，新类型才值得存在。

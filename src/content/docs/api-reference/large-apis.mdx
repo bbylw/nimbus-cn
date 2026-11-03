@@ -1,0 +1,160 @@
+---
+title: "大型 API"
+description: "通过按需加载侧边栏、分块 API 首页、按请求渲染与 bundle 选项，让大型规格的页面更小、构建更快。"
+sidebar:
+  order: 2
+---
+
+默认情况下，每个 API 页面都包含整棵导航树。对于大型 API，这棵树可能占据每页的大部分体积。在 `api` 条目上设置 `sidebar`，可以减少包含的内容：
+
+```ts title="astro.config.ts"
+api: [
+  {
+    collection: "api",
+    spec: "./src/api/openapi.yaml",
+    sidebar: "on-demand",
+  },
+],
+```
+
+| 值 | 每个页面包含的内容 | 折叠的分组 |
+| --- | --- | --- |
+| `"full"`（默认） | 整棵树。 | 就地展开。 |
+| `"on-demand"` | 顶层条目，加上当前页面的分支。 | 就地展开，首次展开时加载其行。 |
+
+使用 `"on-demand"` 时，当前页面的祖先分组保持展开并显示全部子项，因此相邻页面只需一次点击即可到达。Schema 页面只显示顶层条目。Webhook 页面会展开侧边栏末尾的 Webhooks 分组。该设置作用于一个家族的所有版本。
+
+当读者展开某个折叠分组时，侧边栏会获取该分组的页面，并从那里复制其行。没有页面的分组（例如 `x-tagGroups` 分类）改用 API 概览页。
+
+获取在悬停或聚焦时开始，因此分组展开时行通常已经出现。如果无法加载，分组链接会改为指向其页面。
+
+没有 JavaScript 时，折叠分组的标签仍然链接到其页面。来自 `x-tagGroups` 的分类没有可链接的页面，因此它们只在自身内部的页面上展开；API 概览页的正文会链接每个分区。
+
+每个页面仍然携带每个顶层条目，因此拥有数百个扁平标签的 API 依然很重。可以把标签归组到某个标签的 `parent` 下，或使用 `x-tagGroups`；Nimbus 在任何 OpenAPI 版本中都会读取它。标签的 `x-displayName` 设置读者看到的标签文字，而它的 `name` 仍决定其坐标和路由：
+
+```yaml title="openapi.yaml"
+tags:
+  - name: workers
+    x-displayName: Workers
+  - name: workers.scripts
+    x-displayName: Scripts
+    parent: workers
+```
+
+在所有模式下，无论桌面端还是移动端，侧边栏都会在会话期间跨页面保留读者展开的分组和滚动位置。已加载的行会在下一页绘制之前显示。新的部署会从头开始，因此旧行不会在新部署后出现。
+
+API 侧轨渲染与文档侧边栏相同的标记：分组是原生 `<details>`/`<summary>` 行，并按位置在 `src/styles/globals.css` 中设置样式（`[data-nb-api-nav] li > a`、`details > summary`、`details > ul`）；分组的页面作为它的第一个 “Overview” 子项列出；每个页面渲染一棵树，移动端抽屉打开期间会借用这棵树。参见[重设侧边栏行](/navigation/sidebar/#restyle-sidebar-rows)。
+
+在 Nimbus 配置的 `api` 条目上设置 `sidebar`。若站点把该条目传给 `apiCollection({ … })`，模式仍取自配置，两者不一致时构建会发出警告。
+
+每个分组页面都会列出其操作和子分区，并且 [API 首页](#the-api-home)会列出每个操作，因此在所有模式下所有页面都保持可达。
+
+`"on-demand"` 需要已安装版本中的 `api-layout` 和 `api-sidebar` 组件；构建会指出过时的文件。这些组件使用 0.19 起始模板的样式，因此在 0.19.0 之前搭建的站点要先采用重新设计的起始模板；`nimbus-docs migrate` 会列出其步骤。
+
+## API 首页
+
+API 首页会列出该版本的每个操作和 webhook，方式与分区页列出其页面类似。每个 `x-tagGroups` 分组都是一个标题，按规格中的顺序排列。每个分区显示其标题和描述，然后显示其操作：名称在前，方法和路径在其下方。
+
+不属于任何分组的分区随后出现，然后是无标签操作，最后是 webhooks。顶部的筛选框会搜索每个端点：按 Enter 打开第一个匹配项，按 Escape 清除。
+
+大型规格会分部分加载。页面先容纳前 `API_HOME_CHUNK_SIZE` 个端点，默认 150 个，该值在 `src/components/ui/api-layout/home.ts` 中设置。能完整容纳的分区保持完整。
+
+之后的每一部分都是独立页面，在读者接近末尾时获取；没有 JavaScript 时，列表末尾会有一个指向下一部分的链接。筛选框在首次聚焦时加载该版本的页面列表，因此也能找到尚未加载的页面，并最多显示 200 个匹配项。浏览器页面内查找只搜索已加载的部分。
+
+API 路由在 `/api/index/2/`、`/api/index/3/` 等位置提供后续部分；对于带版本的 API，这些路径位于该版本的 URL 下。它们像 API 的其他页面一样渲染，可以构建时生成或按请求渲染，并且带有 `noindex`，不会出现在站点地图和搜索中。该路由把 `API_HOME_CHUNK_SIZE` 作为 `homeChunkSize` 同时传给 `getApiStaticPaths`（它为每个部分生成一个页面）和 `getApiRoute`（它在按请求渲染的路由中读取该值）；如果两者不一致，构建时生成的路由会失败。不设置时，首页会在单个页面上列出每个端点。`getApiRoute` 以 `home` 返回结果：页面显示的部分，以及指向每个部分的链接。
+
+要基于整个参考构建自己的页面，可用 `@cloudflare/nimbus-docs/runtime` 的 `getApiRoot` 读取某个版本的根页面；省略 `version` 即为默认版本。它的 `index` 恰好包含每个操作和 webhook 各一次，每项都带有 `method`、`path` 和链接。`apiIndexRows(index)` 会将其展平，`chunkApiIndex(index, { size })` 会像首页那样拆分它。
+
+```astro title="src/pages/endpoints.astro"
+---
+import { apiIndexRows, getApiRoot, withBase } from "@cloudflare/nimbus-docs/runtime";
+
+const root = await getApiRoot(Astro, { collection: "api" });
+const rows = root ? apiIndexRows(root.index) : [];
+---
+
+<ul>
+  {rows.map(([method, path, label, href]) => (
+    <li><a href={withBase(href, import.meta.env.BASE_URL)}>{label}</a> <code>{method} {path}</code></li>
+  ))}
+</ul>
+```
+
+## 按请求渲染
+
+API HTML 默认预渲染。若只让 API 集合按请求渲染，请在 Nimbus 配置中添加以下策略：
+
+```ts title="astro.config.ts"
+rendering: {
+  default: "build",
+  collections: {
+    api: "request",
+  },
+},
+```
+
+然后运行 Cloudflare 适配器安装程序。它会保留已有的渲染策略。没有策略时，它会设置 `rendering: { default: "request" }`，让所有集合都按请求渲染。
+
+```sh
+npx @cloudflare/nimbus-docs add adapter-cloudflare
+yarn nimbus-docs add adapter-cloudflare
+pnpm nimbus-docs add adapter-cloudflare
+bunx @cloudflare/nimbus-docs add adapter-cloudflare
+```
+
+安装程序还会更新 API 路由文件以按请求渲染，删除 Astro 会忽略的 `getStaticPaths`。自行修改 `rendering` 后，运行 `nimbus-docs check --fix`；参见[选择构建时或按请求渲染](/reference/rendering/)。
+
+该方案中的 API catch-all 使用 Nimbus 运行时辅助函数来解析任一模式。备用 Markdown 版本和 `llms.txt` 索引也遵循渲染策略，提供构建时准备好的内容。坐标数据、搜索记录和站点地图仍属于构建产物，请求时读取准备好的内容条目，而不是解析 OpenAPI 文档。
+
+## 多版本
+
+按请求渲染的 API 会把页面数据打包进服务器。这适合大多数 API。对于非常大的规格，或需要保留许多版本的规格，在其条目上设置 `bundle: false`，这样无论添加多少版本，服务器包都能保持较小：
+
+```ts title="astro.config.ts"
+api: [
+  {
+    collection: "api",
+    versions: [/* … */],
+    bundle: false,
+  },
+],
+rendering: {
+  collections: { api: "request" },
+},
+```
+
+Nimbus 随后会把每个页面的数据作为静态资源写在站点旁边，并在版本之间共享未变化的页面。每个请求读取一个版本的索引和所请求的页面。当某个 API 打包后的页面数据超过 16 MiB 时，构建会建议使用 `bundle: false`。
+
+每次构建还会附带上一次构建的页面文件，因此滚动发布期间仍运行旧版本的服务器可以继续工作。在 Cloudflare 上，每个 Worker 版本本就保留自己的文件。
+
+页面通过 Astro live collection 读取，而 Astro 只接受来自你自己的 `src/live.config.ts` 的 live collection。请添加一次；缺失时构建会显示该片段：
+
+```ts title="src/live.config.ts"
+import { defineLiveCollection } from "astro:content";
+import { apiPagesLoader } from "@cloudflare/nimbus-docs/live";
+
+export const collections = {
+  apiPages: defineLiveCollection({ loader: apiPagesLoader() }),
+};
+```
+
+启用 Astro 的路由缓存后，每个页面会以 `nimbus-api:<collection>` 和 `nimbus-api:<collection>@<version>` 标签缓存。
+
+`bundle: false` 需要将该集合按请求渲染，并使用 Cloudflare 或 Node 适配器；否则构建会说明需要改什么。
+
+它还会收窄该 API 的发现范围。搜索、`llms.txt`、`llms-full.txt`、站点地图和 Markdown 版本只覆盖默认版本。较旧版本仍可作为带 `noindex` 的 HTML 阅读，仍会发布其规格，并保留在 API 目录中。
+
+使用 `bundle: false` 时，Nimbus 会复用你未更改的版本。在 CI 中：
+
+- 在构建前恢复整个 `.nimbus/cache/page-assets/` 目录。
+- 在生产部署成功后保存它，而不是在预览部署后保存，这样“上一次”指的就是线上发布。
+- 按项目设置缓存键，并提供一个回退键，以便添加版本时保留较早的条目。
+
+Nimbus 会检查缓存，并重建任何缺失或损坏的内容，因此请把规格保存在仓库中。升级 Nimbus 可能会重建每个版本一次。某个版本被重建时，“Prepared API pages”一行会说明原因：规格、路由、示例、Nimbus 或已安装的包发生了变化，或者此前没有任何缓存。`astro build --verbose` 会输出准备、烘焙和暂存的耗时。
+
+API 页面会显示侧边栏筛选框；按 `/` 聚焦它。
+
+- **`sidebar: "full"`** 就地筛选侧边栏，按标题和 HTTP 方法匹配。
+- **`sidebar: "on-demand"`** 首次使用时加载该版本的一个小页面列表，然后匹配标题、方法和路径。
+
+结果会停留在你正在阅读的版本中。部署期间一直打开的标签页仍可继续筛选，只要 CI 按上述方式恢复 `.nimbus/cache/page-assets/`，打包的 API 也是如此。

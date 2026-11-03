@@ -1,0 +1,138 @@
+---
+title: "路由与坐标"
+description: "区分配置 API 条目的坐标与页面 URL，选择路由约定，并了解 schema 页面、联合与坐标形状。"
+sidebar:
+  order: 3
+---
+
+Nimbus 将标识与路由分开处理。**坐标**（coordinate）在引用、跨版本匹配、锚点和坐标清单中标识一个 API 条目。**路由**（route）是其生成页面的 URL。
+
+操作使用 OpenAPI 的 `operationId` 作为坐标：
+
+```yaml
+paths:
+  /v1/events/{event_id}:
+    get:
+      operationId: retrieveEvent
+      summary: Retrieve an event
+      tags: [Events]
+```
+
+该操作的坐标是 `retrieveEvent`。没有路由策略时，它的第一个标签和操作 ID 会生成 `/api/Events/retrieveEvent`。没有 `routes` 的配置保留这些 URL，因此已有站点永远不会移动。
+
+使用方案创建的站点会获得 `resource-action-v2` 策略，它改为从 HTTP 方法和路径推导路由：
+
+```ts
+api: [
+  {
+    collection: "api",
+    spec: "./src/api/openapi.yaml",
+    requireOperationId: true,
+    routes: {
+      convention: "resource-action-v2",
+      stripPathPrefixes: ["/v1"],
+    },
+  },
+],
+```
+
+这里，Nimbus 移除 `/v1`，并在 `/api/events/retrieve` 发布该操作；其坐标仍为 `retrieveEvent`。
+
+推导会在移除前缀后识别 `/<resource>` 和 `/<resource>/{parameter}`。它把集合的 `GET`/`POST` 映射为 `list`/`create`，把成员的 `GET`/`PUT`/`PATCH`/`DELETE` 映射为 `retrieve`/`update`/`update`/`delete`。标签不影响由任一约定推导出的操作路由。其他形状或不受支持的方法/形状组合通常会回退为规范化坐标并给出构建警告；如果该坐标无法产生非空路由，构建会失败。
+
+标签页面也遵循该约定。`resource-action-v2` 会将它们转为小写，因此 `User Management` 位于 `/api/tags/user-management`。较早的 `resource-action-v1` 保留标签的大小写：`/api/tags/User-Management`。两种约定下标签的坐标（例如 `tags.Locations`）相同。
+
+在 `resource-action-v2` 下，`sections: "hierarchical"` 改为在标签层级的路径提供标签页面。标签的父级来自 `tag.parent` 或 `x-tagGroups`；`zero-trust` 下名为 `zero-trust-devices` 的标签会去掉父级前缀，因此它位于 `/api/zero-trust/devices/`。本身不是标签的 `x-tagGroups` 分类没有页面，也不添加路径段。坐标和操作 URL 不变。页面路径的第一段不能是 Nimbus 为自己页面保留的名称：`tags`、`schemas`、`webhooks`、`errors`、`changelog` 和 `index`；更深的段不受限制，因此 `zones/schemas/` 是可以的。`tagSegments` 可在任一设置下替换某个标签的路径段，这也是与保留段同名的标签获得 URL 的方式：
+
+```ts
+routes: {
+  convention: "resource-action-v2",
+  sections: "hierarchical",
+  tagSegments: { tags: "tagging" },
+},
+```
+
+约定一经发布就永不改变；新的路由以新名称发布。
+
+按精确可用 `operationId` 键控的显式操作覆盖优先，可以保留现有 URL，或处理无法推导的路径：
+
+```ts
+routes: {
+  convention: "resource-action-v2",
+  operations: {
+    retrieveEvent: "events/get",
+  },
+},
+```
+
+没有可用的 `operationId` 时，Nimbus 会根据方法和路径推导回退坐标。`requireOperationId: true` 会拒绝该回退，但更改现有操作 ID 仍会更改坐标。Webhook 始终使用其映射键作为坐标，并发布在 `webhooks/<key>` 之下；为 webhook 配置操作覆盖会导致构建失败。
+
+重命名坐标需要更新引用，并影响跨版本匹配。只更改路由不会破坏基于坐标的引用，但会破坏指向旧 URL 的直接链接。Nimbus 不会自动创建该重定向；请在 Astro 或部署平台上添加。
+
+### 切换约定
+
+从 `resource-action-v1` 迁移到 `resource-action-v2` 只会改变标签页面 URL。为原本没有 `routes` 的集合添加 `routes` 也会改变操作 URL。引用仍可工作，因为它们引用的是坐标；但请为旧 URL 添加重定向。
+
+家族中的每个版本可以使用不同的约定；版本选择器仍按坐标配对页面。
+
+### 坐标形状
+
+操作不是唯一可寻址的条目。Nimbus 会为页面及页面内的细节分配坐标：
+
+| API 条目 | 坐标示例 |
+| --- | --- |
+| API 根 | `api` |
+| 标签 | `tags.Events` |
+| 操作 | `retrieveEvent` |
+| 请求体字段 | `retrieveEvent.name` |
+| 参数 | `retrieveEvent.path.event_id` |
+| 响应 | `retrieveEvent.response.200` |
+| 其他媒体类型中的响应字段 | `retrieveEvent.response.200.text-csv.id` |
+| Schema（开启 [schema 页面](#schema-pages)时） | `Event` |
+| Schema 字段（开启 schema 页面时） | `Event.created_at` |
+| Webhook | `delivery.succeeded` |
+
+请求字段列表会省略 `readOnly` 属性，响应字段列表会省略 `writeOnly` 属性，因此这些字段在那里没有坐标。Webhook 的载荷遵循响应规则。
+
+请在响应中引用 `readOnly` 字段，也就是它出现的位置。在请求下引用它会导致构建失败，并指出对应的响应字段。
+
+使用 `/nimbus-api/coordinates.json` 查看构建后的站点发布的确切坐标和解析后的 URL。
+
+## Schema 页面
+
+默认情况下，类型只以内联形式显示在使用它们的操作上：请求和响应字段，以及每个联合变体下预览的属性，都来自 `components/schemas`，但 schema 不会获得自己的页面。在大型 API 中，schema 页面会多于操作页面。
+
+要为每个 schema 在 `/api/schemas/<Name>` 发布页面，请设置 `schemaPages: true`：
+
+```ts title="astro.config.ts"
+api: [
+  {
+    collection: "api",
+    spec: "./src/api/openapi.yaml",
+    schemaPages: true,
+  },
+],
+```
+
+每个 schema 随后还会获得：
+
+- Markdown 版本和 OG 图片；
+- 站点地图、搜索和 `llms.txt` 条目；
+- schema 及其字段的坐标，用于引用和 `coordinates.json`。
+
+联合变体、判别器映射和 `map<Name>` 值类型等类型名称会链接到其 schema 页面；没有这些页面时，它们渲染为文本。
+
+关闭 schema 页面时，内容中指向 schema 或 schema 字段的 `api.ref:` 引用会导致构建失败，并指出该设置。请改为引用使用该类型的操作。无论哪种情况，schema 名称都占据其 `schemas/<Name>` 路由，因此开启 schema 页面不会与操作冲突。该设置作用于家族的所有版本。
+
+## 联合
+
+`oneOf`/`anyOf` 在声明处展开，内联分支会按规格嵌套的深度继续展开：
+
+- 本身是联合的分支把其分支作为 `union` 携带。具名联合在操作页面上展开一级：其分支中的具名联合仍是一个标签。
+- 本身是具名 schema 的分支以其键（`label`，也是 `name`）标记，并在声明了 `title` 时携带 schema 的 `title`；起始模板的联合浏览器显示 `title ?? label`。存在 schema 页面时，它链接到该页面；在操作页面上，它会预览 schema 的属性（包括嵌套对象）：其中的联合会显示其分支，具名联合显示为标签，内联联合显示其字段。预览内容都不设锚点：schema 的字段及其中的分支属于它自己的页面，因此不带 `anchor`。组件渲染 `id={field.anchor}`，无需自己的规则。
+- 内联声明且没有 `$ref` 的分支以其从 1 开始的位置寻址：`source` 字段的第二个分支是 `source.2`，其 `iban` 属性是 `source.2.iban`。其字段始终展开，在页面上设锚点，并且可以被引用。位置遵循文档顺序，因此插入一个分支会重新编号其后的分支。
+- 已在上面展开的分支仍保持为标签，因此自引用 schema 会在第一次重复处停止。
+
+Markdown 版本把嵌套分支打印为嵌套列表，并打印内联分支的字段；具名分支仍保持为标签或链接，即使它本身是联合，在关闭 schema 页面时也是如此。
+
+深度没有限制。字段列表在 25,000 个字段处停止，远超任何测量过的规格，构建随后会发出警告，指出被截断列表所属的操作或 schema。页面显示截断之前的字段。

@@ -1,0 +1,45 @@
+---
+title: "Dialog"
+description: "基于原生 dialog 元素的模态框，自动处理滚动锁定与点击遮罩关闭。"
+sidebar:
+  order: 13
+---
+
+Dialog 基于原生的 `<dialog>` 元素构建：焦点被困在模态框内，打开时锁定页面滚动，按 Escape 或点击遮罩即可关闭。
+
+## 安装
+
+```bash
+nimbus-docs add dialog
+```
+
+源码位于 `src/components/ui/dialog/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `id` | string | — | 否 | 用于通过 `document.getElementById(id).showModal()` 打开模态框。 |
+
+## 示例
+
+`Dialog` 是外壳，`DialogContent` 是居中、限高且可滚动的内框，`DialogClose` 是关闭按钮：
+
+```mdx
+<Dialog id="confirm">
+  <DialogContent>
+    <p>确定要删除这个页面吗？</p>
+    <DialogClose>取消</DialogClose>
+  </DialogContent>
+</Dialog>
+```
+
+打开时调用原生的 `showModal()`：
+
+```ts
+document.getElementById("confirm")?.showModal();
+```
+
+`DialogContent` 默认高度上限为 `70vh`，内容更长时在内部滚动；需要更宽或更高时，通过 `class` 覆盖即可。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

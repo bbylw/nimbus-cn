@@ -1,0 +1,72 @@
+---
+title: "脚手架选项"
+description: "create-nimbus-docs 的交互式提问、命令行标志与生成结果。"
+sidebar:
+  order: 5
+---
+
+`create-nimbus-docs` 会搭好带布局、组件、内容 schema、搜索、sitemap、分享卡片以及每页 Markdown 版本的项目。想要有引导的首次体验，请跟随[快速开始](/quickstart/)；本页列出全部选项。
+
+## 要求 {#requirements}
+
+- **Node** 22.12 或更高版本
+- **一个包管理器**——npm、pnpm、yarn 或 bun
+- **Git**——用于生成最后更新日期，它来自提交历史
+
+## 脚手架 {#scaffold}
+
+```sh
+npm create @cloudflare/nimbus-docs@latest
+yarn create @cloudflare/nimbus-docs
+pnpm create @cloudflare/nimbus-docs@latest
+bun create @cloudflare/nimbus-docs@latest
+```
+
+脚手架会询问：
+
+1. **目录**
+
+   项目创建位置；按 Enter 使用 `my-docs`。把它作为第一个参数传入，例如 `my-docs`，或用 `.` 表示当前文件夹。该文件夹必须是新建的、空的，或只包含 `.git`，例如刚克隆的仓库。
+2. **站点包含什么**
+
+   **Docs**，手写页面（默认）；**Docs 与 API 参考**，文档位于 `/`，由 OpenAPI 规范生成的参考位于 `/api`；或 **API 参考**，整站只有位于 `/` 的参考。标志：`--api` 添加参考，`--template api` 让参考成为整站内容。
+3. **OpenAPI 规范**
+
+   站点包含 API 参考时才会询问：OpenAPI 3.x 规范（`.yaml`、`.yml` 或 `.json`）的路径，或按 Enter 使用稍后替换的示例。标志：`--api <path>`。
+4. **起始内容**
+
+   **入门指南 + 示例页面**，或 **空**，只有供你自己内容使用的骨架。只有 API 参考的站点会跳过此问题并拒绝该标志。标志：`--content starter|empty`。
+5. **包管理器**
+
+   npm、pnpm、yarn 或 bun；默认是运行脚手架的那个。除非传入 `--skip-install`，否则它会用你的选择安装依赖。标志：`--package-manager <pm>`。
+6. **Git**
+
+   是否初始化仓库并创建首次提交。在已有仓库内它两者都不做。标志：`--git` 或 `--no-git`。
+7. **输出模式**
+
+   **Static** 会预渲染每个内容集合路由，可部署到任何地方。**Server** 按请求渲染文档页面。之后可以单独覆盖某个集合。标志：`--deploy` 选择静态，`--adapter` 选择服务端。
+8. **部署目标或适配器**
+
+   静态输出会询问部署目标：Cloudflare 或其他静态主机（标志：`--deploy cloudflare|other`）。服务端输出来提供 Cloudflare；`--adapter` 标志还接受 `vercel`、`netlify` 与 `node`。
+
+传入 `--yes` 接受所有默认值，或传入 `--help` 列出全部标志。
+
+在没有终端的环境中（例如 CI 或智能体），请为每个问题传入 `--yes` 或对应标志；否则脚手架会退出并列出仍缺少的标志。未知或冲突的标志会在写入任何内容之前中止。
+
+如果安装依赖失败，脚手架会保留项目，打印完成配置所需的命令，然后以状态码 1 退出。如果想从本地文件夹而不是下载模板来创建项目（例如离线开发模板时），请传入 `--template-dir <path>`。
+
+使用 npm 时，请在参数前加上 `--`，否则 npm 会把标志留给自己：
+
+```sh
+npm create @cloudflare/nimbus-docs@latest -- my-docs --yes
+npm create @cloudflare/nimbus-docs@latest -- my-docs --api ./openapi.yaml   # docs + API 参考
+npm create @cloudflare/nimbus-docs@latest -- my-docs --template api         # 只有 API 参考
+```
+
+把目录放在 `--api` 之前：标志之后的值会被当作规范路径。
+
+## 仓库中会生成什么 {#what-lands-in-your-repo}
+
+脚手架写入的每个文件及其用途，参见[项目结构](/project-structure/)。
+
+要运行、构建并发布站点，参见[快速开始](/quickstart/)与[部署](/deploy/cloudflare/)。

@@ -1,0 +1,39 @@
+---
+title: "Collapsible"
+description: "单个折叠面板，用触发按钮切换带动画的内容区。"
+sidebar:
+  order: 11
+---
+
+Collapsible 是最小的显示／隐藏原语：一个触发按钮，一个展开时带动画出现的内容区。`Accordion` 与侧边栏分组都用它搭建。
+
+## 安装
+
+```bash
+nimbus-docs add collapsible
+```
+
+源码位于 `src/components/ui/collapsible/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `open` | boolean | `false` | 否 | 默认展开。 |
+
+## 示例
+
+三个部件组合使用：`Collapsible` 包住整体，`CollapsibleTrigger` 是切换按钮，`CollapsibleContent` 是内容面板。
+
+```mdx
+<Collapsible>
+  <CollapsibleTrigger>高级设置</CollapsibleTrigger>
+  <CollapsibleContent>
+    这里放展开后的内容。
+  </CollapsibleContent>
+</Collapsible>
+```
+
+面板用 `grid-template-rows` 从 `0fr` 过渡到 `1fr`，高度变化平滑；收起时内容会被标记为 `inert`，不会被键盘聚焦。给 `Collapsible` 加 `open` 可以让它初始展开。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

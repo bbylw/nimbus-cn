@@ -1,0 +1,80 @@
+---
+title: "页面与路由"
+description: "页面文件放在哪里，以及它对应的 URL 和侧边栏条目。"
+sidebar:
+  order: 1
+---
+
+页面是 `src/content/docs/` 下的 `.md` 或 `.mdx` 文件。它在磁盘上的路径就是它的 URL，也是它在[侧边栏](/navigation/sidebar/)中的位置——没有单独的路由或导航配置。
+
+## 文件到 URL
+
+| 文件 | URL |
+|---|---|
+| `src/content/docs/guides/install.mdx` | `/guides/install/` |
+| `src/content/docs/guides/styling.mdx` | `/guides/styling/` |
+| `src/content/docs/guides/index.mdx` | `/guides/` |
+
+在 Astro 默认的 `trailingSlash` 和 `build.format` 下，URL 以斜杠结尾；见[链接与结尾斜杠](/reference/configuration/#links-and-trailing-slashes)。Slug 会转为小写，文件夹的 `index` 文件会折叠为目录 URL。目录的 `index.mdx` 会成为该分区的落地页。
+
+```
+src/content/docs/
+├── introduction.mdx
+└── guides/
+    ├── index.mdx
+    └── styling.mdx
+```
+
+## 自定义 Astro 路由
+
+`src/pages/` 下添加的文件使用 Astro 的原生路由与渲染语义。在服务端输出项目中，页面或端点默认按请求渲染；想显式声明这一选择时，设置 Astro 的 `prerender` 导出：
+
+```astro title="src/pages/status.astro"
+---
+export const prerender = false;
+---
+
+<h1>Service status</h1>
+```
+
+```ts title="src/pages/api/ping.ts"
+export const prerender = false;
+
+export function GET() {
+  return new Response("pong");
+}
+```
+
+使用 `export const prerender = true` 可让自定义路由在构建时输出为静态产物。无需注册 Nimbus 路由或加入允许列表。
+
+这条边界不只适用于 `prerender`。动态段、端点方法、重定向与响应，以及其他原生 Astro 路由行为仍由路由自身控制。只有当某个路由声明了与已配置的常规内容路由、包注入的基础设施、已启用的功能或已发布内容条目完全相同的模式时，Nimbus 才会介入。
+
+Nimbus 的 `rendering` 配置控制它管理的路由：每个集合的兜底路由，以及脚手架生成的、调用 Nimbus 工厂的 `llms.txt` 与 Markdown 路由。这些文件由你编辑，但渲染方式由 `rendering` 决定；`nimbus-docs check --fix` 会让二者保持一致。`src/pages/` 下的其他文件（例如 Open Graph 图片和 `robots.txt`）与其他路由一样，使用 Astro 的原生渲染行为。
+
+## 页面模式
+
+默认所有页面都在 `DocsLayout` 中渲染：侧边栏、目录、面包屑、上一页/下一页。用 `mode` 让页面跳过全部外壳：
+
+```yaml
+---
+title: Welcome
+mode: custom
+---
+```
+
+`mode: custom` 用于落地页和自定义布局。按列开关（`sidebar: false`、`tableOfContents: false`）可以只关闭单个部分，而不必完全自定义——见[布局](/styling/layouts/)。
+
+## 草稿
+
+`draft: true` 让页面不进入生产构建和 `llms.txt` 索引，但在 `astro dev` 下仍会渲染（视为 `noindex`）。适合进行中的内容。
+
+```yaml
+---
+title: Experimental feature
+draft: true
+---
+```
+
+## 集合
+
+`src/content/docs/` 是主集合，挂在站点根路径。要添加其他集合（例如博客），见[集合](/writing/collections/)。路由与 URL 辅助函数见[包 API](/styling/package-api/#urls)。

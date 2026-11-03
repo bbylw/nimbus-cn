@@ -1,0 +1,42 @@
+---
+title: "Search"
+description: "基于 Pagefind 的站内搜索对话框，支持键盘快捷键与无结果提示。"
+sidebar:
+  order: 26
+---
+
+Search 渲染站内搜索对话框，默认由 Pagefind 提供全文检索：构建时生成静态索引，不需要后端。对话框支持键盘操作，没有匹配结果时会给出提示。
+
+## 安装
+
+```bash
+nimbus-docs add search
+```
+
+源码位于 `src/components/ui/search/`。安装时会一并带上注册表依赖：`dialog`、`cn`，并引入 `pagefind` 依赖。
+
+## 属性
+
+Search 没有公开属性。对话框与触发按钮是两个部件：`SearchDialog` 负责浮层，`SearchTrigger` 负责页头的入口。
+
+## 用法
+
+在基础布局中渲染一次对话框：
+
+```astro title="src/layouts/BaseLayout.astro"
+import { SearchDialog } from "@/components/ui/search";
+
+<SearchDialog />
+```
+
+搜索入口放在页头，按钮上显示 `Ctrl K`，macOS 上显示 `⌘ K`：
+
+```astro
+import SearchTrigger from "@/components/ui/search/SearchTrigger.astro";
+
+<SearchTrigger />
+```
+
+打开后 `↑` `↓` 选择结果、`Enter` 跳转、`Esc` 关闭。索引范围与替换后端的方式见[搜索](/navigation/search/)。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

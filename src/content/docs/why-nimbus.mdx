@@ -1,0 +1,169 @@
+---
+title: "为什么选择 Nimbus"
+description: "Nimbus 的设计原则：你拥有全部代码，内容、交互与扩展都留在自己的仓库里，并同时面向人与智能体。"
+---
+
+## 你拥有全部代码
+
+布局、组件、内容、样式——站点上每一块可见的部分都在你的仓库里。脚手架把它们写入一次便退场。此后项目属于你：编辑任何文件、重组任何目录、更改任何默认值。没有需要等待的上游 API，也没有需要绕开的固定主题。
+
+编码智能体和你以同样的方式工作。当重要逻辑不藏在导入边界之后时，智能体对整个仓库的推理会好得多。
+
+参见[项目结构](/project-structure/)，它标出了每个文件。
+
+## 交互内容完全属于你
+
+值得阅读的文档常常需要*展示*机制——请求如何流转、状态如何嵌套、线缆在哪里接入。你要么采用预置样式的组件库并继承它的外观，要么从头构建交互部分。Nimbus 把这个问题拆开。
+
+`nimbus-docs/react` 提供一个无头 `<Diagram>` 封装和可组合的 hooks——`usePhase`、`useMeasure`、`useTabIndicator`、`useDiagram`。封装负责那些难以做对的部分：离屏暂停、尊重减少动画偏好、键盘快捷键、错误边界和跨岛协调。它本身不渲染任何可见内容。
+
+最小而有意义的示例——一个两步图表及其代码——见[图表与交互内容](/writing/interactive-content/)。
+
+操作栏、标签页和播放/暂停控件按需安装到 `src/components/react/diagram/`——可自由编辑、改样式或替换，hooks 仍会正常工作。从不编写交互卡片的站点不会为此付出任何代价。
+
+## 人与智能体优先
+
+文档不再只由人阅读，因此每个 Nimbus 站点都会在 HTML 之外附带若干机器可读格式：
+
+- 每个页面的 Markdown 版本，位于 `/<slug>/index.md`
+- 站点级索引 `/llms.txt`，列出每个页面
+- 每个页面 head 中的 JSON-LD，为搜索和智能体工具提供足够的结构化数据，让它们识别自己看到的内容
+
+```text
+# Nimbus 中文文档
+
+A way to build documentation sites on top of Astro.
+
+## Pages
+- [Quickstart](https://nimbus.ndjp.net/quickstart/index.md)
+- [Why Nimbus](https://nimbus.ndjp.net/why-nimbus/index.md)
+- [CLI](https://nimbus.ndjp.net/cli/index.md)
+```
+
+这些格式是默认能力，而不是附加项。在智能体网络上成为一个死胡同，代价真实，而且还在增长。
+
+## 智能体化写作
+
+你用 `nimbus-docs add` 添加组件和功能：
+
+- **组件和工具**以文件形式复制到你的仓库，连同它们的依赖。
+- **功能**是配方：一段 Markdown，由你的编码智能体阅读、适配你的项目并应用。
+
+```sh
+npx @cloudflare/nimbus-docs add 404-page
+yarn nimbus-docs add 404-page
+pnpm nimbus-docs add 404-page
+bunx @cloudflare/nimbus-docs add 404-page
+```
+
+两种模式的分界只有一个关键问题：哪类改动真的需要编码智能体介入，哪类更适合直接复制文件。
+
+## 写作质量是一等公民
+
+一个内容质量不断下滑的文档站会损害它自己的产品。Nimbus 对待写作质量，就像代码 linter 对待源码：一组分层校验器，每层捕获不同类别的错误。
+
+构建前校验器自动运行，只有当问题确实会破坏站点时才拦截构建：
+
+- **配置校验**——`defineConfig` 会检查结构和必填字段；错误会把有问题的值回显给你
+- **frontmatter schema 校验**——按集合用 Zod 类型 schema 捕获缺失或格式错误的字段，并提供编辑器友好的报错
+- **MDX 组件校验**——构建前的内容扫描会捕获小写用法、未注册组件和缺失的 import
+- **注册表校验**——构建时解析 `src/components.ts`，与实际 MDX 用法比对
+
+lint 引擎增加一层按需的写作质量检查。规则有稳定的标识符，如 `nimbus/single-h1` 和 `nimbus/bare-url`，在 `astro.config.ts` 中与其他 Nimbus 集成配置一同设置。运行 `nimbus-docs lint` 获得人类可读的输出，`--format json` 获得智能体可读的诊断，`--fix` 应用自动修复。构建从不因 lint 结果被拦截——草稿仍会渲染，警告会明确提示但不阻塞。
+
+```ts title="astro.config.ts" {6-9}
+import { defineConfig } from "astro/config";
+
+export default defineConfig({
+  integrations: [
+    nimbus(nimbusConfig, {
+      rules: {
+        "nimbus/single-h1": "error",
+        "nimbus/bare-url": "warn",
+      },
+    }),
+  ],
+});
+```
+
+## 可读只是底线
+
+每个 Nimbus 站点都已附带智能体读取的格式——每个页面的 Markdown 版本、`llms.txt` 索引和 head 中的结构化数据。一年前这还能让一个文档工具与众不同；今天这只是入场条件。有意思的界线在更远处。
+
+*所有工具都让文档变得可被智能体读取。Nimbus 让文档可被它们写入、维护和操作——端到端，基于你完全拥有的代码库。*
+
+这依赖本页的第一条原则。当每个文件都在你的仓库里，智能体就能安全地修改文档，而不只是读取，因为它能看到自己触碰的一切。智能体可以抓取供应商的主题运行时，但无法重写它。
+
+这就是功能以配方形式交付的原因。当 `nimbus-docs add` 在编码智能体内运行时，它交接一份配方：检查功能是否已存在、探索项目、确认计划、应用它，并*验证构建仍然通过*。你的智能体从头到尾负责这次安装。
+
+```sh
+# 在编码智能体内，配方直接流入
+npx @cloudflare/nimbus-docs add new-version
+yarn nimbus-docs add new-version
+pnpm nimbus-docs add new-version
+bunx @cloudflare/nimbus-docs add new-version
+```
+```sh
+# 在人类终端中，交给任意智能体
+npx @cloudflare/nimbus-docs add new-version --print | claude
+yarn nimbus-docs add new-version --print | claude
+pnpm nimbus-docs add new-version --print | claude
+bunx @cloudflare/nimbus-docs add new-version --print | claude
+```
+
+## 来源信息是一等能力
+
+当智能体开始起草页面时，问题就不再是*机器能否读取它*，而是*这是谁写的，有没有人检查过*。因为你拥有内容集合，答案就在你控制的 schema 里——来源信息只差几个 `schemaFields`，而不需要额外附加约定。
+
+起始模板附带一个这样的字段。页面被假定也为智能体而写，因此 `audience: "human"` 标记一个主要为人编写的页面。
+
+用同样的方式添加更多字段。本站为智能体起草且无人审阅的页面添加了 `aiGenerated`，并在有人确认之前显示“待审阅”标签：
+
+```ts title="src/content.config.ts"
+import { z } from "astro/zod";
+
+docsCollection({
+  schemaFields: {
+    audience: z.literal("human").optional(),
+    aiGenerated: z.boolean().optional(), // 在清除前显示“待审阅”
+  },
+})
+```
+
+字段注册后，每个页面的来源与审阅状态会随页面本身一起流动：
+
+```yaml title="src/content/docs/new-endpoint.mdx"
+---
+title: New endpoint
+aiGenerated: true   # 由智能体起草——人工确认前显示“待审阅”
+---
+```
+
+只有当偏差被捕获时，来源信息才有价值。lint 引擎输出带版本号的 JSON，携带字符级精确的修复，`--fix` 会就地应用；脚手架生成的 `AGENT.md` 附带一份审计配方，采用固定的诊断格式——因此智能体可以扫描整个站点，并以其他工具可解析的形式报告：
+
+```text
+- [error] src/content/docs/cli.mdx:42 — broken internal link "/instal" — did you mean "/quickstart"?
+- [warn]  src/content/docs/registry.mdx:8 — link text "here" isn't meaningful out of context.
+Summary: 1 error, 1 warning.
+```
+
+文档于是成为智能体可以长期保持正确的东西——被维护、可操作，而不只是被发布——而且是在属于你而非供应商的仓库上。
+
+## 目录树即事实
+
+没有第二份配置需要与内容保持同步。`src/content/` 下的文件夹既是 URL，也是侧边栏：移动文件，其条目随之移动；删除文件，条目随之消失。frontmatter 处理细节，例如顺序、徽章和草稿。
+
+结果是页面存在与否只有一个事实来源。站点不会偏离自己的内容，因为它的内容就是站点。
+
+## 版本就是集合
+
+大多数文档工具把版本管理当作特例附加——并行文件系统、URL 重写、自定义路由。Nimbus 用它已有的原语实现：多集合内容。
+
+每个版本是独立的内容集合，使用相同的 schema。`docs-v2/` 集合就是一个 v2 站点；`docs-v3/` 集合就是 v3。路由和侧边栏各自独立地识别每个版本。版本选择器只是薄薄的一层。
+
+- src/content/
+  - docs/
+  - docs-v2/
+  - docs-v3/
+
+同一原语也处理按产品拆分（`docs-api/` 集合可与 `docs-cli/` 并存）。当你需要版本时，所需的大部分已经具备；在此之前你不必为它付出成本。

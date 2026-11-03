@@ -1,0 +1,40 @@
+---
+title: "定制的工作方式"
+description: "了解你自己的文件与框架文件的分层关系、逐级定制策略，以及如何跟进上游更新。"
+sidebar:
+  order: 1
+---
+
+Nimbus 站点分为两层。在修改组件或布局之前先读本节，以了解升级会改动什么、不会改动什么。
+
+## 你的文件与框架的文件
+
+脚手架写入仓库的所有内容都归你所有：组件、布局、路由、样式和内容。你可以随意修改。没有任何东西会覆盖你的文件：升级包时不会碰它们，上游对这些文件的改动会以 diff 的形式提供，由你决定是否采纳。[项目结构](/project-structure/)标明了每个文件的位置，以及框架部分从何处开始。
+
+`@cloudflare/nimbus-docs` 包的导出是稳定契约，遵循 semver 版本管理：破坏性变更会附带迁移，由 `nimbus-docs migrate` 应用或说明。[包 API](/styling/package-api/)列出了你的文件所调用的辅助函数。
+
+## 定制阶梯
+
+在能完成目标的最低一层进行定制，因为每往上一层，需要你自己维护的代码就更多：
+
+1. **配置。** `astro.config.ts` 中的选项，例如侧边栏、搜索和渲染。参见[配置](/reference/configuration/)。
+2. **令牌。** `src/styles/globals.css` 中的颜色、字体和间距。参见[主题与令牌](/styling/theme-and-tokens/)。
+3. **来自注册表的组件。** 用 `nimbus-docs add` 安装；它们会以你拥有的文件形式落地。参见[添加组件与功能](/styling/add-components/)。
+4. **编辑文件。** 直接修改组件、布局或路由。
+5. **你自己的组件。** 编写新组件并在 MDX 中使用。参见[自定义组件](/styling/custom-components/)。
+
+## 保持更新
+
+上游对你拥有的文件的改动会以需要你审阅的变更形式送达：
+
+| 命令 | 作用 |
+| --- | --- |
+| `nimbus-docs outdated` | 列出上游发生变化的起始模板文件、注册表组件和包 API 相关工作。`--to <templates-vX.Y.Z>` 可与指定版本对比。 |
+| `nimbus-docs diff <file>` | 将某个起始模板文件的上游改动与你的版本并排展示。若你未编辑该文件，`--apply` 可直接采纳。 |
+| `nimbus-docs add <slug> --overwrite` | 重新安装注册表组件，替换你编辑过的组件前会先询问。 |
+| `nimbus-docs migrate` | 应用包 API 迁移，并列出新版本的升级审阅项。 |
+| `nimbus-docs init` | 为尚无 `nimbus.json` 的项目写入该文件，让上述命令知道起点。 |
+
+`outdated` 和 `diff` 会从 GitHub 下载起始模板。如果 GitHub 对你限流，请将 `GIGET_AUTH` 设为 GitHub token；参见[故障排查](/publish/troubleshooting/#github-rate-limited-the-template-download-http-403)。
+
+[升级 Nimbus](/publish/upgrading/)按发布顺序组织这些操作。

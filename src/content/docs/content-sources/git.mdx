@@ -1,0 +1,234 @@
+---
+title: "Git 与其他来源"
+description: "在构建时从其他 Git 仓库检出内容、声明 source、处理私有仓库与多仓库站点。"
+sidebar:
+  order: 1
+---
+
+拥有多个仓库的产品会把文档放在代码旁边：SDK 的指南放在 SDK 仓库里，API 的规范与 API 在一起。Nimbus 可以在不复制任何文件的情况下，用它们构建站点的一部分。先从 CLI 开始，它会把针对你所命名来源的指南交给你的编码智能体：
+
+```sh
+npx @cloudflare/nimbus-docs add source github --print | claude
+yarn nimbus-docs add source github --print | claude
+pnpm nimbus-docs add source github --print | claude
+bunx @cloudflare/nimbus-docs add source github --print | claude
+```
+
+| `add source …` | 添加的内容 |
+| --- | --- |
+| `git`，或 `github`、`gitlab`、`bitbucket` | 来自另一个 Git 仓库的页面，在构建时检出（即本页） |
+| `notion` | 来自 Notion 数据库的页面，通过你的智能体写入站点的 loader 实现（[来自 Notion 的内容](/content-sources/notion/)） |
+| 一个 URL | 针对任何其他提供方编写 loader 的指南，从其文档开始 |
+
+只写 `add source` 会列出这些选项。
+
+## 声明 Git 来源 {#declare-a-git-source}
+
+**内容来源**是 Nimbus 在内容同步之前检出的 Git 仓库。在 Nimbus 配置中声明一次：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  site: "https://docs.example.com",
+  title: "Acme",
+  sources: {
+    sdk: {
+      repo: "https://github.com/acme/sdk.git",
+      ref: process.env.SDK_DOCS_REF ?? "4f2c1e9a0b3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f",
+      path: "docs",
+      editPattern: "https://github.com/acme/sdk/edit/main/{path}",
+    },
+  },
+});
+```
+
+| 键 | 说明 |
+| --- | --- |
+| `repo` | 任何 `git clone` 接受的值：`https` 或 `ssh` URL，或本地路径（相对于项目根目录）。绝不能包含凭据；参见下文[私有仓库](#private-repositories)。 |
+| `ref` | 40 个字符的 commit，或分支名、标签名。 |
+| `path` | 要检出的文件夹，相对于仓库根目录。`""` 表示整个仓库。它之外的内容不会被获取。 |
+| `editPattern` | 该来源页面的可选编辑链接。参见下文[编辑链接](#edit-links)。 |
+
+名称（`sdk`）由小写字母、数字与短横线组成。
+
+然后为每个挂载点注册一个集合。`base` 是来源 `path` 内的文件夹（默认：整个 `path`）：
+
+```ts title="src/content.config.ts"
+export const collections = {
+  docs: defineCollection(docsCollection()),
+  "sdk-guides": defineCollection(docsCollection({ source: "sdk", base: "guides" })),
+  "sdk-reference": defineCollection(docsCollection({ source: "sdk", base: "reference" })),
+};
+```
+
+和任何集合一样，每个集合都需要一个路由文件与一条侧边栏条目；`nimbus-docs add new-collection --print` 会打印两者的步骤。一个来源可以从一次检出为任意数量的集合提供内容。
+
+- **侧边栏。** 未设置 `sidebar.items` 时，侧边栏只显示 `docs`。一旦添加 `sidebar.items`，也要在其中列出 `docs`，因为该列表会替换默认结构。
+- **落地页。** 集合自己的 URL（例如 `/sdk-guides/`）就是它的 `index.md`。没有它时，分区标签会链接到不存在的页面。
+
+## 为 GitHub 编写的文档 {#docs-written-for-github}
+
+仓库的文档文件夹通常可以按原样使用：
+
+- **标题。** frontmatter 中没有 `title` 的页面会取第一个标题（`## Promise API`），否则取文件名。该标题仍会显示在页面标题之下。
+- **页面之间的链接。** 指向集合内另一页的相对链接（例如 `2-options.md#signal`）会变成该页面在站点上的 URL。指向集合未发布文件的相对链接（例如 `../readme.md`）保持原样，构建会发出警告，以便你把它指向某个页面或完整 URL。
+- **Lint。** `nimbus-docs lint` 读取 `.mdx` 文件；它会说明因此漏掉了多少 `.md` 页面。
+
+这些页面与本地页面在所有方面都一样：提示块、组件（包括在页面旁边导入的组件）、图片、`api.ref:` 引用、链接检查、冲突检查、MDX 校验、Markdown 版本、`llms.txt` 与搜索。两个条目解析到同一个 URL 会让构建失败，无论它们来自哪个集合。
+
+## 构建时会发生什么 {#what-happens-at-build-time}
+
+每个来源都会解析为一份**快照**：`path` 在某个 commit 上的稀疏、无历史检出，位于 `.nimbus/sources/` 下，并移除了 `.git` 文件夹。构建日志会写明来源与 commit：
+
+```text
+nimbus: source "sdk" (https://github.com/acme/sdk.git @ 4f2c1e9…): fetched commit 4f2c1e9a0b3d.
+```
+
+`.nimbus/` 会被 git 忽略（对用 `nimbus-docs init` 接入的站点，请把它加入 `.gitignore`）。快照属于创建它的仓库、ref 与路径；运行中的开发服务器或构建会一直保留它读取的那份直到退出，之后的构建会清理没有任何内容读取或声明的快照。
+
+来自来源的页面没有自己的 git 历史，因此除非 frontmatter 设置了 `lastUpdated`，它们不会得到最后更新日期。
+
+## 固定 commit，或跟随分支 {#pin-a-commit-or-follow-a-branch}
+
+**commit** 只获取一次，之后复用且不再发起网络请求。固定来源的站点每次都会构建出相同的页面，且可离线构建。这是推荐的目标。
+
+**分支或标签**会在每次构建时通过一次 `git ls-remote` 解析，因此页面可能在两次构建之间变化；`nimbus-docs check` 会把它报告为 `nimbus/source-floating-ref`。
+
+无法访问远端时，分支会用其上一份快照构建，并给出指明该 commit 的警告。以下情况则会失败：
+
+- 来源的 `path` 或 `ref` 自该快照以来发生了变化；
+- 从未获取过的固定 commit；
+- 该 commit 上不存在的 `path`。
+
+像上面那样对 ref 使用模板，可以让预览构建任意 commit，而生产环境保持固定；`check` 会通过回退值读取模板化的 ref。
+
+## 私有仓库 {#private-repositories}
+
+Nimbus 从不接收凭据。`repo` 中带有 token 或密码（`https://<token>@github.com/…`、`https://user:<token>@…`）会在 git 运行前导致配置校验失败，消息中会把 URL 显示为 `https://***@…`。请改为把凭据交给 git：
+
+- **本地：** git 的凭据助手，或 SSH 远端（`git@github.com:acme/sdk.git`），本身就可以工作。
+- **CI：** 通过环境变量设置 git 的 `extraHeader`，这也是 `actions/checkout` 的认证方式：
+
+  ```yaml
+  env:
+    GIT_CONFIG_COUNT: "1"
+    GIT_CONFIG_KEY_0: http.https://github.com/.extraHeader
+    GIT_CONFIG_VALUE_0: "Authorization: Basic ${{ secrets.SDK_DOCS_BASIC_AUTH }}"
+  ```
+
+  该 secret 在 GitHub 上是 `x-access-token:<token>` 的 base64，在 GitLab 上是 `gitlab-ci-token:<token>`，在 Bitbucket 上是 `x-token-auth:<access token>`。
+
+git 运行时不使用终端提示，因此缺少凭据会立刻以 git 自己的错误失败，而不是等待超时。
+
+> **来源就是受信任的代码**
+>
+> 来自来源的 MDX 会在构建时像本地 MDX 一样运行：它可以导入模块并渲染组件。对你不控制的仓库请固定 commit；分支会运行任何能向该仓库合并的人的推送内容。
+
+## 从来源读取 API 规范 {#api-specs-from-a-source}
+
+`api` 条目可以从来源读取规范。`path` 是文件在仓库内的路径，并且必须位于来源的 `path` 之下：
+
+```ts title="astro.config.ts"
+api: [{ collection: "api", spec: { source: "sdk", path: "docs/openapi.json" } }],
+```
+
+## 编辑链接 {#edit-links}
+
+站点的 `editPattern` 指向文档仓库，因此每个来源也需要自己的配置。`{path}` 是文件在来源仓库中的路径，`{ref}` 是配置中的 `ref`。没有它时，来源的页面就没有编辑链接。
+
+使用固定 commit 时，请把分支名写进模板，例如 `edit/main/{path}`：在大多数主机上，带 commit 的编辑 URL 会以只读方式打开。
+
+| 主机 | `editPattern` |
+| --- | --- |
+| GitHub | `https://github.com/<owner>/<repo>/edit/main/{path}` |
+| GitLab | `https://gitlab.com/<group>/<project>/-/edit/main/{path}` |
+| Bitbucket | `https://bitbucket.org/<workspace>/<repo>/src/main/{path}?mode=edit` |
+
+## 开发服务器、lint 与 check {#development-server-lint-and-check}
+
+`astro dev` 在启动时解析每个来源并保留那份快照；分支移动后需要重启才能跟随。`.nimbus/sources` 不会被监视。无法获取且没有快照的来源会让其集合保持为空：参见下文[没有来源时构建](#build-without-a-source)。
+
+`nimbus-docs lint` 与 `check` 读取上次构建或开发启动所选择的快照，并按来源与仓库路径报告其中的问题（`sdk: docs/guides/intro.mdx:12`），由该来源的作者修复。`--fix` 从不写入快照：其中可修复的发现会留在报告里。首次构建之前没有快照，lint 会把相应集合标记为未检查。
+
+`check` 还能在不构建的情况下报告：
+
+- `nimbus/source-floating-ref`（警告）：字面分支或标签形式的 `ref`。
+- `nimbus/source-unreferenced`（警告）：没有任何集合、也没有任何 `api` 条目读取的来源。
+
+如果 `sources` 映射的计算超出了模板化 ref，只会推迟那些依赖它的检查。
+
+## 没有来源时构建 {#build-without-a-source}
+
+`astro build` 是严格的；其他所有命令都可以在无法获取的来源缺席时启动。
+
+**部分构建只获取它读取的内容。** 使用 [`NIMBUS_BUILD_ONLY`](/publish/partial-builds/) 时，构建只会在切片中的某个集合读取该来源，或任何 `api` 条目读取它时获取它。其他来源保留上一份快照，因此 `lint` 与下一次完整构建仍能找到它们：
+
+```text
+nimbus: source "acme-sdk" not fetched: no collection in NIMBUS_BUILD_ONLY=docs reads it.
+```
+
+构建会把 `src/content.config.ts` 当作文本读取，而不运行它，因此请把 `source` 写成 `docsCollection()` 中的字符串字面量。变量、辅助函数、导入的集合或展开语法会隐藏这次读取，切片随后会获取所有来源，并指明是什么隐藏了读取：
+
+```text
+nimbus: NIMBUS_BUILD_ONLY fetches every source: collection "sdk" sets its source in a way the build can't read without running src/content.config.ts. Write source as a string literal to let slices skip it.
+```
+
+名为 `source` 的 schema 字段也算作一次读取；`schema: docsCollection().schema` 不读取任何内容。从另一个模块导入的 loader（`defineCollection({ loader: sdkLoader })`）完全不可见：跳过其来源的切片会失败，并指明集合与来源。
+
+**缺少来源时构建会失败。** 无法获取且没有快照的来源会让 `astro build` 失败，并给出 git 的错误、哪些内容读取了该来源，以及在哪里给 git 提供凭据：
+
+```text
+nimbus-docs: could not fetch source "acme-sdk" (https://github.com/acme/acme-sdk.git @ main): <git's error>. No snapshot of this repo, ref and path exists under .nimbus/sources/acme-sdk/.
+  Read by: collection "sdk".
+  Give git a credential: https://nimbus-docs.com/content-sources/git/#private-repositories
+```
+
+**其他命令会在它缺席时启动。** `astro dev` 与 `astro sync`（`astro check` 会运行它）可以在这种来源缺席时启动：它的集合为空，站点其余部分正常工作，日志会在每次启动时说一次：
+
+```text
+nimbus: source "acme-sdk" (https://github.com/acme/acme-sdk.git @ main) is unavailable; collections "sdk", "sdk-guides" are empty until it can be fetched (restart to retry). A full build fails until then. git: <git's error>
+```
+
+`astro preview` 不运行任何 git 命令，只读取已有的快照；没有快照的来源会让其集合为空。
+
+被 `api` 条目读取的来源仍会让这些命令失败，因为 API 参考没有规范就无法渲染。配置错误也一样，例如该 commit 上缺少 `path`。大型仓库的首次获取可能等满整个超时时间；缺少凭据则会在几秒内失败。
+
+## 超时 {#timeouts}
+
+解析分支或标签有 30 秒，获取 commit 有 10 分钟。`NIMBUS_SOURCES_RESOLVE_TIMEOUT` 与 `NIMBUS_SOURCES_FETCH_TIMEOUT`（秒）可修改它们。
+
+## 运维多仓库站点 {#operating-a-multi-repository-site}
+
+**固定生产版本，用 bump PR 推进。** 让生产环境停留在某个 commit，由来源仓库提议下一个 commit。来源仓库中的工作流会在其文档变化时向文档仓库发起拉取请求；diff 就是评审内容：
+
+```yaml title=".github/workflows/bump-docs.yml（位于来源仓库）"
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**"]
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: acme/docs
+          token: ${{ secrets.DOCS_REPO_TOKEN }}
+      - run: |
+          sed -i -E 's/(SDK_DOCS_REF \?\? ")[0-9a-f]{40}/\1${{ github.sha }}/' astro.config.ts
+          git switch -c bump-sdk-docs-${{ github.sha }}
+          git commit -am "bump sdk docs to ${{ github.sha }}"
+          git push origin HEAD
+          gh pr create --fill --repo acme/docs
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_REPO_TOKEN }}
+```
+
+**浮动预发布环境。** 预发布部署可以设置 `SDK_DOCS_REF=main`，并在来源仓库推送时调用的部署钩子上重新构建。
+
+**从来源仓库发起预览。** 来源仓库中的拉取请求可以在文档站点上预览其文档。用 `SDK_DOCS_REF` 设为该拉取请求的 head commit 来触发文档站点的预览构建，在 GitHub 上则设为 `refs/pull/<number>/head`；以 `refs/` 开头的 `ref` 会按原样使用。
+
+对于私有来源，请给预览环境一个用于 git 的只读 token（方式见上文），而不是给 Nimbus。
+
+**缓存。** 在 CI 运行之间缓存 `.nimbus/sources`；固定的 commit 于是成为缓存命中，无需获取。一次构建只保留它自己声明所选中的快照，因此使用另一个 ref 的预览构建会从共享缓存中清理生产快照。请按 ref 设置缓存键（例如 `sources-${{ env.SDK_DOCS_REF }}`），让预览与生产不共享同一份缓存。
+
+**构建镜像上的 Git。** 构建会运行 `git`。大多数 CI 与托管镜像都包含它；请检查你的镜像。

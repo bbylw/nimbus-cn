@@ -1,0 +1,28 @@
+---
+title: "Accordion"
+description: "由标题行与可展开面板组成的折叠卡片，同组相邻时合并为一张带边框的卡片。"
+sidebar:
+  order: 1
+---
+
+Accordion 用来折叠次要内容。每一行由一个 chevron 图标和标题组成，点击后在原位展开内容；把多个条目放进同一组，它们会共用一张带边框的卡片。
+
+## 安装
+
+```bash
+nimbus-docs add accordion
+```
+
+源码位于 `src/components/ui/accordion/`。安装时会一并带上注册表依赖：`collapsible`、`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `open` | boolean | `false` | 否 | 默认展开。 |
+
+## 用法
+
+折叠卡片适合放“常见问题”“高级选项”这类可以跳过的内容。默认全部收起；需要某一条初始展开时传入 `open`。Accordion 基于 `Collapsible` 构建，展开动画与 `Collapsible` 保持一致。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

@@ -1,0 +1,160 @@
+---
+title: "代码示例"
+description: "每个操作页面的请求示例如何生成，参数、服务器、表单与 multipart 请求体如何处理，以及如何手写或限制示例语言。"
+sidebar:
+  order: 4
+---
+
+每个操作页面都会显示由规格构建的 cURL、TypeScript 和 Python 请求。
+
+## 参数值
+
+- 参数自身的 `example`，或其第一个 `examples` 条目，优先。
+- 否则，值会根据参数的 schema 生成，与请求体一样。没有声明值时，是类型猜测，例如 `string`、`0` 或某个格式的固有值。
+- 没有声明值的路径参数会在尖括号中显示其名称，例如 `<account_id>`：猜出的标识符并不指向真实资源。
+- 必填查询参数和 header 保留生成的值，包括猜测值。没有 schema，或生成值是数组或对象的参数，显示 `<name>`。
+- 可选查询参数和 header 不会出现在示例中，即使有 `example`。
+
+## 服务器与凭据
+
+- **凭据**渲染为占位符：`Bearer <token>`、`Basic <credentials>` 或 API key 的名称，例如 `<X-API-Key>`。占位符从不进行 URL 编码；声明的值会。
+- **服务器。** 示例使用规格中的第一个 server，每个变量设为其 `default`。没有 default 的变量显示为 `<region>`。
+- **没有 server**，或使用相对 server（例如 `/v1`）：示例以 `<base-url>` 开头，由读者填写。
+
+## 请求体
+
+请求体使用请求示例，或根据 schema 生成的值。
+
+字符串示例会按原样发送，除非媒体类型是 JSON（`application/json` 或 `+json` 类型），此时会作为 JSON 字符串发送。因此 `application/x-ndjson` 下的字符串会原样到达。
+
+显式的 JSON `null` 会作为 `null` 发送，这与没有请求体不同。
+
+### 表单请求体
+
+`application/x-www-form-urlencoded` 请求体会作为表单字段发送。没有 `encoding` 条目时，属性使用大多数表单 API 期望的方括号约定：
+
+| 值 | 发送为 |
+| --- | --- |
+| 嵌套对象 | `metadata[plan]=pro` |
+| 标量数组 | `tags=a&tags=b` |
+| 对象数组 | `items[0][price]=p_1` |
+| `null` 或 `""` | `name=` |
+| 空对象或数组 | 无字段 |
+
+带 `encoding` 条目的属性会遵循该条目。`style`、`explode` 或 `allowReserved` 会选择查询式序列化，`deepObject` 会为每个数组建立索引，例如 `expand[0]=customer`。只有 `contentType` 的条目会以该类型发送值，因此对象会作为 JSON 发送。
+
+例如，以下媒体类型会发送以逗号连接的 `tags`，以及方括号形式的 `metadata`：
+
+```yaml
+application/x-www-form-urlencoded:
+  schema:
+    type: object
+    properties:
+      tags: { type: array, items: { type: string } }
+      metadata: { type: object, additionalProperties: { type: string } }
+  encoding:
+    tags: { style: form, explode: false }
+  example:
+    tags: ["a,b", "c"]
+    metadata: { plan: pro }
+```
+
+```text
+tags=a%2Cb,c&metadata%5Bplan%5D=pro
+```
+
+- **`explode: false`** 用 `,`（`form`）、`|`（`pipeDelimited`）或 `%20`（`spaceDelimited`）连接各项。每项先编码，因此项内的分隔符保持区分。
+- **`explode: true`** 为每项重复该字段一次。
+- **`allowReserved: true`** 按 OpenAPI 的规定，将项内的 `,` 不编码发送，因此 `["a,b", "c"]` 和 `["a", "b,c"]` 发送相同的字节。表单分隔符（`=`、`&`、`+`）和不安全字符仍保持编码。
+- **JSON `contentType`** 会先对每个值进行 JSON 序列化，因此 `abc` 发送为 `%22abc%22`，`null` 发送为 `null`。
+
+字符串示例会被当作已编码的表单读取。
+
+### Multipart 请求体
+
+`multipart/form-data` 请求体会按每个字段一个 part 发送：
+
+- **文件。** 带 `format: binary` 的字符串会作为名为 `<file>` 的文件发送（字段名在括号中）。文件数组会为每项发送一个 part，生成的示例有两个。文件 part 默认使用 `application/octet-stream`。
+- **带 `encoding` 条目的字段。** 在 OpenAPI 3.1 中，`style`、`explode` 和 `allowReserved` 会把字段序列化为表单字段，因此 `deepObject` 会生成 `link_options[create]` 之类的名称。`contentType` 会以该类型发送 part。OpenAPI 3.0 对 multipart 忽略这些。
+- **其他字段。** 对象或对象数组是一个 JSON part。标量数组会重复该字段。其他任何内容都是文本 part，按原样发送，即使它以 `@` 开头。
+
+只有 `format: binary` 会让字段成为文件；在 OpenAPI 3.1 中，请使用 `encoding.contentType` 设置 part 的类型。其他 multipart 类型（例如 `multipart/mixed`）不会生成示例，页面会改为显示请求示例。
+
+例如，一个包含单个文本字段的文件上传：
+
+```sh
+curl --request POST \
+  --url https://api.example.com/v1/files \
+  --form 'file=@<file>;type=application/octet-stream' \
+  --form-string 'purpose=identity_document'
+```
+
+以及一个没有请求体、带路径参数和 bearer token 的请求：
+
+```sh
+curl --request GET \
+  --url 'https://api.example.com/accounts/<account_id>' \
+  --header 'Authorization: Bearer <token>'
+```
+
+## 手写示例
+
+操作的 `x-codeSamples` 会替换生成的示例，Nimbus 从不更改其文本。每个条目为 `{ lang, label?, source }`。所有条目都会按顺序显示，包括同一语言的多个条目。手写示例不需要任何生成器包；如果站点手写了所有示例，可以设置 `samples.generate: []` 并在没有这些包的情况下构建。两个包都是可选 peer，因此在 pnpm 下，移除会在 lockfile 不再列出它们后生效。
+
+每个条目的 `label` 会在代码栏和 Markdown 版本中命名它。没有 label 时，使用其 `lang`，重复项会编号：`Python`、`Python (2)`。
+
+手写示例的 `lang`（不区分大小写）如果是 Shiki 已知的语言，例如 `hcl`、`rust` 或 `kotlin`，就会高亮；其他任何 `lang` 都会渲染为纯文本。`curl` 示例会按 `bash` 高亮，其 Markdown 围栏标记为 `bash`；其他所有围栏保留手写的 `lang`。
+
+请求体会出现在代码示例内部，Markdown 版本还会把它列为示例请求。完全没有示例的操作会在页面上改为显示其请求示例。
+
+## 选择语言
+
+`api` 条目上的两个设置控制生成的示例，作用于家族的所有版本：
+
+- **`samples.generate`** 选择要生成的语言。默认是全部三种，`[]` 不生成任何语言。
+- **`samples.keepGenerated`** 在手写示例旁保留生成的语言。每种语言也必须出现在 `generate` 中。
+
+有效值为 `"curl"`、`"typescript"` 和 `"python"`。例如，只生成 cURL，并把它显示在任何手写 SDK 示例旁边：
+
+```ts title="astro.config.ts"
+api: [
+  {
+    collection: "api",
+    spec: "./src/api/openapi.yaml",
+    samples: { generate: ["curl"], keepGenerated: ["curl"] },
+  },
+],
+```
+
+保留的示例排在手写示例之后。同一语言的手写示例会替换生成的示例：`curl`、`python` 或 `py`、`typescript` 或 `ts`，不区分大小写。`shell` 或 `bash` 示例不会替换 cURL。
+
+代码栏记住读者的语言，而不是确切的示例。`?lang=` 链接会打开具有该 id 的示例，例如 `python-2`，或该语言中的第一个，例如 `python`。
+
+## 在自己的组件中渲染已准备的代码
+
+`apiCollection()` 在构建内容索引时会高亮请求示例、主请求示例和具名请求示例、响应，以及其他请求体和响应媒体类型的示例。OpenAPI 的 `requestBody.content.*.examples` 条目可作为 `ApiOperationPage.requestExamples` 使用，保留每个键、summary、description、媒体类型和内联值。仅外部示例不会被获取。
+
+用户自有的渲染器应使用 Astro 的 `set:html` 渲染 `highlightedHtml`，而不是在按请求渲染的路由中导入 Shiki 或 Astro 的 `Code` 组件：
+
+```astro
+---
+import type { ApiOperationPage } from "@cloudflare/nimbus-docs/api";
+
+interface Props extends Pick<ApiOperationPage, "samples"> {}
+
+const { samples } = Astro.props;
+
+function preparedCode(value: { highlightedHtml?: string }): string {
+  if (!value.highlightedHtml) {
+    throw new Error("Nimbus API code was not prepared during content sync.");
+  }
+  return value.highlightedHtml;
+}
+---
+
+{samples.map((sample) => (
+  <Fragment set:html={preparedCode(sample)} />
+))}
+```
+
+把缺失的已准备值视为过时或错误构建的 API 索引。更改规格或 API 渲染器类型后请重新构建。

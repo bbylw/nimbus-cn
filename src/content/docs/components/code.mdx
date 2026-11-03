@@ -1,0 +1,34 @@
+---
+title: "Code"
+description: "从字符串渲染的语法高亮代码块，Shiki 转换器提供文件名框、行高亮、diff、聚焦与标记。"
+sidebar:
+  order: 10
+---
+
+Code 接受一段源码字符串并交给 Shiki 高亮。它重新导出 Astro 内置的 `<Code>`，默认挂上 Nimbus 的转换器，因此文件名标题、行高亮、diff、聚焦、错误与警告标注、词语高亮都可以直接用。
+
+## 安装
+
+```bash
+nimbus-docs add code
+```
+
+源码位于 `src/components/ui/code/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `code` | string | — | 是 | 要高亮的源码字符串。 |
+| `lang` | string | — | 是 | 语言标识，例如 `"ts"`、`"tsx"`、`"bash"`。 |
+| `meta` | string | — | 否 | Shiki meta，例如 `title="src/foo.ts" {1,3-5}`，用于文件名框与行高亮。 |
+
+## 示例
+
+```mdx
+<Code code={snippet} lang="ts" meta='title="src/lib/cn.ts" {2}' />
+```
+
+默认主题跟随站点的明暗模式（`github-light` 与 `github-dark`），传入 `theme` 或 `themes` 即可覆盖。页面正文里通常直接写围栏代码块，支持的标记见 [代码块](/writing/code-blocks/)。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

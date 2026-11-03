@@ -1,0 +1,50 @@
+---
+title: "Steps"
+description: "带序号圆点与连接线的分步说明，序号自动递增，可从指定数字开始。"
+sidebar:
+  order: 28
+---
+
+Steps 把一段说明排成带序号的分步列表：每步一个圆形序号，步骤之间用竖线连接，序号自动递增。`start` 可以让它从指定数字开始，方便把长流程拆到多个页面小节。
+
+## 安装
+
+```bash
+nimbus-docs add steps
+```
+
+源码位于 `src/components/ui/steps/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `start` | number | — | 否 | `Steps` 的属性，偏移步骤计数，适合把长流程拆到多个页面小节。 |
+| `title` | string | — | 否 | `Step` 的属性，渲染在步骤正文上方的加粗引导句；需要格式时改用 `title` 插槽。 |
+
+## 示例
+
+用 `Step` 逐条写，`title` 是加粗的引导句：
+
+```mdx
+<Steps>
+  <Step title="安装依赖">运行 `npm install`。</Step>
+  <Step title="配置站点">在 `astro.config.ts` 中设置 `site`。</Step>
+  <Step title="启动开发服务器">运行 `npm run dev`。</Step>
+</Steps>
+```
+
+也可以直接把 Markdown 有序列表包进 `Steps`，列表项会获得同样的序号样式：
+
+```mdx
+<Steps>
+
+1. 安装依赖。
+2. 配置站点。
+
+</Steps>
+```
+
+`Steps` 内、第一个 `Step` 之前的内容会留在列表上方，适合放一段引导说明。
+
+Steps、Step 已默认注册，可直接在 `.mdx` 中使用。

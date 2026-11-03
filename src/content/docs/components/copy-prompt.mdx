@@ -1,0 +1,30 @@
+---
+title: "CopyPrompt"
+description: "一行提示词配一个复制按钮，方便读者粘贴到 AI 编程智能体。"
+sidebar:
+  order: 12
+---
+
+CopyPrompt 把一句可以直接交给 AI 编程智能体的提示词显示成一行，并在旁边放一个复制按钮，读者不需要手动选中长文本。
+
+## 安装
+
+```bash
+nimbus-docs add copy-prompt
+```
+
+源码位于 `src/components/ui/copy-prompt/`。安装时会一并带上注册表依赖：`button`、`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `text` | string | — | 是 | 显示并复制的提示词。屏幕上截断为一行，但复制的是完整文本。 |
+
+## 示例
+
+```mdx
+<CopyPrompt text="把这个页面里的 Aside 换成 callout，保持现有文案与链接。" />
+```
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

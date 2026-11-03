@@ -1,0 +1,156 @@
+---
+title: "Lint 规则"
+description: "nimbus-docs lint 与构建检查中的全部规则、级别、选项与自动修复能力。"
+sidebar:
+  order: 3
+---
+
+Nimbus 用两种方式检查内容。**构建校验器**捕获会破坏页面的问题；它们始终运行，并让构建失败。**写作规则**捕获能渲染但不该发布的问题；它们默认关闭，开启后由 `nimbus-docs lint` 运行。[Lint](/writing/linting/) 介绍如何开启规则、按集合设置严重级别，以及使用 `--fix`。
+
+| 规则 | 类别 | 可自动修复 | 选项 |
+| --- | --- | --- | --- |
+| [`nimbus/mdx-syntax`](#nimbusmdx-syntax) | 构建校验器 | — | — |
+| [`nimbus/component-pascalcase`](#nimbuscomponent-pascalcase) | 构建校验器 | — | — |
+| [`nimbus/partial-exists`](#nimbuspartial-exists) | 构建校验器 | — | — |
+| [`nimbus/duplicate-slug`](#nimbusduplicate-slug) | 构建校验器 | — | — |
+| [`nimbus/frontmatter-shape`](#nimbusfrontmatter-shape) | 写作规则 | — | — |
+| [`nimbus/description-required`](#nimbusdescription-required) | 写作规则 | — | — |
+| [`nimbus/internal-link`](#nimbusinternal-link) | 写作规则 | — | allowRelative, components, ignore |
+| [`nimbus/redirected-link`](#nimbusredirected-link) | 写作规则 | — | components, ignore |
+| [`nimbus/image-ref`](#nimbusimage-ref) | 写作规则 | — | aliases, components, ignore |
+| [`nimbus/single-h1`](#nimbussingle-h1) | 写作规则 | — | — |
+| [`nimbus/heading-hierarchy`](#nimbusheading-hierarchy) | 写作规则 | — | — |
+| [`nimbus/heading-punctuation`](#nimbusheading-punctuation) | 写作规则 | 是 | — |
+| [`nimbus/duplicate-heading-text`](#nimbusduplicate-heading-text) | 写作规则 | — | — |
+| [`nimbus/code-block-lang`](#nimbuscode-block-lang) | 写作规则 | — | — |
+| [`nimbus/code-block-prompt-prefix`](#nimbuscode-block-prompt-prefix) | 写作规则 | — | — |
+| [`nimbus/no-self-host-url`](#nimbusno-self-host-url) | 写作规则 | — | hosts |
+| [`nimbus/bare-url`](#nimbusbare-url) | 写作规则 | — | — |
+| [`nimbus/list-marker-style`](#nimbuslist-marker-style) | 写作规则 | 是 | style |
+| [`nimbus/emphasis-style`](#nimbusemphasis-style) | 写作规则 | 是 | style |
+
+## 构建校验器 {#build-validators}
+
+它们在每次构建时运行，无法在配置中关闭。要在单个页面上跳过某条规则，请使用 frontmatter 中的 `nimbusDisableRules` 条目或行内禁用注释；参见 [Lint](/writing/linting/)。
+
+### nimbus/mdx-syntax
+
+页面的 MDX 无法解析，例如标签未闭合或出现多余的 `{`。
+
+### nimbus/component-pascalcase
+
+首字母大写的标签既未在 `src/components.ts` 注册，也未在页面中导入。MDX 会把它当作文本输出，因此构建会中止。
+
+### nimbus/partial-exists
+
+`<Render file="…" />` 引用的 partial 在 `src/content/partials/` 中不存在。
+
+### nimbus/duplicate-slug
+
+两个页面解析到同一个 URL。
+
+## 写作规则 {#authoring-rules}
+
+在 Nimbus 集成选项的 `rules` 中以 `"error"` 或 `"warn"` 开启这些规则。标记为**可自动修复**的规则会由 `nimbus-docs lint --fix` 应用修复。
+
+### nimbus/frontmatter-shape
+
+页面的 frontmatter 不是合法 YAML。它会在其他规则运行前报告解析错误。内容 schema 本身（例如未知键与错误类型）由构建检查。
+
+### nimbus/description-required
+
+页面缺少 `description`，而搜索结果、分享卡片与智能体索引都会用到它。对 partial 可用集合级覆盖关闭此规则。
+
+### nimbus/internal-link
+
+链接指向站内不存在的页面或文件。它从上次构建读取路由，因此请先运行 `astro build`。选项：`ignore`（要跳过的路径）、`allowRelative`、`components`（其属性中含有链接的额外组件）。
+
+### nimbus/redirected-link
+
+链接只能通过永久重定向生效；消息会给出应改写的 URL。选项：`ignore`、`components`。
+
+### nimbus/image-ref
+
+图片文件不存在：以 `/` 开头的路径在 `public/` 中查找，相对路径则在页面旁边查找。选项：`aliases`、`ignore`、`components`。
+
+### nimbus/single-h1
+
+页面出现多个 `#` 标题。页面标题本身已渲染为 H1，因此页面通常从 `##` 开始。
+
+### nimbus/heading-hierarchy
+
+标题跳过层级，例如 `#` 后直接跟 `###`，这会破坏读者与屏幕阅读器使用的提纲。
+
+### nimbus/heading-punctuation
+
+标题以 `.`、`,`、`:`、`;` 或 `!` 结尾。问号允许使用。**可自动修复。**
+
+### nimbus/duplicate-heading-text
+
+同一页面上有两个标题文本相同。它们的锚点会冲突，使链接落到错误的标题。
+
+### nimbus/code-block-lang
+
+围栏代码块没有语言标记，会失去高亮与语言徽标。
+
+### nimbus/code-block-prompt-prefix
+
+shell 代码块的每一行以 `$ ` 开头。读者会把提示符和命令一起复制走。
+
+### nimbus/no-self-host-url
+
+指向本站的链接写成了自身主机上的绝对 URL，例如 `https://docs.example.com/guide`，这会在预览环境失效。它始终标记配置的 `site` 与 localhost。选项：`hosts`（属于同一站点的其他主机名）。
+
+### nimbus/bare-url
+
+正文中的裸 URL，或链接文本就是其 URL。请改写为描述性的链接文本。
+
+### nimbus/list-marker-style
+
+项目符号列表使用了与其他列表不同的标记。选项：`style`，`"dash"`（默认）或 `"asterisk"`。**可自动修复。**
+
+### nimbus/emphasis-style
+
+斜体使用了与其他文本不同的分隔符。选项：`style`，`"asterisk"`（默认）或 `"underscore"`。**可自动修复。**
+
+## 构建与 check 的发现 {#build-and-check-findings}
+
+构建与 `nimbus-docs check` 会报告这些代码，并给出文件与修复方式。它们不是 lint 规则，因此无法关闭。
+
+### 集合路由 {#collection-routing}
+
+错误。参见[集合 URL](/writing/collections/)。
+
+| 代码 | 原因 |
+|---|---|
+| `nimbus/collection-two-routes` | 一个集合有多个静态路由，且没有一个位于其默认 URL。保留一个。 |
+| `nimbus/collection-same-url` | 两个集合位于同一个 URL。移动其中一个路由。 |
+| `nimbus/collection-dynamic-folder` | 除 `docs` 之外的集合只从动态文件夹下的路由提供。给它一个静态路由。 |
+| `nimbus/collection-docs-route` | `docs` 被路由到站点根之外。把路由移到 `src/pages/[...slug].astro`，或设置 Astro 的 `base`。 |
+| `nimbus/collection-version-route` | 文档版本被路由到 `/<version>` 之外。把路由移到那里。 |
+| `nimbus/collection-route-param` | 路由中的路由辅助函数使用的参数不是 `slug`（`[...path].astro`）。把它重命名为 `[...slug].astro`。 |
+| `nimbus/collection-owns-url` | 某个页面位于另一个集合已移动的 URL 下。移动该页面。 |
+
+页面若从其集合并不提供服务的路由渲染，构建会失败，并指出该路由所在文件夹与集合的路由文件。
+
+按请求渲染时，这类路由会返回未找到，并记录同样的建议。动态文件夹下的路由，例如 `src/pages/[locale]/kit/[...slug].astro`，不会被报告，因为它们的文件夹取决于 URL。
+
+警告：
+
+| 代码 | 原因 |
+|---|---|
+| `nimbus/collection-unread-route` | 嵌套文件夹中的路由，其 `getStaticPaths` 无法被 Nimbus 读取。集合会保持在其默认 URL。 |
+| `nimbus/collection-alias-route` | 一个集合有多个静态路由；多余的路由会让其页面在 sitemap 与搜索中重复。请删除或重定向它们。 |
+
+### 内容来源 {#content-sources}
+
+来自 `nimbus-docs check` 的警告。参见[来自另一个仓库的内容](/content-sources/git/)。
+
+| 代码 | 原因 |
+|---|---|
+| `nimbus/source-floating-ref` | 来源固定到字面分支或标签，因此其页面可能在两次构建之间变化。 |
+| `nimbus/source-unreferenced` | 没有任何集合、也没有任何 `api` 条目读取该来源。 |
+
+## 保留代码 {#reserved-codes}
+
+`nimbus/orphan-page` 与 `nimbus/sidebar-entry` 保留给未来的规则。把其中任何一个配置为 `"error"` 或 `"warn"` 都会中止构建并给出说明；`"off"` 可以接受。

@@ -1,0 +1,269 @@
+---
+title: "侧边栏"
+description: "从文件系统生成侧边栏，用配置调整结构，或在运行时转换最终的导航树。"
+sidebar:
+  order: 1
+---
+
+Nimbus 会根据内容构建一棵带类型的侧边栏树。你可以从文件系统开始，用配置取得控制权，或转换最终的树，以实现依赖应用数据或当前路由的导航。
+
+## 排序与标记页面
+
+侧边栏默认根据 `src/content/docs/` 生成。只有在需要覆盖该结构时，才在 `astro.config.ts` 中设置 `sidebar.items`。使用页面 frontmatter 中的 `sidebar.order`（例如 `src/content/docs/guides/install.mdx`）控制排序；否则条目按字母顺序排列。
+
+```yaml title="src/content/docs/guides/install.mdx"
+---
+title: Install the CLI
+sidebar:
+  order: 1
+  label: Install
+  badge:
+    text: New
+    variant: tip
+---
+```
+
+Frontmatter 还可以隐藏条目、自定义目录分组、重定向链接，或折叠某个分区。参见[隐藏或修改单个页面的条目](#hide-or-change-one-pages-entry)。
+
+## 手动安排侧边栏
+
+在 `astro.config.ts` 中，当文件系统不应决定整条导航栏时，使用 `sidebar.items`。配置项可以嵌套，也可以把手工链接与生成内容混合在一起：
+
+```ts title="astro.config.ts"
+sidebar: {
+  items: [
+    "introduction",
+    { label: "GitHub", link: "https://github.com/you/repo" },
+    {
+      label: "Guides",
+      autogenerate: { directory: "guides" },
+      collapsed: false,
+      badge: "New",
+      icon: "ph:book-open",
+    },
+    {
+      label: "API",
+      autogenerate: { collection: "api" },
+      icon: "ph:code",
+    },
+    {
+      label: "AI",
+      segment: "/ai",
+      landing: "/ai/models",
+      items: [
+        { label: "Models", link: "/ai/models" },
+        { autogenerate: { directory: "ai/guides" } },
+      ],
+    },
+  ],
+}
+```
+
+| 形式 | 用途 |
+|---|---|
+| `"slug"` | 链接主集合中的一个页面。 |
+| `{ label, link }` | 添加带标签的内部或外部链接。 |
+| `{ autogenerate: { directory } }` | 从一个内容目录生成分组。 |
+| `{ autogenerate: { collection, prefix? } }` | 挂载另一个已注册的集合，并链接到它被提供的位置（参见 [集合 URL](/writing/collections/#collection-urls)）。`prefix` 设置由你自己的路由提供的集合的 URL，而不是 Nimbus 路由辅助函数提供的集合；对于后者，URL 由路由设置，`prefix` 已弃用。 |
+| `{ label, items }` | 构建递归的手工分组。分组支持 `collapsed`、`badge` 和 `icon`。 |
+| `{ segment, landing }` | 让手工分组拥有某个 URL 段，同时把它的标签和面包屑链接到真实的落地页。 |
+
+数组中的位置决定手工条目的顺序。Nimbus 不会对已配置或已转换的数组重新排序。
+
+## 在文件夹中显示集合
+
+在文档文件夹 URL 内提供的集合会出现在该文件夹中。以 `src/content/docs/integrations/connectors/` 和通过 `src/pages/integrations/connectors/dbt/[...slug].astro` 路由的 `dbt` 集合为例（参见 [集合 URL](/writing/collections/#collection-urls)）。dbt 会成为 Connectors 内的一个分组，落地页为 `/integrations/connectors/dbt/`。
+
+面包屑和上一页、下一页链接也会跟随，因为它们读取侧边栏。侧边栏未收录的页面，会使用其 URL 之上最深分组的面包屑。
+
+无论文件夹是默认生成还是通过 `autogenerate` 生成，这一规则都适用；但手工分组的自有条目中不适用。
+
+如果中间层级的文件夹不存在，集合会放入实际存在的最深文件夹。若某个文件夹唯一的页面就是它的 `index`，该文件夹会成为一个分组来容纳它，并保留该页面的标签。
+
+集合自己的 `index` 页面控制该分组，行为与文件夹的 `index` 相同。设置它的标签和位置：
+
+```yaml title="src/content/dbt/index.mdx"
+---
+title: dbt
+sidebar:
+  order: 2              # its position among the folder's pages; pages with an order come first,
+                        # and a group without one takes its lowest child's
+  group:
+    label: dbt Core     # the group label; the title otherwise
+---
+```
+
+没有 `index` 页面时，分组是以 URL 最后一段命名的标题（`Dbt`）。用 `sidebar.hideChildren: true` 只显示它的落地页链接；或用 `sidebar.hidden: true` 把整个集合（连同在其中提供的任何集合）从侧边栏中移除。
+
+要自行放置它，请在 `sidebar.items` 中指定它，此后它只会出现在那里：
+
+- **`{ autogenerate: { collection: "dbt" }, label: "dbt" }`** 把它的页面显示为一个带落地页的分组。不提供 `label` 时，它的页面会直接进入周围的分组，且不链接其落地页。
+- **`{ label: "dbt", link: "/integrations/connectors/dbt/" }`**，或手工分组的 `landing`，只显示它的落地页。
+
+不会被放置的情况：
+
+- 只有一段路径的集合（`/blog`），其父级是站点根目录；
+- API 集合，它有自己的导航；
+- 其他文档版本页面上的任何内容；
+- 集合的别名路由（只有它实际被提供的 URL 才算数）。
+
+在 `astro dev` 中，对已放置集合的 `src/content` 下页面所做的编辑会在重新加载时体现。从其他位置或内容来源加载的集合，其导航变更需要重启后才能体现。
+
+## 只显示当前分区
+
+分区很多的站点会让列出全部内容的导航栏溢出。设置 `scope: "section"` 后，每个页面的导航栏只显示它自己的一级分组：
+
+```ts title="astro.config.ts"
+sidebar: {
+  scope: "section",
+}
+```
+
+分区是一个列出一个其他集合的一级分组，写作 `autogenerate: { collection: "api" }`。主文档集合自身页面组成的分组（无论通过 `directory` 还是 `items`）不算分区。
+
+有两个或更多分区时，起始模板的页头会把它们显示为标签页：宽屏上位于导航条中，手机上单独占一行。它通过 `getSidebarSections()` 从同一棵树构建这些标签页，你自己的页头也可以这样做：
+
+```astro
+---
+import { getSidebarSections } from "@cloudflare/nimbus-docs";
+
+const sections = await getSidebarSections(currentSlug, {
+  collection: entry.collection,
+});
+---
+```
+
+`scope: "full"` 是默认值，会在每个页面上渲染完整的树。
+
+## 为深层文件夹提供独立侧边栏
+
+当一个分区本身很大时，例如按产品分文件夹的参考文档，可以把导航栏再深入一层。把应获得独立导航栏的文件夹列为段通配符，其中 `*` 匹配一个路径段：
+
+```ts title="astro.config.ts"
+sidebar: {
+  scope: "section",
+  isolate: { boundaries: ["reference/*"] },
+}
+```
+
+现在 `/reference/cli/` 下的页面只显示 `reference/cli` 分组。边界之外的页面保留分区导航栏。该导航栏以分组的落地页开头，其标签方式与 `indexDisplay: "overview-leaf"` 下的概览叶子项相同。
+
+## 默认折叠分组
+
+当分组默认关闭时，长长的导航栏更容易浏览。设置 `defaultCollapsed: true`：
+
+```ts title="astro.config.ts"
+sidebar: {
+  defaultCollapsed: true,
+}
+```
+
+包含当前页面的分组仍会展开。在 `sidebar.items` 中设置了 `collapsed: false` 的分组保持展开，因此可以保留一个始终可见的“从这里开始”分组，而其余分组关闭。
+
+## 选择分组落地页的显示方式
+
+目录中的 `index.mdx` 就是该分组的落地页。在 `astro.config.ts` 中配置这些落地页在全站的显示方式：
+
+```ts title="astro.config.ts"
+sidebar: {
+  indexDisplay: "overview-leaf",
+  overviewLabel: "Overview",
+}
+```
+
+| 选项 | 行为 |
+|---|---|
+| `indexDisplay: "header-link"` | 默认值。分组标题链接到它的落地页。 |
+| `indexDisplay: "overview-leaf"` | 分组标题变为可展开项，落地页成为它的第一个子项。 |
+| `overviewLabel: true` | 把落地链接标记为 `Overview`。传入字符串可自定义标签。 |
+| `sidebar.group.hideIndex: true` | 保留页面构建，但让分组标题不可交互。 |
+| `sidebar.hideChildren: true` | 把整个目录折叠为指向其落地页的单个链接。 |
+
+## 按页面修改侧边栏
+
+配置定义结构性导航树。`getSidebar()` 还接受同步或异步的 `transform`，用于计算导航。它在作用域与隔离之后运行，但在 `indexDisplay` 重塑落地页之前运行。
+
+```astro title="src/pages/[...slug].astro"
+---
+import { getPrevNext, getSidebar } from "@cloudflare/nimbus-docs";
+
+const sidebar = await getSidebar(currentSlug, {
+  collection: entry.collection,
+  transform: ({ tree, sectionSlug }) => {
+    if (sectionSlug !== "api") return tree;
+
+    return tree.map((item) =>
+      item.type === "group" && item.label === "Reference"
+        ? {
+            ...item,
+            collapsed: false,
+            badge: "API",
+            children: [
+              ...item.children,
+              {
+                type: "external",
+                label: "API status",
+                href: "https://status.example.com",
+                order: Number.MAX_SAFE_INTEGER,
+              },
+            ],
+          }
+        : item,
+    );
+  },
+});
+
+const prevNext = await getPrevNext(currentSlug, {
+  sidebarTree: sidebar,
+});
+---
+```
+
+回调会收到：
+
+| 值 | 含义 |
+|---|---|
+| `tree` | 当前页面经过克隆、带激活状态的 `SidebarItem[]`。节点为 `link`、`external` 或递归的 `group` 条目。 |
+| `currentSlug` | 完整的当前 URL 路径。 |
+| `sectionSlug` | 第一个路径段。 |
+| `module` | 第二个路径段（如果存在）。 |
+| `indexEntryId` | 当前分区分组的落地页条目 ID（如果有）。 |
+
+转换函数可以获取数据、插入或删除节点、重写嵌套分组、附加徽章或重新排序导航栏。请返回渲染后的 `SidebarItem` 节点，而不是 `autogenerate` 这类仅用于配置的形状。修饰节点时保留其已有属性；如果分页应遵循转换后的顺序，请把结果传给 `getPrevNext()`。
+
+转换只影响页面的侧边栏。面包屑和 `getSidebarSections()` 仍使用结构性导航树。
+
+## 隐藏或修改单个页面的条目 {#hide-or-change-one-pages-entry}
+
+使用 frontmatter 做局部修改：
+
+| 字段 | 行为 |
+|---|---|
+| `sidebar: false` | 从此页面移除侧边栏栏位。 |
+| `sidebar.order` | 在自动生成的分组内为条目排序。 |
+| `sidebar.label` | 在侧边栏中覆盖页面标题。 |
+| `sidebar.badge` | 添加字符串或带样式的徽章。 |
+| `sidebar.hidden` | 构建页面，但将其从侧边栏移除。 |
+| `sidebar.group.label` | 从目录的 `index.mdx` 覆盖分组标签。 |
+| `sidebar.group.badge` | 为目录分组添加徽章。 |
+| `sidebar.group.icon` | 为目录分组添加 `astro-icon` 图标。 |
+| `sidebar.group.hideIndex` | 阻止目录分组标题链接到它的 index。 |
+| `sidebar.hideChildren` 或 `hideChildren` | 把目录折叠为它的落地链接。 |
+| `external_link` | 把条目指向另一个内部路径或绝对 URL。页面仍在其自身路径构建，绝对 URL 在新标签页打开。 |
+
+在 `astro.config.ts` 中设置 `features.sidebar: false` 可全站禁用侧边栏。完整字段形状和徽章变体参见 [Frontmatter](/reference/frontmatter/)。
+
+## 重新设置侧边栏行的样式
+
+侧边栏分组是原生 `<details>`/`<summary>` 元素：展开和关闭不需要 JavaScript，关闭分组中的链接仍保留在 HTML 中，供页内查找和爬虫使用；关闭的列表带有 `display: none`，因此大型树仍保持快速。带落地页的分组会把落地页列为分组的第一个子项，标记为“Overview”——摘要行只有标签。
+
+行本身不带 class 或 data 属性，因此有数千个页面的侧边栏依然轻量。`src/styles/globals.css` 的 “Sidebar rows” 部分按侧边栏内的位置为它们设置样式（`[data-nb-sidebar]`，API 参考另用 `[data-nb-api-nav]`）。编辑这些规则即可调整每一行的样式。它们位于 Tailwind 的 `components` 层，因此行上的 Tailwind 工具类仍能覆盖它们：
+
+| 选择器 | 元素 |
+|---|---|
+| `[data-nb-sidebar] li > a` | 叶子行：`<a href>Label</a>`。当前页面带有 `aria-current="page"`。 |
+| `[data-nb-sidebar] details > summary` | 分组行。箭头是它的 `::after` 遮罩，通过 `details[open]` 旋转；激活路径带有 `data-nb-active`。 |
+| `[data-nb-sidebar] details > ul` | 分组的子列表。 |
+| `i[data-m]` | API 操作的方法标签；`data-m` 是小写的方法名。 |
+
+每个页面渲染一棵侧边栏树：移动端抽屉在打开时借用侧边栏的树，关闭时归还，因此展开的分组、过滤器和滚动位置在跨断点切换时保持不变。

@@ -1,0 +1,211 @@
+---
+title: "面向智能体的文档"
+description: "Nimbus 站点向智能体提供的 Markdown 版本、索引、发现文件与 MCP 接口，以及页面如何被索引。"
+sidebar:
+  order: 1
+---
+
+Nimbus 通过一系列端点提供文档，AI 工具无需解析 HTML 站点就能读取。
+
+## 与版本匹配的指南
+
+每个框架包都在 `node_modules/@cloudflare/nimbus-docs/dist/docs-for-agents.md` 附带了这份指南。使用预览版本时，请使用已安装的这份副本：即使公开站点描述的是更早的稳定版本，它与正在测试的包一致。脚手架的 `AGENT.md` 会把编码智能体指向它。
+
+## 提供的内容
+
+- **每个可发现页面的备用 Markdown/MDX 版本**——`/<slug>/index.md` 是干净的 Markdown，组件已转换为文本；`/<slug>/index.mdx` 保留 import、JSX 和指令，`.md` 会链接到它。API 参考页面只有 `.md`，隐藏版本则两者都没有。
+- **站点级 `llms.txt` 索引**——列出当前文档的顶层页面和分区索引。每个分区索引把其可发现页面链接到对应的备用 Markdown 版本。较早的文档版本不会列出；每个版本各有自己的索引 `/<version>/llms.txt`。
+- **`llms-full.txt`**——当前站点的全部页面合成一个 Markdown 文档，适合一次请求取回全部内容的工具。超过 25 MiB 时，它会变成按分区分文件的索引，因此没有文件会超过限制。参见[添加 llms-full.txt](/ai/publish-markdown/#3-add-llms-fulltxt)。
+- **`/<section>/llms.txt` 下的分区索引**——每个顶层分组和集合（例如 `blog` 或某个文档版本）都有自己的索引，其下每个文件夹（如 `/reference/functions/llms.txt`）也有，并由上级索引链接。
+- **版本标签**——在带版本的站点上，每个备用 Markdown 版本的 frontmatter 都带 `version:` 键（由你的 `versions` 清单解析而来），使智能体能锁定版本。无版本的站点不输出任何标签。
+- **每个页面 head 中的 JSON-LD**——结构化数据，让搜索和智能体工具识别所看到的内容。
+- **`/robots.txt` 与 sitemap**——设置 `site` 后自动接入。
+- **远程 MCP 服务器**——在带服务器适配器的站点上设置 `agents: { mcp: true }` 时，`/mcp` 通过已发布的 Markdown 页面提供 `list_pages` 和 `get_page`，并在 `/mcp/server-card` 提供 Server Card。参见[远程 MCP 服务器](/ai/remote-mcp/)。
+
+```text title="/llms.txt"
+# Nimbus
+
+A way to build documentation sites on top of Astro.
+
+## Pages
+- [Quickstart](https://nimbus-docs.com/quickstart/index.md)
+- [Why Nimbus](https://nimbus-docs.com/why-nimbus/index.md)
+```
+
+## 智能体发现
+
+每个站点都提供 `/.well-known/ard.json` 和 `/.well-known/ai-catalog.json`，两者内容相同。它们列出 `/llms.txt`、主页的 Markdown 文件 `/index.md`，以及站点运行远程 MCP 服务器时的 Server Card。域名归其他站点所有的站点可以关闭这些文件（见[共享域名](#shared-domains)）。
+
+主页通过 HTTP `Link` 响应头公布这些文件，以及每个可见的 API 参考。请求时渲染的主页直接发送这些响应头。静态构建会写入 `_headers` 规则，Cloudflare 和部分其他主机读取该文件；在其他主机上，需要在主机配置中设置同样的响应头。
+
+你自己设置的 `_headers` 优先。如果你的规则已经为某个路径设置了某个响应头——无论是精确路径还是 `/*` 这样的通配符——Nimbus 会省略该响应头，因为主机会合并重复的值，而浏览器不接受 `Access-Control-Allow-Origin: *, *`。
+
+`Link` 是例外，因为合并后的 `Link` 值仍然有效。如果你的规则只覆盖了生成的通配符的一部分，构建会发出警告并列出需要覆盖的路径。
+
+`/index.md` 是根内容条目（若存在），否则是 `llms.txt` 的内容。设置了 `noindex: true` 的根条目仍会被提供，但不会出现在发现文件中。
+
+如果站点在任一 `.well-known` 路径上已有文件或路由，构建会失败，以便你先移动这些条目——除非发现功能已关闭。
+
+发现文件应位于源站点根目录。使用 `base` 时，Cloudflare 适配器会替你放到那里；在其他主机上，需要把生成的 `.well-known` 目录部署到根的站点目录旁。使用 Cloudflare 适配器且带 `base` 的静态输出需要 `wrangler deploy --assets ./dist/client`。
+
+对于在 `/docs` 下提供站点的静态主机，公开的目录结构是：
+
+```text
+host-root/
+├── .well-known/        # 生成的发现文件与 Skills 文件
+├── docs/               # 站点的 HTML、Markdown、索引与 Pagefind 文件
+└── _headers            # 主机支持该格式时
+```
+
+使用主机的挂载或部署配置来生成这一结构。发现 JSON 应以 `application/json` 提供，并带 `Access-Control-Allow-Origin: *`；Skills 产物也应使用同样的 CORS 响应头。主页 Markdown 使用 `text/markdown; charset=utf-8`；Skills 归档使用 `application/gzip`。请验证实际部署后的响应，而不只是检查生成的文件：
+
+```sh
+curl -I https://docs.example.com/.well-known/ard.json
+curl -I https://docs.example.com/docs/
+curl -I https://docs.example.com/docs/index.md
+```
+
+### 共享域名
+
+当域名归另一个站点所有时，例如文档位于 `example.com/docs`，主站位于 `example.com`，根目录的 `.well-known` 文件属于那个站点。此时关闭 Nimbus 的发现功能：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  // …
+  agents: { discovery: false },
+});
+```
+
+之后 Nimbus 不再发布 `ard.json`、`ai-catalog.json` 或 `api-catalog`，也不再为主页生成指向它们的 `Link` 或 `_headers` 规则。你在 `public/.well-known/` 中的自有文件会保留；在 `base` 下它们会在那里提供，例如 `/docs/.well-known/ard.json`。
+
+切换后，请清除缓存的主页，因为它的 `Link` 响应头仍列出旧文件。在会保留旧部署文件的主机上（例如不带 `--delete` 的 S3 同步），也要删除这些旧文件。
+
+其他功能保持开启，包括 `llms.txt`、Markdown 版本、Markdown 协商和远程 MCP 服务器——智能体仍可通过 `llms.txt` 找到它们。
+
+Agent Skills 仍会发布。使用 Cloudflare 适配器，或没有 `base` 时，它们会落在源站点根目录的 `/.well-known/agent-skills/`，因此除非该站点拥有这个路径，否则不要保留 `skills/` 文件夹。站点若自己提供 `api-catalog`，需要在自己的 `_headers` 中设置它的 `Content-Type`，因为该文件没有扩展名。
+
+### Content Signals
+
+脚手架的 `src/pages/robots.txt.ts` 声明了 `Content-Signal: ai-train=yes, search=yes, ai-input=yes`。按你的策略修改这些值；如果把某一项设为 `no`，请在其上方加上 [contentsignals.org](https://contentsignals.org/) 提供的策略说明。已有站点保留自己的 `robots.txt`；`nimbus-docs migrate` 会说明这一变更。Content Signals 和 `robots.txt` 是向爬虫发出的请求，不是访问控制。私有文档需要身份验证。
+
+## API 目录与已发布的规范
+
+带有 API 集合的站点会在 `/.well-known/api-catalog` 提供 [RFC 9727](https://www.rfc-editor.org/rfc/rfc9727) 目录，除非 `agents.discovery` 为 `false`。每个可见的集合与版本对应一个条目，链接参考页面、其 Markdown 和已发布的规范。通过查询参数选中的版本会列在其查询 URL 下，例如 `/pets/?version=v1`；当它不是默认版本时，没有 Markdown 链接。
+
+每个规范都发布为单个自包含的 JSON 文件，位于其挂载路径，例如 `/pets/openapi.json`，引用的文件内嵌在 `x-ext` 下。发现清单会列出每个可见的规范。主页的 `Link` 响应头只列出每个族群的默认参考与规范，以及该目录。
+
+在集合或某个版本上设置 `publishSpec: false` 可使其规范不被发布；目录仍会链接其文档。无法打包的规范会被跳过并给出警告。隐藏版本会发布其文件，但不会在任何地方列出。
+
+目录文件没有扩展名，因此忽略 `_headers` 的主机需要自行设置规则，为其媒体类型以及 HEAD 请求上的 `Link` 响应头。
+
+## Markdown 协商
+
+在服务端输出下，请求时渲染的页面会针对 `Accept: text/markdown`，在同一 URL 返回与其 `index.md` 相同的 Markdown。两种形式都会发送 `Vary: Accept`。只有当 Markdown 的优先级高于响应头中的每个 HTML 和通配符类型时，它才胜出，因此浏览器的 `*/*` 和 `text/plain` 仍会得到 HTML。一旦某个集合在请求时渲染，主页也会进行协商。
+
+Cloudflare 通过其 assets 绑定读取已发布的 Markdown。其他适配器会从 Nimbus 的 `site` 所指向的源站获取，而不是从请求的 Host 获取，因此请将静态 Markdown 与服务端一起部署，并把 `site` 设为部署的源站地址（包括预览环境）。
+
+请求时渲染的 API 集合需要 Cloudflare。在其他适配器上，请在构建时渲染 API 集合，在请求时渲染正文集合。
+
+例如，Node 部署使用官方 [Astro Node 适配器](https://docs.astro.build/en/guides/integrations-guide/node/)：
+
+```ts title="astro.config.ts"
+import node from "@astrojs/node";
+import { defineConfig } from "astro/config";
+import nimbus, { defineConfig as defineNimbusConfig } from "@cloudflare/nimbus-docs";
+
+export default defineConfig({
+  output: "server",
+  adapter: node({ mode: "standalone" }),
+  integrations: [nimbus(defineNimbusConfig({
+    site: "https://docs.example.com",
+    title: "Example",
+    rendering: { collections: { docs: "request" } },
+  }))],
+});
+```
+
+使用官方 Netlify 或 Vercel 适配器时，沿用同样的 Nimbus 渲染策略，并按该适配器的部署说明操作。静态输出、发现资源、Skills 和浏览器搜索都不需要服务器适配器。
+
+```sh
+curl -i -H 'Accept: text/markdown, text/html;q=0.9' https://docs.example.com/guide/
+curl -I -H 'Accept: text/markdown' https://docs.example.com/guide/
+```
+
+预渲染页面和静态站点返回 HTML：主机在任何中间件运行之前就已提供该文件。对于这些情况，Cloudflare 的 [Markdown for Agents](https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/) 会在平台层面进行协商并转换 HTML。资源、API 端点和未知路由会原样通过。
+
+## Agent Skills
+
+在项目根目录添加 `skills/<name>/SKILL.md` 文件夹，采用 [Agent Skills](https://agentskills.io/specification) 格式，Nimbus 会把它们发布到 `/.well-known/agent-skills/`。索引遵循发现规范 RFC v0.2.0，并为每个条目给出 SHA-256 摘要。
+
+单文件技能以其 `SKILL.md` 形式发布；多文件技能发布为 `.tar.gz`，根目录包含 `SKILL.md`。发现清单会列出该索引，除非 `agents.discovery` 为 `false`。
+
+frontmatter 违反规范的技能会被跳过，构建警告会指明该文件夹和违反的规则。点开头的文件不会包含在归档中，符号链接会被跳过。没有 `skills/` 文件夹时不会发布任何内容。
+
+例如，创建 `skills/getting-started/SKILL.md`：
+
+```md
+---
+name: getting-started
+description: Help a user install and configure the example project.
+---
+
+# Getting started
+
+Read the installation guide before changing project configuration.
+```
+
+运行生产构建，然后检查 `/.well-known/agent-skills/index.json`，并取回每个公布的产物。删除技能文件夹后，下次构建就会停止发布它。若生成的发现路径与 Skills 路径上已存在公开文件或路由，构建会报错，并给出移动或删除的指引。
+
+## 浏览器智能体搜索
+
+脚手架通过 `document.modelContext`（[WebMCP](https://webmachinelearning.github.io/webmcp/)，一个实验性的浏览器 API）注册了 `search_documentation` 工具。它搜索站点的 Pagefind 索引，返回分区标题、带锚点的 URL 和纯文本摘要，可见性规则与站点搜索相同。在智能体调用该工具之前不会加载任何内容，不支持该 API 的浏览器什么也不做。
+
+设置了 `search: false` 或使用自定义提供者的站点不会注册工具。索引来自生产构建，因此在开发环境中该工具会返回 `index_unavailable`。需要 Pagefind 1.5.2 或更新版本。已有站点从脚手架复制 `WebMCP.astro`，并在 `BaseLayout.astro` 的 `<head>` 中渲染它。
+
+浏览器工具与部署提供者无关。它使用实验性的 `Document.modelContext` API，而不是 `Navigator.modelContext`，也不是远程 MCP 服务器或浏览器 polyfill。没有该 API 的浏览器保留普通搜索，不会注册智能体工具。
+
+智能体使用如下 JSON 调用注册的工具：
+
+```json
+{ "query": "installation", "limit": 5 }
+```
+
+| 字段 | 规则 |
+|---|---|
+| `query` | 必填。不能为空，最多 500 个字符。 |
+| `limit` | 1 到 20 的整数。默认 5。 |
+| `version` | 仅带版本的站点：可见版本之一。不传时，已弃用的版本会被排除。 |
+
+草稿、隐藏版本和 `noindex` 页面不会被搜索，除非页面设置了 `searchable: true`。每个结果包含 `title`、`heading`、带锚点的 `url`，以及不超过 1,000 个字符的纯文本 `excerpt`。
+
+### 搜索失败与恢复
+
+| 代码 | 含义与处理 |
+|---|---|
+| `invalid_input` | 重试前修正查询、limit 或可见版本。 |
+| `index_unavailable` | 搜索资源无法加载，或 Pagefind 版本不兼容。检查连接并重新加载。站点所有者应确认生产构建的完整 Pagefind 输出已部署；收到提示时升级到 Pagefind 1.5.2 或更新版本。 |
+| `search_failed` | 搜索执行、结果加载或搜索代码的懒加载失败。资源恢复后重试执行失败的情况；如果代码仍无法加载，请重新加载页面。 |
+
+## 页面如何被索引
+
+每个页面集合都会被索引：用 `docsCollection()`、`componentsCollection()` 或 `withNimbusMarkdown()` 加载器创建的集合，以及 API 集合。存在 `title` 和 `description` 时，Nimbus 会读取它们。普通数据集合不会被索引，隐藏版本会被排除。
+
+备用 Markdown/MDX 版本和 `llms.txt` 索引使用公开的智能体端点资源。请求时的授权无法在这里保证私有内容的安全。请把私有内容放在公开内容集合之外。Nimbus 会省略被排除的条目，并在无法判断内容是否公开时使构建失败。
+
+要让页面**不**出现在 `llms.txt` 索引中，请设置 `draft: true`（完全排除）或 `noindex: true`。永远不应被智能体读取的页面应放在内容集合之外。
+
+### 自定义内容加载器
+
+Nimbus 的集合工厂会自动准备 Markdown。如果自定义加载器为备用 Markdown 版本或 `llms-full.txt` 保留 Markdown 正文，请用 `@cloudflare/nimbus-docs/content` 的 `withNimbusMarkdown()` 包装它。完整示例参见[其他集合](/writing/collections/#add-a-collection)。
+
+## 路由设置
+
+新项目已包含这些路由。要在现有项目中添加或更新它们，请参阅 [Markdown 与 llms.txt 端点](/ai/publish-markdown/)。
+
+## AGENT.md
+
+脚手架会在项目根目录写入 `AGENT.md`——也就是编码智能体在你的仓库中工作时读取的同一份上下文。它是你维护的真实文件，请让它与项目的约定保持同步。
+
+## 为什么重要
+
+在智能体网络中成为死角的代价真实且不断上升。由于这些文件和元数据都是默认提供的，Nimbus 站点从发布第一天起就能被智能体读懂——面向人类搜索的部分参见[元数据与 SEO](/publish/metadata-and-seo/)。

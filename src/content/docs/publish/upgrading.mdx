@@ -1,0 +1,97 @@
+---
+title: "升级"
+description: "升级 Nimbus 包、运行迁移，并采纳起始模板与注册表的变更。"
+sidebar:
+  order: 4
+---
+
+一个 Nimbus 版本包含两部分：`@cloudflare/nimbus-docs` 包，像普通依赖一样升级；以及起始模板和注册表文件的变更，它们位于你的仓库中，只有你采纳时才会改变。本页介绍这两部分，`nimbus-docs migrate` 会列出你的版本跳跃所需的每个步骤。[所有权](/styling/how-customization-works/)解释了它们为什么分开。
+
+先提交你的工作，这样升级做出的每项改动都会显示在 `git diff` 中。
+
+1. **更新包**
+
+   ```sh
+   npm i @cloudflare/nimbus-docs@latest
+   yarn add @cloudflare/nimbus-docs@latest
+   pnpm add @cloudflare/nimbus-docs@latest
+   bun add @cloudflare/nimbus-docs@latest
+   ```
+2. **运行迁移**
+
+   ```sh
+   npx @cloudflare/nimbus-docs migrate
+   yarn nimbus-docs migrate
+   pnpm nimbus-docs migrate
+   bunx @cloudflare/nimbus-docs migrate
+   ```
+
+   `migrate` 会比较你的站点上次审查的版本（记录在 `nimbus.json` 中）与你安装的版本。它会列出：
+
+   - **迁移项**：可以应用到你的代码，例如重命名的选项。写入前会询问；`--dry-run` 和 `--diff` 只展示计划而不写入。
+   - **必需的升级审查**：你必须手动完成的变更，每项都包含受影响的文件、要做什么以及如何检查。
+   - **可选的升级条目**：你现在或以后可以采纳的改进，例如重新设计的组件。
+
+   逐项完成必需的审查。然后运行 `migrate` 最后打印的命令 `migrate --yes`，把新版本记录到 `nimbus.json`。如果 `nimbus.json` 没有说明你来自哪个版本，请传入：`migrate --from 0.17.0`。
+3. **采纳起始模板变更**
+
+   ```sh
+   npx @cloudflare/nimbus-docs outdated
+   yarn nimbus-docs outdated
+   pnpm nimbus-docs outdated
+   bunx @cloudflare/nimbus-docs outdated
+   ```
+
+   `outdated` 会列出起始模板文件（例如布局和 `globals.css`）自你的站点创建以来在上游发生的变更。对于未编辑过的文件，采纳新版本：
+
+   ```sh
+   npx @cloudflare/nimbus-docs diff src/layouts/DocsLayout.astro --apply
+   yarn nimbus-docs diff src/layouts/DocsLayout.astro --apply
+   pnpm nimbus-docs diff src/layouts/DocsLayout.astro --apply
+   bunx @cloudflare/nimbus-docs diff src/layouts/DocsLayout.astro --apply
+   ```
+
+   对于编辑过的文件，运行不带 `--apply` 的 `diff` 查看两组变更，然后手动合并。
+4. **采纳注册表变更**
+
+   对于通过 `nimbus-docs add` 安装的组件，重新安装 `outdated` 列出的那些：
+
+   ```sh
+   npx @cloudflare/nimbus-docs add api-layout --overwrite
+   yarn nimbus-docs add api-layout --overwrite
+   pnpm nimbus-docs add api-layout --overwrite
+   bunx @cloudflare/nimbus-docs add api-layout --overwrite
+   ```
+
+   `--overwrite` 会替换未编辑的文件，并对编辑过的文件询问。没有终端时，它会保留编辑过的文件并列出它们。
+
+## 验证
+
+```sh
+npx @cloudflare/nimbus-docs check
+yarn nimbus-docs check
+pnpm nimbus-docs check
+bunx @cloudflare/nimbus-docs check
+```
+
+```sh
+npm run build
+yarn run build
+pnpm run build
+bun run build
+```
+
+`check` 无错误退出，构建通过，并且 `outdated` 不列出必需的包 API 工作。浏览站点，然后提交。
+
+## 如果出问题
+
+- 命名了重命名选项或已移除辅助函数的构建错误通常有对应迁移：再次运行 `migrate` 并阅读输出。
+- 来自你拥有的文件（例如布局）的错误，意味着它需要上游变更：用 `diff <file>` 比较。
+
+各包的变更日志（位于 [npm](https://www.npmjs.com/package/@cloudflare/nimbus-docs) 和仓库中）列出了每个版本的变化。
+
+## 后续步骤
+
+- [故障排查](/publish/troubleshooting/)：按错误原文整理常见错误。
+- [所有权](/styling/how-customization-works/)：升级会触及哪些文件。
+- [CLI](/cli/)：`outdated`、`diff` 和 `migrate` 的每个参数。

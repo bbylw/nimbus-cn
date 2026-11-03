@@ -1,0 +1,77 @@
+---
+title: "可复用片段"
+description: "只写一次内容，在多个页面中引用，并集中维护。"
+sidebar:
+  order: 5
+---
+
+片段（partial）是可复用的内容块。写一次片段，在多页中引用，只需在一个地方编辑。
+
+## 编写片段
+
+片段放在 `src/content/partials/`，格式为 `.md` 或 `.mdx`，并在 `src/content.config.ts` 中注册为集合：
+
+```ts title="src/content.config.ts"
+import { defineCollection } from "astro:content";
+import { partialsCollection } from "@cloudflare/nimbus-docs/content";
+
+export const collections = {
+  partials: defineCollection(partialsCollection()),
+};
+```
+
+```md title="src/content/partials/install-note.md"
+Nimbus requires Node 22.12 or later and any package manager.
+```
+
+## 引用片段
+
+`<Render>` 位于默认注册表。用片段的 id 引用它——即 `src/content/partials/` 下的路径，不含扩展名：
+
+```mdx
+<Render file="install-note" />
+<Render file="workers/setup" />
+```
+
+如果在渲染规范 HTML 时 id 无法解析，`Render.astro` 会失败，并给出 "did you mean..." 建议和可用片段列表。生成的 Markdown 构建会按 id 报告缺失的已准备片段。
+
+Nimbus 会在生成的 Markdown 中展开片段，并在构建时合并它们的标题。循环或缺失的片段、非静态或缺失的 `file`、无效的 `params`、未声明的参数，以及被排除或未知的可见性决定，都会在部署前导致构建失败。
+
+### 自定义片段 ID
+
+如果 `<Render>` 上的属性决定片段所在位置，请在 Nimbus 集成上配置一个解析器：
+
+```ts title="astro.config.ts"
+nimbus(config, {
+  markdown: {
+    partialResolver: {
+      revision: "product-v1",
+      resolve: ({ file, product }) =>
+        product ? `${product}/${file}` : file,
+    },
+  },
+});
+```
+
+该解析器控制替代 Markdown 版本、`llms-full.txt` 和已准备标题中的片段 ID。当它的输出规则变化时，请修改 `revision`，以便 Nimbus 重新构建受影响的 Markdown。
+
+`Render.astro` 归用户所有，会单独解析规范 HTML 片段。如果自定义了片段 ID，请把解析函数移到项目的共享文件，并在 `astro.config.ts` 和 `Render.astro` 中于 `getVisibleEntry("partials", id)` 之前调用它。这样 HTML、标题和生成的 Markdown 才能保持一致。
+
+不支持路由级的 `partialHeadings` 选项。请在集成上配置已准备标题的解析，以免按请求渲染的页面打包生成 Markdown 和标题逻辑。用户拥有的 `Render.astro` 仍会作为 HTML 页面的一部分加载并渲染选中的片段。
+
+## 参数
+
+在片段的 frontmatter 中声明接受的参数——可选参数以 `?` 结尾。它们以 props 形式传入，只有 `.mdx` 片段能读取：`.md` 片段是纯 Markdown，会原样显示 `{props.runtime}`。
+
+```mdx title="src/content/partials/runtime-note.mdx"
+---
+params: [runtime, version?]
+---
+This page targets the {props.runtime} runtime.
+```
+
+```mdx
+<Render file="runtime-note" params={{ runtime: "node" }} />
+```
+
+缺少必需参数和出现意外参数名都会导致构建失败并给出明确信息——片段是类型化契约，而非字符串插值。

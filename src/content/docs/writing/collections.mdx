@@ -1,0 +1,93 @@
+---
+title: "集合"
+description: "注册额外的内容集合，并控制其路由与 URL。"
+sidebar:
+  order: 2
+---
+
+## 添加集合
+
+`src/content/docs/` 是主集合，挂在站点根路径。其他集合（`blog`、`api`、带版本的 `docs-v2`）在各自的 URL 上提供：取决于其路由文件的位置，默认是 `/<name>`（见[集合 URL](#collection-urls)）。在 `src/content.config.ts` 中用 `@cloudflare/nimbus-docs/content` 的工厂函数注册它们。
+
+Nimbus 的 `docsCollection()`、`partialsCollection()` 和 `componentsCollection()` 工厂会自动为内容准备链接、替代 Markdown/MDX 版本、`llms-full.txt` 和片段标题。如果你注册的 loader 直接存储 Markdown 正文，请用 `withNimbusMarkdown()` 包装它：
+
+```ts title="src/content.config.ts"
+import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
+import { withNimbusMarkdown } from "@cloudflare/nimbus-docs/content";
+
+export const collections = {
+  blog: defineCollection({
+    loader: withNimbusMarkdown(
+      glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
+    ),
+  }),
+};
+```
+
+包装器保留 loader 的方法与生命周期。当 loader 以 Markdown `body` 存储条目时使用它。
+
+页面集合的文件可以放在任何位置。内容位于另一个仓库或 CMS 时，见[来自另一个仓库的内容](/content-sources/git/)。
+
+- **`src/` 之外的文件夹**（例如 monorepo 中的共享文件夹）与 `src/content` 下的页面完全一样地工作。
+- **没有文件的 loader**（例如 CMS）同样会获得路由、侧边栏、引用、链接、Markdown 版本、`llms.txt` 和搜索。它的页面只有 Markdown，因此没有提示框或组件，lint 也会跳过它。它必须自行拒绝重复 id，因为没有文件时 Nimbus 无法区分冲突和更新。
+
+两个文件使用相同 slug 会导致构建失败。
+
+用 `docsCollection()`、`componentsCollection()` 或 `withNimbusMarkdown()` loader 创建的集合会变成页面：有路由，并进入搜索、sitemap、`llms.txt` 和 Markdown 版本。`apiCollection()` 对 API 参考做同样的事，使用 Nimbus 的渲染器。
+
+其他所有集合都是普通 Astro 数据。Nimbus 不会干预，`getCollection()` 照常工作。集合名称本身没有含义。
+
+## 集合 URL
+
+集合在其路由文件所在的位置提供。把路由放在 `src/pages/products/sdk/[...slug].astro`，`sdk` 集合就在 `/products/sdk/…` 下提供：包括页面、侧边栏、面包屑、Markdown 版本、`llms.txt`、sitemap、搜索、社交卡片，以及 API 的 `openapi.json` 和 API 目录。没有配置键；移动分区就是移动它的文件夹。
+
+```astro title="src/pages/products/sdk/[...slug].astro"
+---
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import { getCollectionPage, getCollectionStaticPaths } from "@cloudflare/nimbus-docs/runtime";
+
+export const getStaticPaths = getCollectionStaticPaths("sdk");
+
+const page = await getCollectionPage(Astro, "sdk");
+if (page instanceof Response) return page;
+const { entry, Content, headings, markdownUrl, ogImageUrl } = page;
+// 其余部分与根 src/pages/[...slug].astro 相同：侧边栏、上一页和下一页、布局。
+---
+```
+
+`nimbus-docs add new-collection` 会为你写好整个路由。相对导入（例如布局的导入）每深入一层文件夹就要多一个 `../`。
+
+Nimbus 从路由导出的 `getStaticPaths` 读取集合：`getCollectionStaticPaths("…")`、`getApiStaticPaths("…")` 或 `getDocsStaticPaths`，直接赋值（`export const getStaticPaths = …`），或从 `export async function getStaticPaths()` 返回。每个集合路由还要在页面辅助函数中指明集合：`getCollectionPage(Astro, "sdk")`，以及 `getCollectionPageProps`、`getApiRoute` 和 `getApiPage`。这正是按请求渲染的路由所需要的，因为这类路由没有 `getStaticPaths`；在构建时路由上也指明集合，可以让同一个文件在两种模式下保持一致。名称必须匹配。`docs` 路由使用 `getDocsPage(Astro)`，其名称本身就表示集合。请传字符串字面量，或保存字面量的导出常量。Astro 会单独运行 `getStaticPaths`，因此它在顶层使用的任何内容都必须被导入或导出（`export const name = "sdk"`）；`export { getStaticPaths }` 无法编译。
+
+Nimbus 无法读取的路由（例如从其他模块导入的包装器）会让集合停留在默认 URL。嵌套文件夹中的这类路由会在构建和 `check` 时警告（`nimbus/collection-unread-route`）；其页面在渲染时会导致构建失败，并指出该路由。
+
+规则如下：
+
+- `docs` 在站点根路径提供，docs 版本（`docs-v1`）在 `/v1` 提供。暂不支持把 docs 路由放在根路径之外；如果整个站点都位于一个路径下，请设置 Astro 的 `base`（`base: "/docs"`）。
+- 任何其他带路由的集合在其路由文件夹处提供，包括根路径。没有路由时，和以前一样在 `/<name>` 提供。
+- 一个路由文件服务一个集合。动态文件夹下的路由（`src/pages/[locale]/sdk/[...slug].astro`）不设定 URL；除 `docs` 以外的集合如果只由这类路由提供，即为错误。按请求渲染时，这类路由根据页面之前的 URL 段找到集合，因此它只服务位于单段 URL（`/sdk`）的集合。
+- 一个集合有多个静态路由时，位于其默认 URL 的路由负责提供。其他路由仍会构建页面（或按请求渲染集合时提供页面），它们会在 sitemap 和搜索中重复该集合的内容，因此构建和 `check` 会警告（`nimbus/collection-alias-route`）；请删除或重定向它们。默认 URL 处没有路由则是错误。
+- 路由移动后的集合拥有其 URL 之下的一切。`/products/sdk` 下另一个集合的页面是错误，除非它位于嵌套更深的集合下（`/products/sdk/cli` 属于它自己）。位于默认 URL（`/sdk`）的集合则让其下的页面保持原状。
+- API 集合可以在站点根路径提供，适用于只有 API 参考的站点：把它的路由放在 `src/pages/[...slug].astro`，并省略 `docs`。
+
+当路由移动了集合时，`nimbus-docs check` 会列出每个集合的提供位置，`check --json` 始终以 `collections` 字段包含该列表。
+
+要在组件中链接到集合，使用 `getCollectionUrl`，它返回不含 `base` 的 URL。传入非页面集合的名称会导致构建失败：
+
+```astro
+---
+import { getCollectionUrl, withBase } from "@cloudflare/nimbus-docs/runtime";
+const sdkHref = withBase(await getCollectionUrl("sdk"), import.meta.env.BASE_URL);
+---
+```
+
+移动路由会移动该集合中的每个 URL，因此要为旧 URL 添加[重定向](/navigation/redirects/)。在此之前，`nimbus-docs lint` 会把指向它们的链接报告为失效，并给出新的 URL。处理之后，[`nimbus/redirected-link`](/writing/linting/) 会找出仍然经过重定向的链接。
+
+在 `astro dev` 中，移动路由文件会重启服务器，并记录需要添加的重定向。那次重启之后，如果内容编辑不再显示，请自行重启开发服务器。
+
+嵌套在 docs 文件夹内的集合会出现在该文件夹内的侧边栏、面包屑和上一页/下一页链接中；见[在文件夹中显示集合](/navigation/sidebar/#show-a-collection-inside-a-folder)。
+
+嵌套集合自己的 `llms.txt` 需要起始模板的 `src/pages/[...section]/llms.txt.ts` 路由。如果使用 `[section]` 路由，根 `llms.txt` 会列出该集合的页面。
+
+构建和 `nimbus-docs check` 会报告集合路由错误，并给出文件和修复方法。所有代码见[构建与检查发现](/reference/lint-rules/#build-and-check-findings)。

@@ -1,0 +1,70 @@
+---
+title: "部署到其他主机"
+description: "部署到任意静态托管，或在 Netlify、Node、Vercel 上运行服务器。"
+sidebar:
+  order: 2
+---
+
+Nimbus 站点默认构建为静态文件，因此任何能提供文件的主机都能运行它。Astro 的[部署指南](https://docs.astro.build/en/guides/deploy/)涵盖各主机的设置。
+
+## 前置条件
+
+- 一个 Nimbus 站点。用 `--deploy other` 创建可跳过 Cloudflare 文件，或从现有站点删除 `wrangler.jsonc` 以及 `deploy`、`predeploy` 和 `preview:cf` 脚本。
+
+## 步骤
+
+1. **设置站点地址**
+
+   在 `astro.config.ts` 中，把 Nimbus 配置里的 `site` 设为读者将使用的地址。在 Netlify 和 Vercel 的生产构建中，当 `site` 仍是占位符时，Nimbus 会从主机读取地址。
+2. **构建**
+
+   ```sh
+   npm run build
+   yarn run build
+   pnpm run build
+   bun run build
+   ```
+3. **发布输出**
+
+   将 `dist/` 目录上传到主机，或把主机的构建设置指向 `npm run build`，并把 `dist` 作为输出目录。
+
+## 验证
+
+打开部署后的地址，然后打开首页的 Markdown 版本 `/index.md`。两者都能加载：主机正在提供 HTML 和智能体文件。
+
+## 使用服务器
+
+[按请求渲染](/reference/rendering/)、[远程 MCP 服务器](/ai/remote-mcp/)和[页面 URL 上的 Markdown](/ai/markdown-negotiation/)需要服务器。为你的主机添加适配器：
+
+```sh
+npx @cloudflare/nimbus-docs add adapter-node
+yarn nimbus-docs add adapter-node
+pnpm nimbus-docs add adapter-node
+bunx @cloudflare/nimbus-docs add adapter-node
+```
+
+对于 Netlify 或 Vercel，使用 `adapter-netlify` 或 `adapter-vercel`。在 Node 上，安装器会添加一个 `start` 脚本 `node ./dist/server/entry.mjs`。要创建带服务器的新站点，向脚手架传入 `--adapter`。
+
+## 重定向与响应头
+
+`astro.config.ts` 中的重定向会应用于所有主机。旧的 Markdown 和 `llms.txt` URL 也需要主机规则；参见[重定向](/navigation/redirects/#host-level-redirects)。Nimbus 会把响应头写入 `_headers`，Cloudflare 和 Netlify 以外的主机可能会忽略它；请在主机自身的配置中设置[发现响应头](/ai/agent-discovery/#homepage-link-header)。
+
+## 从 CI 部署
+
+"最后更新"行和 sitemap 的日期来自 git 历史，而大多数 CI 系统只克隆最新提交。在 GitHub Actions 的 checkout 步骤设置 `fetch-depth: 0`，或在构建前运行 `git fetch --unshallow`。
+
+## GitHub Pages
+
+本站就是通过 GitHub Pages 发布的，可以作为最小可用的参考：
+
+- `.github/workflows/deploy.yml` 在每次推送到 `main` 时用 Bun 安装依赖、执行 `bun run build`，并把 `dist/` 作为 Pages 产物上传。
+- 仓库的 **Settings → Pages** 中，Source 选择 **GitHub Actions**。
+- 自定义域名在 Pages 设置中填写（本站为 `nimbus.ndjp.net`），并添加对应的 DNS 记录：四条 A 记录指向 GitHub Pages 的地址，或一条 CNAME 指向 `<owner>.github.io`。
+- 证书签发后启用 **Enforce HTTPS**，HTTP 请求会自动 301 到 HTTPS。
+
+如果站点部署在子路径而不是自定义域名根路径，请先阅读[在路径下提供服务](/deploy/base-path/)。
+
+## 后续步骤
+
+- [在路径下提供服务](/deploy/base-path/)：发布到 `example.com/docs/`。
+- [元数据与 SEO](/publish/metadata-and-seo/)：标题、分享卡片和 sitemap。

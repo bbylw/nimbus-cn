@@ -1,0 +1,72 @@
+---
+title: "发布 Agent Skills"
+description: "在 skills/<name>/SKILL.md 编写技能，让 Nimbus 把它们发布到 /.well-known/agent-skills/。"
+sidebar:
+  order: 7
+---
+
+[Agent Skill](https://agentskills.io/specification) 是一个说明文件夹，编码智能体在任务需要时会加载它。Nimbus 会把项目中的技能发布到 `/.well-known/agent-skills/`，因此找到你站点的智能体可以安装它们。
+
+## 前置条件
+
+- 能用 `npm run build` 构建的 Nimbus 站点
+
+## 步骤
+
+1. **创建技能文件夹**
+
+   在项目根目录创建 `skills/getting-started/`。文件夹名就是技能名。
+2. **编写技能**
+
+   创建 `skills/getting-started/SKILL.md`：
+
+   ```md title="skills/getting-started/SKILL.md"
+   ---
+   name: getting-started
+   description: Help a user install and configure the example project.
+   ---
+
+   # Getting started
+
+   Read the installation guide before changing project configuration.
+   ```
+
+   `name` 必须与文件夹名一致。技能需要时，可在 `SKILL.md` 旁添加脚本或参考文件。
+3. **构建站点**
+
+   ```sh
+   npm run build
+   ```
+
+## 验证
+
+打开 `dist/.well-known/agent-skills/index.json`（使用服务器适配器时为 `dist/client/`）。它会列出 `getting-started` 及其 SHA-256 摘要：
+
+```json
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "name": "getting-started",
+      "type": "skill-md",
+      "description": "Help a user install and configure the example project.",
+      "url": "/.well-known/agent-skills/getting-started/SKILL.md",
+      "digest": "sha256:<hash>"
+    }
+  ]
+}
+```
+
+如果技能缺失，构建会输出警告，指明该文件夹以及其 frontmatter 违反的规则。修正 frontmatter 后重新构建。
+
+## 技能如何发布
+
+- 只有 `SKILL.md` 的技能以该文件发布。包含更多文件的技能发布为 `.tar.gz`，根目录带 `SKILL.md`。
+- 以点开头的文件不会包含在归档中，符号链接会被跳过。
+- 删除技能文件夹后，下次构建就会移除它。
+- 该索引会列在[发现清单](/ai/agent-discovery/#discovery-manifest)中，除非 `agents.discovery` 为 `false`。
+
+## 后续步骤
+
+- [智能体发现](/ai/agent-discovery/)：智能体用来找到站点的其他文件。
+- [远程 MCP 服务器](/ai/remote-mcp/)：让智能体通过 MCP 读取文档。

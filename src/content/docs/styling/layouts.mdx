@@ -1,0 +1,52 @@
+---
+title: "布局"
+description: "认识 BaseLayout 与 DocsLayout 两个外壳，并用页面级或全站开关关闭侧边栏和目录列。"
+sidebar:
+  order: 4
+---
+
+布局是 `src/layouts/` 中归用户所有的 `.astro` 文件。脚手架会写入它们；你可以自由编辑。
+
+## 外壳
+
+- **`BaseLayout`**——外层外壳：`<html>`、`<head>`、主题启动、字体预加载、元数据。所有内容都在其中渲染。
+- **`DocsLayout`**——文档页结构：侧边栏栏位、内容列、目录、面包屑、上一页/下一页。内容页的默认布局。
+
+因为这些文件归你所有，移除某块界面元素的方式就是把它从布局中删除——从 `DocsLayout` 中去掉 `<Pagination />`，全站就不再显示。
+
+## 按页面开关
+
+Frontmatter 可以在不碰布局的情况下关闭单个列：
+
+```yaml
+---
+title: Wide page
+sidebar: false           # hide the sidebar rail
+tableOfContents: false   # hide the TOC column
+---
+```
+
+对于完全不需要文档框架的页面——落地页或营销页——使用 `mode: custom`：
+
+```yaml
+---
+title: Welcome
+mode: custom
+---
+```
+
+## 全站开关
+
+Nimbus 配置中的 `features` 块会在全站关闭某一列。合并逻辑是 AND——只有全站标志和页面字段都为真时才渲染该列：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  // …
+  features: {
+    sidebar: true,
+    tableOfContents: false,   // no TOC on any page
+  },
+});
+```
+
+无法通过单页设置覆盖全站的 `false`：全站关闭某一列后，它就保持关闭。

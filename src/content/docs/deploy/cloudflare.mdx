@@ -1,0 +1,66 @@
+---
+title: "部署到 Cloudflare"
+description: "使用脚手架自带的 Workers Static Assets 配置，把站点发布到 Cloudflare。"
+sidebar:
+  order: 1
+---
+
+脚手架会为每个新站点配置好 Cloudflare：一个 `wrangler.jsonc`，通过 Workers Static Assets 提供构建后的 `dist/` 目录，以及一个 `deploy` 脚本。静态站点不需要 Astro 适配器。
+
+## 前置条件
+
+- 使用[快速上手](/quickstart/)创建的站点，且未使用 `--deploy other`
+- 一个 Cloudflare 账户
+
+## 步骤
+
+1. **设置站点地址**
+
+   在 `astro.config.ts` 中，把 Nimbus 配置里的 `site` 设为读者将使用的地址。`nimbus-docs check` 在它仍是占位符时会给出警告。
+2. **部署**
+
+   ```sh
+   npm run deploy
+   yarn run deploy
+   pnpm run deploy
+   bun run deploy
+   ```
+
+   `predeploy` 会先运行 `astro check` 和 `astro build`。首次运行会打开浏览器登录 Cloudflare。
+
+## 验证
+
+完成时 Wrangler 会打印站点地址：
+
+```text
+Deployed my-docs triggers (<n> sec)
+  https://my-docs.<your-subdomain>.workers.dev
+```
+
+打开它：你的站点，和本地运行时一样。要在部署前检查生产构建，运行 `npm run preview:cf`，它会用 `wrangler dev` 按 Cloudflare 的方式提供站点。
+
+## 使用自己的域名
+
+在 Cloudflare 控制台中，为 Worker 添加自定义域名。然后把 `site` 设为该域名并再次部署。
+
+## 使用服务器
+
+[按请求渲染](/reference/rendering/)、[远程 MCP 服务器](/ai/remote-mcp/)和[页面 URL 上的 Markdown](/ai/markdown-negotiation/)需要服务器。添加 Cloudflare 适配器：
+
+```sh
+npx @cloudflare/nimbus-docs add adapter-cloudflare
+yarn nimbus-docs add adapter-cloudflare
+pnpm nimbus-docs add adapter-cloudflare
+bunx @cloudflare/nimbus-docs add adapter-cloudflare
+```
+
+脚本保持不变：`deploy` 会构建并发布 Worker。要创建带服务器的新站点，向脚手架传入 `--adapter cloudflare`。
+
+## 从 CI 部署
+
+"最后更新"行和 sitemap 的日期来自 git 历史，而大多数 CI 系统只克隆最新提交。在 GitHub Actions 的 checkout 步骤设置 `fetch-depth: 0`，或在构建前运行 `git fetch --unshallow`。
+
+## 后续步骤
+
+- [在路径下提供服务](/deploy/base-path/)：发布到 `example.com/docs/`。
+- [元数据与 SEO](/publish/metadata-and-seo/)：标题、分享卡片和 sitemap。

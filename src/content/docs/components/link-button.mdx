@@ -1,0 +1,48 @@
+---
+title: "LinkButton"
+description: "外观与按钮一致的链接，提供 primary、secondary、minimal 三种变体与三档尺寸。"
+sidebar:
+  order: 20
+---
+
+LinkButton 渲染一个样式与 Button 相同的 `<a>`，用于跳转而不是触发页面内操作。变体决定强调程度，尺寸与形状覆盖从行内链接到纯图标按钮的各种场景。
+
+## 安装
+
+```bash
+nimbus-docs add link-button
+```
+
+源码位于 `src/components/ui/link-button/`。安装时会一并带上注册表依赖：`button`、`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `href` | string | — | 是 | 目标 URL。 |
+| `variant` | `"primary"` \| `"secondary"` \| `"minimal"` | `"primary"` | 否 | 视觉样式。 |
+| `size` | `"sm"` \| `"md"` \| `"lg"` | `"md"` | 否 | 相对尺寸，影响内边距与字号。 |
+| `shape` | `"base"` \| `"square"` \| `"circle"` | `"base"` | 否 | 只放图标时用 `"square"` 或 `"circle"`，并传入 `aria-label`。 |
+| `icon` | boolean | `false` | 否 | 在末尾渲染一个悬停时轻微移动的 chevron。 |
+
+## 示例
+
+```mdx
+<LinkButton href="/start/" variant="primary">开始使用</LinkButton>
+<LinkButton href="/components/" variant="secondary">浏览组件</LinkButton>
+<LinkButton href="/writing/" variant="minimal" icon>了解更多</LinkButton>
+```
+
+只放图标的链接需要 `shape` 与 `aria-label`：
+
+```mdx
+import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
+
+<LinkButton href="/sitemap/" shape="circle" aria-label="站点地图">
+  <Icon name="ph:map-trifold" />
+</LinkButton>
+```
+
+样式来自 `button/variants`，与 `Button` 共用，因此两者的变体与尺寸一一对应：`minimal` 等价于 `ghost`，`md` 等价于 `base`。需要触发操作而不是跳转时，改用 [`Button`](/components/button/)。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

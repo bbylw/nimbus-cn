@@ -1,0 +1,40 @@
+---
+title: "Tabs"
+description: "标签页内容面板，可用 syncKey 在多组标签页之间同步选择。"
+sidebar:
+  order: 29
+---
+
+Tabs 把几段并列内容收进标签页：一次只显示一个面板，标签名由 `TabItem` 的 `label` 提供。给多个实例设置相同的 `syncKey` 后，切换一处会同步到页面上其他同组实例。
+
+## 安装
+
+```bash
+nimbus-docs add tabs
+```
+
+源码位于 `src/components/ui/tabs/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `syncKey` | string | — | 否 | 带有相同 `syncKey` 的多个实例会通过 `localStorage` 同步选中项。 |
+| `label` | string | — | 是 | `TabItem` 的属性，客户端据此生成对应的标签按钮。 |
+
+## 示例
+
+```mdx
+<Tabs syncKey="runtime">
+  <TabItem label="Node.js">
+    使用 `node` 运行构建产物。
+  </TabItem>
+  <TabItem label="Bun">
+    使用 `bun` 运行同一份产物。
+  </TabItem>
+</Tabs>
+```
+
+需要手动控制结构时，改用 `TabsList`、`TabsTrigger`、`TabsContent` 组合；标签页的选中状态保存在 `localStorage`，同步键相同的实例共享选择。
+
+Tabs、TabItem 已默认注册，可直接在 `.mdx` 中使用。

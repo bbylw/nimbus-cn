@@ -1,0 +1,66 @@
+---
+title: "图表与交互内容"
+description: "用无头 Diagram 封装与 hooks 构建读者可以探索的交互式图表。"
+sidebar:
+  order: 6
+---
+
+文档经常需要*展示*机制——请求如何流转、状态如何嵌套、线缆在哪里接入。Nimbus 把问题拆开：框架负责繁琐的生命周期，你负责渲染。
+
+## 无头封装
+
+`nimbus-docs/react` 提供一个无头的 `<Diagram>` 封装和可组合的 hooks——`usePhase`、`useMeasure`、`useTabIndicator`、`useDiagram`。封装处理那些难以做对的部分：离屏暂停、尊重减少动画偏好、键盘快捷键、错误边界和跨岛协调。它本身不渲染任何可见内容。
+
+下面是最小的完整示例——`usePhase` 走过两个步骤，渲染出的节点依次点亮。
+
+### 代码
+
+```tsx
+import { Diagram, usePhase } from "@cloudflare/nimbus-docs/react";
+import { DiagramControls } from "@/components/react/diagram";
+
+function PingPong() {
+  const { current } = usePhase({
+    steps: [{ id: "left", hold: 1500 }, { id: "right", hold: 1500 }],
+    loop: true,
+  });
+  return (
+    <div className="flex items-center justify-center gap-12 py-12">
+      <Node label="Left" active={current === "left"} />
+      <Node label="Right" active={current === "right"} />
+    </div>
+  );
+}
+
+export function Demo() {
+  return (
+    <Diagram label="Ping-pong">
+      <DiagramControls />
+      <PingPong />
+    </Diagram>
+  );
+}
+```
+
+## 外壳由你掌控
+
+操作栏、标签组和播放/暂停控件是**你拥有的视觉外壳**。它们通过注册表按需安装到 `src/components/react/diagram/`：
+
+```sh
+npx @cloudflare/nimbus-docs add diagram
+yarn nimbus-docs add diagram
+pnpm nimbus-docs add diagram
+bunx @cloudflare/nimbus-docs add diagram
+```
+
+可以随意编辑、改样式或替换它们——hooks 仍然可用。从不编写交互卡片的站点不会有任何开销：`react` 和 `react-dom` 是可选的 peer 依赖，只有在你导入 `nimbus-docs/react` 时才会加载。
+
+## 边界
+
+| 层 | 负责方 | 内容 |
+|---|---|---|
+| `<Diagram>` 与 hooks | `nimbus-docs/react` | 生命周期、状态、离屏暂停、减少动画、键盘、错误边界。 |
+| 外壳 | 你（注册表） | 操作栏、控件、标签指示器——复制到你的仓库中。 |
+| 渲染 | 你 | 几何、布局、图表所表达的语义主张。 |
+
+框架负责行为，你负责外观。在 MDX 中用 `client:visible` 指令嵌入结果，使其滚动进入视口时才水合。

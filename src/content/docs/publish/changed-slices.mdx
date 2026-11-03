@@ -1,0 +1,146 @@
+---
+title: "仅构建变更切片"
+description: "用脚本把拉取请求的变更路径映射到切片，并由 GitHub Actions 构建这些切片。"
+sidebar:
+  order: 3
+---
+
+在拆分为[部分构建](/publish/partial-builds/)的大型站点上，改动一个切片的拉取请求不需要重建其余部分。一个脚本把变更路径映射到切片，再由工作流构建每个切片。
+
+## 前置条件
+
+- 已拆分为切片、部署在同一主机名下的站点：见[部分构建](/publish/partial-builds/)
+- GitHub Actions
+
+## 将变更路径映射到切片
+
+把切片映射表集中在一处：
+
+```js title="scripts/pick-slice.mjs"
+// 从 stdin 读取变更路径（git diff --name-only --no-renames，因此
+// 在集合间移动的页面会同时列出新旧路径），并以 JSON 输出要构建的
+// 切片。集合内容文件夹之外的路径（组件、配置、片段、API 规范、
+// public/）会触及所有切片；`--all` 选择所有切片。
+import { readFileSync } from "node:fs";
+
+// `preview` 和 `deploy` 是主机对应的命令；这里是 Cloudflare 的命令。
+const SLICES = [
+  {
+    name: "docs-site",
+    only: "docs,api",
+    preview: "npx wrangler versions upload --config wrangler.jsonc",
+    deploy: "npx wrangler deploy --config wrangler.jsonc",
+  },
+  {
+    name: "docs-site-es",
+    only: "sdk",
+    preview: "npx wrangler versions upload --config wrangler.sdk.jsonc",
+    deploy: "npx wrangler deploy --config wrangler.sdk.jsonc",
+  },
+];
+
+const paths = process.argv.includes("--all")
+  ? ["astro.config.ts"]
+  : readFileSync(0, "utf8").split("\n").filter(Boolean);
+const picked = new Set();
+for (const path of paths) {
+  const collection = /^src\/content\/([^/]+)\//.exec(path)?.[1];
+  const slice =
+    collection && collection !== "partials"
+      ? SLICES.find((candidate) => candidate.only.split(",").includes(collection))
+      : undefined;
+  if (slice) picked.add(slice);
+  else for (const candidate of SLICES) picked.add(candidate);
+}
+console.log(JSON.stringify([...picked]));
+```
+
+```yaml title=".github/workflows/slices.yml"
+name: Slices
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  pick:
+    runs-on: ubuntu-latest
+    outputs:
+      slices: ${{ steps.pick.outputs.slices }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: pick
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git diff --name-only --no-renames "origin/${{ github.base_ref }}...HEAD" | node scripts/pick-slice.mjs
+          else
+            node scripts/pick-slice.mjs --all
+          fi | sed 's/^/slices=/' >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: pick
+    if: needs.pick.outputs.slices != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        slice: ${{ fromJSON(needs.pick.outputs.slices) }}
+    name: ${{ matrix.slice.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # 上一次全站构建的路由，用于指向其他切片的链接。
+      - uses: actions/cache/restore@v4
+        with:
+          path: .nimbus/routes.json
+          key: routes-${{ github.event.pull_request.base.sha || github.sha }}
+          restore-keys: routes-
+
+      - run: pnpm build
+        env:
+          NIMBUS_BUILD_ONLY: ${{ matrix.slice.only }}
+      - run: pnpm nimbus-docs lint
+
+      - if: github.event_name == 'pull_request'
+        run: ${{ matrix.slice.preview }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - if: github.event_name == 'push'
+        run: ${{ matrix.slice.deploy }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+  # 整个站点，每次推送运行一次：所有切片构建借用这份路由基准。
+  routes:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - uses: actions/cache/save@v4
+        with:
+          path: .nimbus/routes.json
+          key: routes-${{ github.sha }}
+```
+
+仅触及 `src/content/sdk/` 的拉取请求会构建并预览 `sdk` 切片；触及组件的拉取请求会构建所有切片。推送到 `main` 会部署所有切片，并保存整个站点的路由供下一次拉取请求使用。
+
+## 后续步骤
+
+- [部分构建](/publish/partial-builds/)：切片会写入什么，以及跨切片的搜索和链接。
+- [元数据与 SEO](/publish/metadata-and-seo/)：整个站点使用一个 sitemap。

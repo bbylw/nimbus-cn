@@ -1,0 +1,175 @@
+---
+title: "包 API"
+description: "路由和布局所调用的辅助函数：页面路由、导航、页面详情、URL、API 参考、集合、浏览器行为与 Markdown 插件。"
+sidebar:
+  order: 7
+---
+
+起始模板的路由和布局会调用这些辅助函数，你定制它们时也会调用。本页涵盖定制所需的那些；包的每个入口导出更多内容，其 TypeScript 类型记录了每个导出。包遵循 semver，`nimbus-docs migrate` 处理破坏性变更（[升级](/publish/upgrading/)）。
+
+## 页面路由
+
+来自 `@cloudflare/nimbus-docs`。起始模板的 `src/pages/[...slug].astro` 使用它们。
+
+| 辅助函数 | 作用 |
+| --- | --- |
+| `getDocsStaticPaths` | 文档集合的 `getStaticPaths`：每个页面一个路径。 |
+| `getDocsPage(Astro)` | 页面的条目、渲染后的 `Content` 和标题，或对请求渲染未命中返回 `404` `Response`。 |
+| `getRouteFlags(entry)` | 结合 frontmatter 和配置后，页面是否显示侧边栏和目录。 |
+| `entryRouteKey(id)` | 条目 id 对应的 URL 段，其中 `index` 被折叠。 |
+
+## 导航
+
+| 辅助函数 | 作用 |
+| --- | --- |
+| `getSidebar(slug, { collection })` | 页面的侧边栏树，标记当前页面及其分组。 |
+| `getSidebarSections(slug, { collection })` | 站点的一级分区，用于页头的分区标签页。 |
+| `getPrevNext(slug, { sidebarTree, overrides })` | 按侧边栏顺序的上一页和下一页，应用 `prev` 和 `next` frontmatter 之后。 |
+| `getBreadcrumbs(slug)` | 页面上方的分组路径。 |
+| `getTOC(headings, config)` | 页面的目录，来自其标题和 `tableOfContents` 设置。 |
+
+## 页面详情
+
+| 辅助函数 | 作用 |
+| --- | --- |
+| `getEditUrl(entry)` | 页面的编辑链接，来自 `editPattern`，否则为 `undefined`。 |
+| `getLastUpdated(entry)` | 页面最后一次 git 提交日期，git 无法确定时为 `undefined`。 |
+| `getVersionStatus(key)` | 版本是当前、已弃用还是隐藏，用于横幅。 |
+| `getCollectionLlmsUrl(collection)` | 索引某个集合的 `llms.txt`。 |
+
+## URL
+
+| 辅助函数 | 作用 |
+| --- | --- |
+| `withBase(path, base)` | 向站点路径添加 Astro 的 `base`，只添加一次。 |
+| `stripBase(pathname, base)` | 移除它。 |
+| `entryRouteKey(id)` | 条目的路由：其 id 去掉末尾的 `/index`。 |
+
+路由匹配使用逻辑的、不含 base 的路径；发送到浏览器的链接使用带 base 的路径：
+
+```ts
+import {
+  entryRouteKey,
+  stripBase,
+  withBase,
+} from "@cloudflare/nimbus-docs/runtime";
+
+const route = entryRouteKey(entry.id);
+const requestedRoute = stripBase(Astro.url.pathname, import.meta.env.BASE_URL);
+const href = withBase(`/${route}`, import.meta.env.BASE_URL);
+```
+
+Nimbus 在构建期间拒绝歧义或不安全的生成路由。常见原因包括同时存在 `foo` 和 `foo/index`、与保留的 `llms.txt` 路由冲突、编码的路径分隔符，以及编码的 `.` 或 `..` 段。构建错误会指出冲突的条目。
+
+### 页面 URL
+
+`getDocsPage()` 和 `getCollectionPage()` 会返回每个页面的 URL，与 `entry`、`Content` 和 `headings` 并列，因此页面路由无需手动构建它们。`getIndexedEntries()` 在每个 `IndexedEntry` 上返回相同的值。
+
+| 字段 | 示例 | 说明 |
+| --- | --- | --- |
+| `markdownUrl` | `/blog/welcome/index.md` | 页面的干净 Markdown 版本。站点根为 `/index.md`。 |
+| `sourceUrl` | `/blog/welcome/index.mdx` | 页面的撰写源文件。没有撰写正文的条目为 `undefined`。 |
+| `ogImageUrl` | `/og/blog/welcome.png` | 页面的生成 OG 卡片。站点根为 `/og/index.png`，挂载在 `/blog` 的集合根为 `/og/blog.png`。 |
+
+URL 跟随条目 ID。Astro 的 glob 加载器会对文件路径做 slug 化，从而去掉点号：`src/content/docs/1.1.1.1/encryption.mdx` 得到的 ID 是 `1111/encryption`。在 Astro 不做 slug 化的地方，点号会保留：版本前缀（`/v1.2/guide/`）、API 操作（`payment.succeeded`），或 `slug` frontmatter 字段（Astro 将其用作 ID）。`docsCollection()` 接受 `slug`，无需更改 schema。
+
+每个 URL 都是站点相对的，不含 Astro 的部署 base；起始模板的布局在输出时会添加 base。起始模板的页面路由直接使用这些 URL：
+
+```astro title="src/pages/[...slug].astro (excerpt)"
+---
+const page = await getDocsPage(Astro);
+if (page instanceof Response) return page;
+const { entry, Content, headings, markdownUrl, ogImageUrl } = page;
+const socialImage = entry.data.socialImage ?? ogImageUrl;
+---
+```
+
+`getOgImagePages()` 为每个索引页面返回一个条目，以卡片在 `/og/` 下的路径为键，因此卡片会写在该页面的 `ogImageUrl` 处，值是该页面的 `IndexedEntry`。`getPageSection(page)` 返回该页面最近父级的标签，卡片会将其打印在标题上方。起始模板的 `src/pages/og/[...slug].ts` 会透传它；参见[自定义 OG 卡片](/ai/override-markdown/#customize-og-cards)。
+
+## API 参考页面
+
+来自 `@cloudflare/nimbus-docs/runtime`。[添加 OpenAPI 参考](/api-reference/openapi/setup/)展示了它们在 API 路由中的用法。
+
+| 辅助函数 | 作用 |
+| --- | --- |
+| `getApiStaticPaths(collection)` | API 参考路由的 `getStaticPaths`，覆盖其各版本。 |
+| `getApiRoute(Astro)` | API 路由的页面和侧边栏，或重定向、`404` `Response`。 |
+| `getApiRoot(Astro, { collection, version })` | 某个版本的根页面，包含所有端点的索引，可从任意路由调用。 |
+| `getApiVersions(collection)` | API 的各个版本，用于版本选择器。 |
+| `getVersionSwitchUrl({ collection, sourceVersion, id, targetVersion })` | 同一页面在另一版本中的地址，或该版本的落地页。 |
+| `getApiVersionHead(collection, version, coordinate, request)` | 规范链接和替代版本，用于自定义 API head。 |
+| `apiIndexRows(index)`, `chunkApiIndex(index, { size })` | 展平根页面的索引，或按 API 首页的方式拆分它。 |
+
+### 用整份参考构建页面
+
+要以整份参考构建自己的页面，用 `@cloudflare/nimbus-docs/runtime` 的 `getApiRoot` 读取某个版本的根页面；省略 `version` 表示默认版本。其 `index` 恰好包含每个操作和 webhook 各一次，每个都带 `method`、`path` 和链接。`apiIndexRows(index)` 将其展平，`chunkApiIndex(index, { size })` 按首页的方式拆分。
+
+```astro title="src/pages/endpoints.astro"
+---
+import { apiIndexRows, getApiRoot, withBase } from "@cloudflare/nimbus-docs/runtime";
+
+const root = await getApiRoot(Astro, { collection: "api" });
+const rows = root ? apiIndexRows(root.index) : [];
+---
+
+<ul>
+  {rows.map(([method, path, label, href]) => (
+    <li><a href={withBase(href, import.meta.env.BASE_URL)}>{label}</a> <code>{method} {path}</code></li>
+  ))}
+</ul>
+```
+
+### 链接到另一版本中的同一页面
+
+```ts
+const href = await getVersionSwitchUrl({
+  collection: "api",
+  sourceVersion: "2026-10-09",
+  id: coordinate,
+  targetVersion: "2026-10-02",
+});
+```
+
+从 `@cloudflare/nimbus-docs/runtime` 导入，并在渲染链接时应用一次 `withBase`。传入页面的确切源版本，包括在最新版本的页面上。链接会指向目标版本中的同一操作；若该操作在目标版本中不存在，则指向该版本的落地页。
+
+自定义 API head 请使用 `getApiVersionHead`；起始模板的 `ApiLayout` 也使用它。
+
+## 集合
+
+来自 `@cloudflare/nimbus-docs/content`，位于 `src/content.config.ts`。
+
+| 辅助函数 | 作用 |
+| --- | --- |
+| `docsCollection(options)` | 文档集合；`schemaFields` 添加 frontmatter 字段，`markdownFields` 将它们写入每个页面的 [Markdown 版本](/ai/publish-markdown/#add-your-own-frontmatter)。 |
+| `partialsCollection(options)` | `<Render>` 引入的可复用片段。 |
+| `componentsCollection(options)` | 组件页面，如[组件目录](/components/)。 |
+| `apiCollection(options)` | 从 OpenAPI 规范生成的页面。 |
+
+## 浏览器中的行为
+
+来自 `@cloudflare/nimbus-docs/client`，在组件脚本中。
+
+| 辅助函数 | 作用 |
+| --- | --- |
+| `mount(selector, init)` | 在每个页面上为所有匹配元素运行 `init`，包括客户端导航之后，并在页面离开时运行其清理函数。参见[自定义组件](/styling/custom-components/)。 |
+| `initTabs(config)` | 标签列表的键盘和选择行为。 |
+| `makeDisclosure(options)` | 展开项的打开与关闭行为。 |
+
+## Markdown 插件
+
+来自 `@cloudflare/nimbus-docs/markdown`，用于集成选项中的 `markdown.hastPlugins`。参见[Markdown 与 MDX](/writing/markdown-and-mdx/)。
+
+| 插件 | 作用 |
+| --- | --- |
+| `tableScroll()` | 包裹宽表格，使其滚动而不是溢出。 |
+| `externalLinks(options)` | 在新标签页打开指向其他站点的链接，并在文本后添加箭头。 |
+| `titleFigure(options)` | 把带标题的图片转为带说明的 figure。 |
+| `math(options)` | 构建时将数学渲染为 MathML；同时开启 `features: { math: true }`。 |
+
+## 组件
+
+| 组件 | 作用 |
+| --- | --- |
+| `@cloudflare/nimbus-docs/components/Icon.astro` | 按名称渲染图标，例如 `ph:check`。 |
+| `@cloudflare/nimbus-docs/components/NimbusHead.astro` | 页面的 head：标题、描述、canonical、分享卡片和智能体发现标签。 |
+| `@cloudflare/nimbus-docs/components/NestedContent.astro` | 在当前页面内显示另一页面的内容，例如变更日志列表中的一条发布：其 `h1` 和 `h2` 会变为 `headingLevel` 并去掉 id，指向其各节的链接会指向 `sourceUrl`。 |

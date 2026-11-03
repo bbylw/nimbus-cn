@@ -1,0 +1,44 @@
+---
+title: "PageActions"
+description: "页面标题下的操作行，提供复制本页 Markdown、查看 Markdown 与可选的更新日期。"
+sidebar:
+  order: 23
+---
+
+PageActions 在页面标题下渲染一行操作：可选的“更新于”日期、复制本页 Markdown、在新标签页打开该页的 `.md`，以及通过默认插槽追加的其他操作。
+
+## 安装
+
+```bash
+nimbus-docs add page-actions
+```
+
+源码位于 `src/components/ui/page-actions/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `markdownUrl` | string | — | 否 | 该页 `.md` 版本的 URL。传入后才会出现复制与查看按钮。 |
+| `lastUpdated` | Date | — | 否 | 设置后在同一行渲染“更新于”日期。 |
+| `aiGenerated` | boolean | `false` | 否 | 把页面标记为 AI 起草，渲染“AI 生成 · 待审阅”徽章。 |
+
+## 示例
+
+```astro title="src/layouts/DocsLayout.astro"
+import { PageActions } from "@/components/ui/page-actions";
+
+<PageActions markdownUrl={markdownUrl} lastUpdated={lastUpdated} />
+```
+
+额外的操作放进默认插槽，会排在两个内置按钮之后，并自动补上分隔符：
+
+```astro
+<PageActions markdownUrl={markdownUrl} lastUpdated={lastUpdated}>
+  <a href="/feedback/">反馈</a>
+</PageActions>
+```
+
+复制按钮在写入剪贴板后短暂显示“已复制”，失败时显示“复制失败”；没有 `markdownUrl` 时整行操作都不会渲染。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

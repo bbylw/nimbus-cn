@@ -1,0 +1,28 @@
+---
+title: "CodeGroup"
+description: "带标签页的代码块组，每个标签一段代码，切换状态在页面内同步。"
+sidebar:
+  order: 9
+---
+
+CodeGroup 把同一操作的不同写法收进标签页：每个标签一段代码，读者一次只看一种。标签选中状态在整页内同步，切换后其他同组标签页也会停在同一个选项上，适合并排展示不同语言或运行时的写法。
+
+## 安装
+
+```bash
+nimbus-docs add code-group
+```
+
+源码位于 `src/components/ui/code-group/`。安装时会一并带上注册表依赖：`layer-card`、`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `titles` | string[] | `"Tab 1"`、`"Tab 2"`… | 否 | 按顺序排列的标签名；省略时按序号命名。 |
+
+## 用法
+
+标签与代码块一一对应，顺序按照子元素出现的先后排列，名称取自 `titles`。标签页由 `LayerCard` 提供外框，因此外观与代码块一致。
+
+页面正文中更常见的是围栏代码块写法，见 [代码块](/writing/code-blocks/)。安装 CodeGroup 后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

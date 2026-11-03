@@ -1,0 +1,35 @@
+---
+title: "CardGrid"
+description: "卡片列表的自适应网格，窄视口下退化为单列。"
+sidebar:
+  order: 7
+---
+
+CardGrid 把一组 Card 排成 1–2 列的网格，视口变窄时自动堆叠成单列。
+
+## 安装
+
+```bash
+nimbus-docs add card-grid
+```
+
+源码位于 `src/components/ui/card-grid/`。
+
+## 属性
+
+CardGrid 没有公开属性，只负责布局；写在其内部的卡片会自动去掉外边距，因此不需要额外清理间距。
+
+## 示例
+
+```mdx
+<CardGrid>
+  <Card title="写一个页面" icon="ph:pencil-simple">
+    在 `src/content/docs/` 中创建 `.mdx` 文件。
+  </Card>
+  <Card title="修改主题" icon="ph:palette">
+    编辑 `src/styles/globals.css` 里的颜色与排版变量。
+  </Card>
+</CardGrid>
+```
+
+CardGrid 与 `Card` 已在 `src/components.ts` 中默认注册，可直接在任何 `.mdx` 中使用。

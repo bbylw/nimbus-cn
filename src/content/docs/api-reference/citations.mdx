@@ -1,0 +1,58 @@
+---
+title: "引用 API 页面"
+description: "按坐标在正文中链接到 API 操作，或引用其他 Nimbus 站点发布的 API 参考。"
+sidebar:
+  order: 1
+---
+
+坐标（coordinate）独立于 URL 标识一个 API 条目，例如操作的 `operationId`。[路由与坐标](/api-reference/openapi/routes/)列出了每个 OpenAPI 条目的坐标。
+
+## 在正文中按坐标链接
+
+在 `src/content` 下的 Markdown 或 MDX 中使用 `api.ref:` 目标：
+
+```md
+See how to [retrieve an event](api.ref:api:retrieveEvent).
+```
+
+Nimbus 在构建时解析该引用：
+
+- `api` 标识 API 集合。
+- `retrieveEvent` 独立于路由标识该操作。
+- 不带版本的引用指向该 API 家族的默认版本。
+- 已知集合中的未知坐标会使已编写内容的构建失败，并可能给出接近的匹配建议。
+- 未知集合会被警告并改写为 `#`；请对照 `/nimbus-api/coordinates.json` 校验集合名称，避免死引用进入发布产物。
+
+只有正文专门讨论某个历史版本时，才指定该版本：
+
+```md
+Review the [v1 operation](api.ref:api@v1:retrieveEvent).
+```
+
+使用 `/nimbus-api/coordinates.json` 查看构建后的站点实际发布的确切坐标和解析后的 URL。
+
+## 引用托管在别处的 API
+
+文档站可以引用另一个 Nimbus 站点发布的参考，而无需挂载或重新发布它：
+
+```ts
+apiReferences: [
+  {
+    collection: "api",
+    manifest: "https://api.example.com/nimbus-api/coordinates.json",
+    origin: "https://api.example.com",
+  },
+],
+```
+
+`collection` 必须与远程清单发布的集合键一致。`origin` 是拼接到站点相对清单路径之前的绝对前缀。如果远程参考托管在某个部署基础路径下，请把该基础路径也包含进来，例如 `https://api.example.com/docs`。
+
+远程集合随后使用相同的正文语法：`api.ref:api:retrieveEvent`。远程参考只提供引用目标；它不会把远程页面加入本地搜索或智能体输出。
+
+清单列出的路径不带结尾斜杠。使用 `origin` 时，引用会按列出的形式使用这些路径，因此提供 `/api/retrieve-event/` 的远程站点可能重定向该链接或返回 404。不使用 `origin` 时，路径采用本站的结尾斜杠形式，这只有在两个站点一致时才正确。
+
+依赖某个引用之前，请对照远程站点检查。
+
+Nimbus 在构建期间获取 HTTPS 清单。如果某个清单不可用或格式错误，构建会发出警告，其引用链接到 `#`。离线构建时，请提交清单并使用项目路径。
+
+无法读取或解析的本地清单会导致构建失败。有效清单中格式错误的条目会被跳过并发出警告。

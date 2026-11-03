@@ -1,0 +1,74 @@
+---
+title: "OpenAPI 选项"
+description: "api 条目与 API 版本的全部配置项，以及参考会发布的输出路由。"
+sidebar:
+  order: 2
+---
+
+Nimbus 配置中的每个 `api` 条目声明一个 API 参考。要设置它，参见[添加 OpenAPI 参考](/api-reference/openapi/setup/)。
+
+## `api` 条目
+
+| 键 | 类型 | 默认值 | 作用 |
+| --- | --- | --- | --- |
+| `collection` | `string` | — | **必填。** 内容集合键，与 `src/content.config.ts` 中的 `apiCollection()` 匹配。 |
+| `spec` | `string` \| `{ source, path }` \| object | — | OpenAPI 3.x 文档：项目相对路径、[内容来源](/content-sources/git/#api-specs-from-a-source)中的文件，或内联对象。设置 `versions` 时省略。 |
+| `versions` | `ApiVersion[]` | — | 用版本家族代替单个 `spec`。参见 [API 版本](/api-reference/versions/)。 |
+| `versionUrl` | `{ in: "path" }` \| `{ in: "query", param? }` | `{ in: "path" }` | 版本在 URL 中的位置。查询模式需要按请求渲染。 |
+| `label` | `string` | `collection` | 构建消息中该 API 的名称。 |
+| `requireOperationId` | `boolean` | `false` | 当操作没有 `operationId` 时使构建失败，而不是从其方法和路径推导坐标。 |
+| `routes` | `{ convention, stripPathPrefixes?, operations?, sections?, tagSegments? }` | — | 路由约定。参见[路由与坐标](/api-reference/openapi/routes/)。 |
+| `sidebar` | `"full"` \| `"on-demand"` | `"full"` | 每个页面包含多少导航。参见[大型 API](/api-reference/large-apis/)。 |
+| `schemaPages` | `boolean` | `false` | 为每个 schema 发布页面，并让 schema 可被引用。 |
+| `samples` | `{ generate?, keepGenerated? }` | 全部三种语言 | Nimbus 生成哪些代码示例。参见[代码示例](/api-reference/openapi/code-samples/)。 |
+| `extensions` | `string[]` | — | 要复制到页面上的 `x-*` 字段。参见[供应商扩展](/api-reference/openapi/extensions/)。 |
+| `publishSpec` | `boolean` | `true` | 将规格发布为 JSON，并在 API 目录中列出。 |
+| `bundle` | `boolean` | `true` | `false` 会把页面数据存储为静态资源，按请求读取。需要按请求渲染和 Cloudflare 或 Node 适配器。参见[大型 API](/api-reference/large-apis/#many-versions)。 |
+
+## API 版本
+
+`versions` 中的每一项：
+
+| 键 | 类型 | 默认值 | 作用 |
+| --- | --- | --- | --- |
+| `version` | `string` | — | **必填。** 版本 id：小写字母、数字、点和短横线，并以字母或数字开头和结尾。它是每个非默认 URL 的一部分。 |
+| `spec` | `string` \| `{ source, path }` \| object | — | **必填。** 该版本的文档。 |
+| `default` | `boolean` | 第一个版本 | 在家族自己的路径提供此版本。默认版本不能是 `hidden`。 |
+| `status` | `"ga"` \| `"beta"` \| `"deprecated"` | — | `deprecated` 会在该版本的每个页面上显示横幅。 |
+| `hidden` | `boolean` | `false` | 使版本不出现在选择器、搜索和站点地图中。其页面仍可加载。 |
+| `label` | `string` | `version` | 版本在选择器中的名称。 |
+| `routes` | 同上 | — | 该版本的路由约定。 |
+| `publishSpec` | `boolean` | 条目的值 | 覆盖条目的 `publishSpec`。 |
+| `extensions` | `string[]` | 条目的值 | 替换条目的 `extensions` 列表。 |
+
+## 发布的规格
+
+每个集合都会把其规格发布为一个自包含的 JSON 文件，位于 `/api/openapi.json`（根路径的参考为 `/openapi.json`），各版本位于其自己的挂载路径，并在站点的 API 目录中列出。在集合或单个版本上设置 `publishSpec: false`，可使该规格不被发布：
+
+```ts title="astro.config.ts"
+api: [
+  {
+    collection: "api",
+    spec: "./src/api/openapi.yaml",
+    publishSpec: false,
+  },
+],
+```
+
+## 发布的输出
+
+对于名为 `api` 的集合，当存在相应的起始模板路由时，参考会与以下路由集成：
+
+| 路由 | 用途 |
+| --- | --- |
+| `/api` | 默认版本的 API 概览。 |
+| `/api/<page-slug>` | 操作、标签或 webhook 页面，以及开启 [`schemaPages: true`](/api-reference/openapi/routes/#schema-pages) 时的 schema 页面。 |
+| `/api/<page-slug>/index.md` | 干净的 Markdown 版本。 |
+| `/api/llms.txt` | 仅含 API 的 `llms.txt` 索引。 |
+| `/llms.txt` 和 `/llms-full.txt` | 站点范围的页面索引和完整 Markdown 文档。 |
+| `/nimbus-api/coordinates.json` | 公开的坐标到 URL 清单。 |
+| `/api/index/<n>/` | [API 首页](/api-reference/large-apis/#the-api-home)的后续部分（`noindex`）。 |
+| `/api/openapi.json` | 发布的规格；其他版本位于 `/api/<version>/openapi.json`。参见[发布的规格](#published-spec)。 |
+| `/.well-known/api-catalog` 和 `/.well-known/ard.json` | 站点的 API 目录和发现清单，列出每个可见版本。 |
+
+当项目中启用相关功能时，API 条目也会加入现有的 Pagefind 搜索、站点地图和 OG 图片路由。

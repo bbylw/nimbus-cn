@@ -1,0 +1,71 @@
+---
+title: "在页面 URL 上提供 Markdown"
+description: "让页面自身的 URL 响应 Accept: text/markdown，智能体无需知道 .md 约定。"
+sidebar:
+  order: 4
+---
+
+每个页面都已有 `/<slug>/index.md` 形式的 Markdown 版本。启用 Markdown 协商后，向页面自身 URL 发送带 `Accept: text/markdown` 的请求也会得到该 Markdown，因此智能体无需知道 `.md` 约定。
+
+## 前置条件
+
+- 在 Nimbus 配置中将 `site` 设为生产源站地址
+- 使用服务器适配器的主机：Cloudflare、Netlify、Node 或 Vercel
+
+## 步骤
+
+1. **添加服务器适配器**
+
+   站点已有适配器时跳过此步。以 Cloudflare 为例：
+
+   ```sh
+   npx @cloudflare/nimbus-docs add adapter-cloudflare
+   yarn nimbus-docs add adapter-cloudflare
+   pnpm nimbus-docs add adapter-cloudflare
+   bunx @cloudflare/nimbus-docs add adapter-cloudflare
+   ```
+
+   其他主机使用 `adapter-netlify`、`adapter-node` 或 `adapter-vercel`。
+2. **在请求时渲染文档**
+
+   在 `astro.config.ts` 中把 docs 集合设为在请求时渲染：
+
+   ```ts title="astro.config.ts" {4}
+   const nimbusConfig = defineNimbusConfig({
+     site: "https://docs.example.com",
+     // …
+     rendering: { collections: { docs: "request" } },
+   });
+   ```
+3. **构建并部署**
+
+   把服务端与生成的 Markdown 文件一起部署。在 Cloudflare 之外，服务端会从 `site` 读取 Markdown，因此这些文件必须能在该地址访问。
+
+## 验证
+
+在 `Accept` 请求头中把 Markdown 放在首位请求一个页面：
+
+```sh
+curl -I -H 'Accept: text/markdown' https://docs.example.com/guide/
+```
+
+```text
+HTTP/2 200
+content-type: text/markdown; charset=utf-8
+vary: Accept
+```
+
+如果 `content-type` 是 `text/html`，说明该页面仍被预渲染：请检查其集合是否设为 `"request"`。浏览器的 `Accept: */*` 始终得到 HTML。
+
+## 静态站点
+
+预渲染页面会在任何服务端代码运行之前被提供，因此无法协商。在 Cloudflare 上，请为该区域开启 [Markdown for Agents](https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/)：智能体请求 Markdown 时，Cloudflare 会转换 HTML。
+
+## API 参考
+
+只有使用 Cloudflare 适配器时，生成的 API 参考才能在请求时渲染。在其他适配器上，请让 API 集合保持 `"build"`，而文档使用 `"request"`。
+
+## 后续步骤
+
+- [Markdown 与 llms.txt](/ai/publish-markdown/)：此处提供的 `.md` 版本。
+- [覆盖生成的 Markdown](/ai/override-markdown/)：改变页面 Markdown 的内容。

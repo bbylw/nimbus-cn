@@ -1,0 +1,76 @@
+---
+title: "让浏览器智能体搜索文档"
+description: "在每个页面上通过 WebMCP 注册 search_documentation 工具，搜索站点的 Pagefind 索引。"
+sidebar:
+  order: 8
+---
+
+[WebMCP](https://webmachinelearning.github.io/webmcp/) 是一个实验性的浏览器 API，允许页面向浏览器中运行的智能体提供工具。Nimbus 注册了一个工具 `search_documentation`，用于搜索站点的搜索索引。新站点已自带它。
+
+## 新站点得到什么
+
+在智能体调用该工具之前不会加载任何内容，不支持该 API 的浏览器会跳过它。结果遵循与站点搜索相同的规则：草稿和隐藏版本会被排除，`noindex` 页面也会被排除，除非它们设置了 `searchable: true`。
+
+### 输入
+
+| 字段 | 类型 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| `query` | string | — | 必填，最多 500 个字符 |
+| `limit` | integer | `5` | 1 到 20 |
+| `version` | string | 除已弃用版本外的所有版本 | 仅带版本的站点；任意可见版本，包括已弃用版本 |
+
+**结果：** 一组匹配项，每项包含 `title`、`heading`、带锚点的 `url`，以及不超过 1,000 个字符的纯文本 `excerpt`。
+
+### 错误
+
+| 代码 | 含义 |
+| --- | --- |
+| `invalid_input` | 查询、limit 或 version 无效。 |
+| `index_unavailable` | 搜索索引无法加载：请检查构建的整个 `pagefind/` 文件夹是否已部署。 |
+| `search_failed` | 搜索或它的代码加载失败。请重试或重新加载页面。 |
+
+## 添加到较早的站点
+
+### 前置条件
+
+- 站点搜索使用默认提供者（`search` 未设为 `false`，也未使用自定义提供者）
+- Pagefind 1.5.2 或更高版本
+
+### 步骤
+
+1. **复制组件**
+
+   从[脚手架](https://github.com/cloudflare/nimbus/blob/main/packages/nimbus-starter-source/src/components/WebMCP.astro)复制 `src/components/WebMCP.astro` 到项目的 `src/components/`。
+2. **在 head 中渲染它**
+
+   在 `src/layouts/BaseLayout.astro` 中导入该组件，并在 `<head>` 中渲染：
+
+   ```astro title="src/layouts/BaseLayout.astro"
+   ---
+   import WebMCP from "@/components/WebMCP.astro";
+   ---
+   <head>
+     <!-- … -->
+     <WebMCP />
+   </head>
+   ```
+3. **构建站点**
+
+   ```sh
+   npm run build
+   ```
+
+### 验证
+
+打开任一已构建页面的 HTML，在 `<head>` 中查找该工具的设置：
+
+```html
+<meta name="nimbus-webmcp" content="{&quot;search&quot;:&quot;pagefind&quot;,…}">
+```
+
+如果该标签缺失，说明站点的搜索没有使用默认提供者。该工具需要生产构建：在 `astro dev` 中它会返回 `index_unavailable`。
+
+## 后续步骤
+
+- [远程 MCP 服务器](/ai/remote-mcp/)：让浏览器之外的智能体读取文档。
+- [智能体发现](/ai/agent-discovery/)：智能体用来找到站点的文件。

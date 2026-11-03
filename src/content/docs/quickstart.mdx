@@ -1,6 +1,6 @@
 ---
-title: 快速开始
-description: 在自己的电脑上运行一个 Nimbus 文档站。
+title: "快速开始"
+description: "在自己的电脑上运行一个 Nimbus 文档站。"
 sidebar:
   order: 1
 ---
@@ -49,15 +49,25 @@ bun run dev
 
 打开 [http://localhost:4321](http://localhost:4321)，首页、侧边栏和示例页面就都在了。
 
+脚手架已经把布局、组件和样式写进 `my-docs/`。它们都是你的源码，可以随意修改。
+
+<Aside type="note" title="搜索需要先构建">
+  搜索读取构建时生成的索引。开发服务器里搜索可能不可用；运行 `bun run build`，再运行 `bun run preview` 后即可搜索。
+</Aside>
+
+## 编辑首页
+
+打开 `src/content/docs/index.mdx`，修改 frontmatter 中的 `title`，保存。页面会带着新标题重新加载，这是确认改动生效最快的方式。
+
 ## 修改站点信息
 
 站点的名称、地址和描述在 `astro.config.ts` 中配置：
 
-```ts title="astro.config.ts" {3-6}
+```ts title="astro.config.ts" {3-7}
 const nimbusConfig = defineNimbusConfig({
-  site: "http://localhost:4321",
-  title: "Nimbus 中文文档",
-  description: "Nimbus 文档写作工具的中文指南。",
+  site: "https://docs.example.com",
+  title: "我的文档",
+  description: "我的产品指南与参考。",
   locale: "zh-CN",
   homeLabel: "首页",
 });
@@ -79,6 +89,8 @@ const nimbusConfig = defineNimbusConfig({
 
 ## 下一步
 
-- 阅读[写作与页面](/writing-pages/)，掌握 frontmatter、侧边栏排序与 MDX 组件。
-- 阅读[配置](/configuration/)，调整侧边栏、搜索、版本与渲染方式。
+- 阅读[项目结构](/project-structure/)，了解脚手架写进仓库的目录与框架边界。
+- 阅读[写作与页面](/writing/pages-and-routing/)，掌握 frontmatter、侧边栏排序与 MDX 组件。
+- 阅读[配置](/reference/configuration/)，调整侧边栏、搜索、版本与渲染方式。
+- 阅读[部署](/deploy/)，把站点发布到 GitHub Pages、Cloudflare 或其他主机。
 - 用 `nimbus-docs check` 在发布前检查配置、链接与组件。

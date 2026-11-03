@@ -1,0 +1,83 @@
+---
+title: "供应商扩展"
+description: "把 OpenAPI 规格中的 x-* 字段复制到页面和字段上，供自有组件读取与展示。"
+sidebar:
+  order: 5
+---
+
+OpenAPI 允许规格通过 `x-*` 字段携带自身的事实，例如哪些套餐可以使用某个操作，或该操作是否不可撤销。除非你列出想要的字段，否则 Nimbus 会忽略它们。列出的字段会原样复制到声明它们的页面上，供你自己的组件显示。Nimbus 本身不渲染它们。
+
+```ts title="astro.config.ts"
+api: [{
+  collection: "api",
+  spec: "./src/api/openapi.yaml",
+  extensions: ["x-acme-plans", "x-acme-confirm", "x-acme-sensitive"],
+}],
+```
+
+版本可以设置自己的 `extensions`，它会替换条目的列表。名称必须以 `x-` 开头；`x-nimbus-*` 为保留名称。某个列出的名称如果在版本中没有任何操作或字段声明，会为该版本记录一条警告。
+
+值会出现在：
+
+- 操作页面（包括 webhooks），作为 `page.extensions`，来自操作对象；
+- 每个字段，作为 `field.extensions`：参数、请求体、响应字段、其他媒体类型，以及 schema 页面上的字段。参数自身的值优先于其 schema 的值，属性自身的值优先于其引用的 schema。
+
+标签页面、schema 页面头部、响应对象、侧边栏、Markdown 版本和 `llms.txt` 不携带它们。如果字段或操作没有所列名称中的任何一个，则没有 `extensions`。
+
+[发布的规格](/api-reference/openapi/options/#published-spec)会保留每个 `x-*` 字段，无论是否列出；设置 `publishSpec: false` 可使其不被发布。
+
+在你自己的 API 组件副本中读取它们。在 `ApiBody.astro`（它已导入 `Banner`）中，向前置内容和应显示提示的标记处添加两行，例如页面操作下方：
+
+```astro title="src/components/ui/api-layout/ApiBody.astro"
+---
+const extensions = page.kind === "operation" ? page.extensions : undefined;
+const plans = extensions?.["x-acme-plans"];
+---
+{extensions?.["x-acme-confirm"] && (
+  <Banner variant="caution" content="This action can't be undone." />
+)}
+{Array.isArray(plans) && <p>Available on {plans.join(", ")}.</p>}
+```
+
+在 `ApiFieldRow.astro` 中导入 `Badge`，并把它添加在字段的其他标记旁边：
+
+```astro title="src/components/ui/api-field-row/ApiFieldRow.astro"
+---
+import { Badge } from "@/components/ui/badge";
+---
+{field.extensions?.["x-acme-sensitive"] === true && <Badge>Sensitive</Badge>}
+```
+
+值是 JSON。要为其提供类型，请在一个独立文件中一次性声明你的扩展：
+
+```ts title="src/nimbus-api.d.ts"
+export {}; // makes this file a module, so the block below adds to Nimbus's types
+
+declare module "@cloudflare/nimbus-docs/types" {
+  interface ApiExtensions {
+    "x-acme-plans": string[];
+    "x-acme-confirm": boolean;
+  }
+}
+```
+
+`page.extensions?.["x-acme-plans"]` 的类型随后为 `string[] | undefined`；未声明的名称仍为 JSON 值。
+
+## 操作顺序
+
+分区页面、侧边栏、[API 首页的索引](/api-reference/large-apis/#the-api-home)和 Markdown 版本会按规格中的路径顺序列出一个分区的操作。操作上的 `x-nimbus-order` 会把它提前：数字越小越靠前，没有该字段的操作按路径顺序随后；相同值也保持路径顺序。不是数字的值会被忽略。分区保持其顺序，webhook 保持规格中的顺序。可在规格中设置，或在 Nimbus 读取规格之前的某个步骤中设置，例如根据 CRUD 等级，让 list、get、create、update 和 delete 在每个分区中领先。
+
+```yaml title="openapi.yaml"
+paths:
+  /users:
+    get:
+      operationId: listUsers
+      x-nimbus-order: 1
+    post:
+      operationId: createUser
+      x-nimbus-order: 3
+  /users/{id}:
+    get:
+      operationId: getUser
+      x-nimbus-order: 2
+```

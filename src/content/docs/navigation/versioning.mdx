@@ -1,0 +1,53 @@
+---
+title: "版本"
+description: "为同一产品的多个发布版本分别保留和发布文档。"
+sidebar:
+  order: 3
+---
+
+当产品发布新的主版本时，你可能希望旧文档仍然可读。每个文档版本都是位于自己路径下的独立集合：当前文档留在 `/`，`v1` 放在 `src/content/docs-v1/`，并通过 `/v1/` 提供。
+
+生成的 API 参考文档的版本机制不同，参见 [API 版本](/api-reference/versions/)。
+
+## 添加版本
+
+`new-version` 配方会端到端地建立一个版本：复制内容、注册集合、添加路由、写入 Nimbus 配置，并在页头安装版本选择器。
+
+```sh
+npx @cloudflare/nimbus-docs add new-version
+yarn nimbus-docs add new-version
+pnpm nimbus-docs add new-version
+bunx @cloudflare/nimbus-docs add new-version
+```
+
+`add` 会把配方交给你的编码智能体，由它询问要创建哪个版本，以及该版本是否已弃用或隐藏。如果想自己查看步骤，加上 `--print`。
+
+## 版本清单
+
+配方会在 `astro.config.ts` 的 Nimbus 配置中记录版本：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  // …
+  versions: {
+    current: "v3",
+    others: ["v2", "v1"],
+    deprecated: ["v1"],
+  },
+});
+```
+
+| 字段 | 作用 |
+| --- | --- |
+| `current` | 根路径下 `docs` 集合的标签。 |
+| `others` | 其他版本，从新到旧排列。每个 `<slug>` 都需要一个名为 `docs-<slug>` 的集合，并作为其 URL 的第一段。 |
+| `deprecated` | 显示弃用横幅和侧边栏徽章，并在搜索中排得更靠后的版本。 |
+| `hidden` | 从版本选择器和搜索中排除的版本。其页面仍可通过 URL 访问。 |
+
+## 读者获得什么
+
+- 页头中的版本选择器：当页面在两个版本中都存在时，让读者停留在同一页面。
+- 每个版本各自拥有侧边栏，由各自的文件夹生成。
+- 每个版本各自拥有 `llms.txt`，智能体可以一次只读一个版本。
+
+要下线某个版本，请将其从 `others` 中移除，删除对应的集合、文件夹和路由，然后[重定向](/navigation/redirects/)其 URL 到当前文档。

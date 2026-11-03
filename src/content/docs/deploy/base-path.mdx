@@ -1,0 +1,43 @@
+---
+title: "在路径下提供服务"
+description: "将 Astro 的 base 设为某个路径，在该路径下发布站点。"
+sidebar:
+  order: 3
+---
+
+将 Astro 的 `base` 设为某个路径，即可在该路径下发布站点。每个页面、Markdown 版本和 `llms.txt` 都会移到该路径下。
+
+## 步骤
+
+1. **设置 base**
+
+   在 `astro.config.ts` 中：
+
+   ```ts title="astro.config.ts" {2}
+   export default defineConfig({
+     base: "/docs",
+     // …
+   });
+   ```
+2. **决定谁拥有该域名的发现文件**
+
+   智能体发现文件位于域名根目录，而不是 `/docs` 下。如果该域名由另一个站点拥有，在 Nimbus 配置中设置 `agents: { discovery: false }`。否则，参见[在 base 路径下](/ai/agent-discovery/#under-a-base-path)了解它们的去向。
+3. **构建并部署**
+
+   ```sh
+   npm run build
+   yarn run build
+   pnpm run build
+   bun run build
+   ```
+
+   使用 Cloudflare 适配器和静态输出时，用 `wrangler deploy --assets ./dist/client` 部署。
+
+## 验证
+
+打开 `https://example.com/docs/` 和 `https://example.com/docs/llms.txt`。两者都能加载，且 `llms.txt` 中的链接以 `/docs/` 开头。
+
+## 后续步骤
+
+- [部分构建](/publish/partial-builds/#under-a-base)：在同一主机名下提供多个 Nimbus 构建。
+- [重定向](/navigation/redirects/#host-level-redirects)：base 路径下站点的主机规则。

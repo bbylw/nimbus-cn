@@ -1,0 +1,43 @@
+---
+title: "Frame"
+description: "截图与媒体的带边框容器，可选说明文字。"
+sidebar:
+  order: 16
+---
+
+Frame 给截图、演示图和视频套上一层带内边距的边框，让媒体与正文之间有明确的分界，并可以在下方附一行说明。
+
+## 安装
+
+```bash
+nimbus-docs add frame
+```
+
+源码位于 `src/components/ui/frame/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `caption` | string | — | 否 | 显示在媒体下方、居中的说明文字。 |
+| `aspect` | string | — | 否 | 把媒体区锁定为某个比例（如 `"16/9"`、`"4/3"`、`"1/1"`）；内部媒体用 `object-fit: cover` 填满。 |
+| `src` | `ImageMetadata` 或 `string` | — | 否 | 导入的图片会走 Astro 图片管线（现代格式、响应式 srcset、懒加载、无布局偏移）；传字符串路径或 URL 时渲染普通懒加载 `<img>`。省略时使用插槽。 |
+| `alt` | string | — | 否 | `src` 的替代文本；装饰性图片传 `""`。 |
+
+## 示例
+
+先把图片导入，再交给 `src`：
+
+```mdx
+import screenshot from "@/assets/dashboard.png";
+```
+
+```mdx
+<Frame
+  src={screenshot}
+  alt="文档站仪表盘截图"
+  caption="设置页的实时预览"
+/>
+```
+
+按比例裁切时再加 `aspect`，例如 `aspect="4/3"`。安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

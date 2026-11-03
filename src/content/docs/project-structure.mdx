@@ -1,0 +1,79 @@
+---
+title: "项目结构"
+description: "脚手架产出的仓库包含哪些文件，框架边界在哪里，以及目录树如何同时决定 URL 和侧边栏。"
+---
+
+脚手架生成的 Nimbus 项目就是一个常规 Astro 项目。所有可见内容都以真实文件存在于你的仓库中；框架以依赖形式提供底层管线。
+
+## 仓库里包含什么
+
+- my-docs/
+  - public/
+  - src/
+    - components/
+      - ui/
+    - content/
+      - docs/
+    - layouts/
+    - lib/
+    - pages/
+    - styles/
+      - globals.css
+    - components.ts
+    - content.config.ts
+  - AGENT.md
+  - CLAUDE.md
+  - astro.config.ts
+  - nimbus.json
+  - package.json
+  - tsconfig.json
+  - pnpm-workspace.yaml
+  - wrangler.jsonc
+
+- **`src/components/`**——UI 组件，归你编辑或替换。
+- **`src/content/docs/`**——你的 MDX 内容。这里的目录树就是站点（见下文）。
+- **`src/layouts/`**——页面外壳（`BaseLayout`、`DocsLayout`）。
+- **`src/pages/`**——路由，包括文档通配路由、替代 Markdown/MDX 版本和 `llms.txt` 索引。
+- **`src/styles/globals.css`**——设计令牌和 Tailwind 层。
+- **`src/components.ts`**——[MDX 全局注册表](/writing/markdown-and-mdx/)。
+- **`src/content.config.ts`**——你的内容集合。
+- **`AGENT.md`**——在项目中工作的编码智能体的指南。`CLAUDE.md` 指向它。
+- **`nimbus.json`**——项目构成的提交记录（见下文）。
+- **`pnpm-workspace.yaml`**——仅 pnpm 使用，用于其依赖构建脚本设置。Yarn 站点使用 `.yarnrc.yml` 代替。
+- **`wrangler.jsonc`**——仅当你部署到 Cloudflare 时存在。
+
+带 API 参考的站点还会有规格文件位于 `src/api/`，路由位于 `src/pages/api/[...slug].astro`，参考组件位于 `src/components/ui/`，并像通过 `nimbus-docs add` 安装的组件一样记录在 `nimbus.json` 中。只有参考的站点没有 `src/content/docs/`，其路由为 `src/pages/[...slug].astro`。参见 [API 参考](/api-reference/)进行配置。
+
+## `nimbus.json`——来源记录 {#nimbusjson--the-provenance-record}
+
+除了你的文件，脚手架还会写入一个小型、由 CLI 管理的 **`nimbus.json`**。它记录：
+
+- `version` 和 `templatesTag`：`create-nimbus-docs` 的版本，以及你的起始模板来自的 `templates-v*` 标签。
+- `lastReviewedNimbusVersion`：站点通过 [`nimbus-docs migrate`](/cli/) 审阅过其升级步骤的最后一个 Nimbus 版本。
+- `templatesTagByFile`：每个通过 `nimbus-docs diff --apply` 获取的文件来自哪个标签。
+- `install.root`：组件的安装位置。
+- `components`：每个你 [`add`](/cli/) 的组件一条记录，包含其来源注册表、发布时的注册表版本和内容哈希。
+
+你在 `astro.config.ts` 中编写站点的行为，例如版本和侧边栏。**`nimbus.json`** 是 CLI 的那一半：[`nimbus-docs add`](/cli/) 写入它，[`nimbus-docs init`](/cli/) 为没有它的项目创建它。
+
+**提交它**：升级正是靠它知道哪些属于你。(`.nimbus/` 不同：它是被 gitignore 的构建临时目录。)
+
+## 框架边界
+
+`nimbus-docs` 包是不可见的那一半——Astro 集成、数据辅助函数（`getSidebar`、`getPrevNext`、`getTOC`）、内容 schema，以及用于替代 Markdown/MDX 版本和 `llms.txt` 索引的辅助函数。你导入它，而不是 fork 它。
+
+其余一切都是你的。没有需要覆盖的上游主题，也没有会破坏的 API——当重要逻辑不藏在导入边界之后时，编码智能体更容易推理这个仓库。
+
+## 目录树即事实
+
+`src/content/docs/` 下的目录结构**就是** URL 结构，也是侧边栏。移动文件，它的路由和侧边栏条目随之移动；删除文件，两者都消失。frontmatter 处理细粒度设置——顺序、徽章、草稿状态——但站点的形态来自文件系统。
+
+- src/content/docs/
+  - introduction.mdx
+  - guides/
+    - styling.mdx
+    - deploying.mdx
+  - reference/
+    - api.mdx
+
+没有第二份需要同步的导航配置。站点不会偏离自己的内容，因为它的内容就是站点。细节见[页面与路由](/writing/pages-and-routing/)。

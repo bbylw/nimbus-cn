@@ -1,0 +1,234 @@
+---
+title: "部分构建"
+description: "把大型站点拆成多个切片，分别构建并部署，再由主机按路径前缀路由。"
+sidebar:
+  order: 2
+---
+
+包含多个产品或大型 API 参考的站点，每次改动都会全量重建。部分构建接收一个集合或一组集合，只构建这些内容：它们的页面、智能体文件和搜索索引。每个切片都是独立的静态站点；由主机把每个切片的路径前缀路由到对应切片，因此访客看到的仍是同一个主机名。
+
+构建单元是集合：某个产品的指南、某个 API 参考，或任何你希望单独维护的部分。请先按无切片时的通常方式建立这些集合，即[新集合](/writing/collections/)或 [API 参考](/api-reference/openapi/setup/)。
+
+## 构建切片
+
+将 `NIMBUS_BUILD_ONLY` 设为一个集合名，或逗号分隔的多个集合名，然后构建：
+
+```sh
+NIMBUS_BUILD_ONLY=sdk pnpm build
+NIMBUS_BUILD_ONLY=docs,api pnpm build
+```
+
+在该构建中，其他所有页面集合都是空的：Astro 不会编译、渲染或索引它们的页面，构建时间和内存随切片规模变化。构建会说明它包含什么：
+
+```text
+[@cloudflare/nimbus-docs] building only sdk (NIMBUS_BUILD_ONLY); docs, api are empty in this build.
+```
+
+只有 `astro build` 会遵循该变量。`astro dev`、`astro sync` 和 `nimbus-docs check` 使用整个站点，并会提示一次，因此作业级变量不会改变 CI 作业中其他步骤的行为。
+
+以下情况构建会失败：
+
+- 名称不是站点的页面集合之一。页面集合在内容同步后才可知，因此拼错的名称需要先做一次同步才会失败；
+- docs 版本集合（`docs` 及所有 `docs-<version>`）被拆分到多个切片。它们必须一起构建。
+
+## 切片会写入什么
+
+持有 `docs` 的切片是**根切片**：它的写入位置与全站构建相同，并负责提供首页、`robots.txt`、`llms.txt`、`.well-known` 以及源站根目录的其他内容。
+
+其他切片会把站点级文件写在其前缀下，由自己的部署提供，并丢弃根切片负责的根文件：
+
+| 位于切片前缀下（`/sdk/…`） | 从输出中丢弃 | 位于资源根目录 |
+|---|---|---|
+| `sitemap-index.xml`、`sitemap-0.xml`、`sitemap.xml` | `/`、`/robots.txt`、`/og.png`、`/nimbus-api/coordinates.json` | `_headers`，仅包含该切片文件的规则 |
+| `pagefind/` | `/llms.txt`、`/llms-full.txt`、`/index.md` | `404.html` |
+| `llms-full.txt`，切片中每个集合一份 | `/.well-known/` | `_redirects`（站点输出该文件时）；对读取这些文件的主机同时提供两者 |
+| `_nimbus/shiki.css`、`_astro/`（打包的 CSS 和 JS） | 其他集合的 `openapi.json` 和导航列表 | |
+
+包含多个集合的切片会将上述内容放在第一个集合的前缀下。OG 图片保持其路径：`/sdk/` 下页面的图片为 `/og/sdk/…`，集合索引页为 `/og/sdk.png`，因此切片也会接管这些路径（见下文）。
+
+根切片的 `llms.txt` 会链接每个集合的 `llms.txt`，包括未构建的切片，因此智能体可以找到全部内容。未构建的集合以其集合名（`sdk` 对应 `Sdk`）或 API 标签命名。
+
+其 sitemap 索引只列出自己的文件；`robots.txt` 会声明其他切片的 sitemap（见下文）。
+
+## 部署每个切片
+
+将每个切片的 `dist/` 作为独立站点部署，然后在主机名上按路径前缀路由。其余内容都交给根切片，最具体的前缀优先，切片可以按任意顺序部署。每个切片需要四个路径：
+
+- 前缀本身 `/sdk`，以免不带斜杠的形式落到根切片；
+- 其下的所有内容 `/sdk/*`；
+- 其页面的 OG 图片 `/og/sdk/*`；
+- 其索引页的 OG 图片 `/og/sdk.png`。
+
+切片的页面会从自己的前缀下加载 CSS、JS、样式表和搜索包，因此切片从不依赖另一个切片的部署是否为最新。`public/` 中的文件（favicon、字体、根路径图片）保持根路径，并由根切片提供，因此改动这些文件需要部署根切片。
+
+把每个集合恰好分配给一个切片：两个同时持有 `api` 的部署会响应相同的 URL。任何按前缀路由的主机都可以。以下三种方式：
+
+**Cloudflare**，每个切片一个 Worker，使用 zone 路由（`workers.dev` 主机名不支持路由）：
+
+```jsonc title="wrangler.sdk.jsonc (the sdk slice)"
+{
+  "name": "docs-site-es",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./dist", "not_found_handling": "404-page" },
+  "routes": [
+    { "pattern": "docs.example.com/sdk", "zone_name": "example.com" },
+    { "pattern": "docs.example.com/sdk/*", "zone_name": "example.com" },
+    { "pattern": "docs.example.com/og/sdk/*", "zone_name": "example.com" },
+    { "pattern": "docs.example.com/og/sdk.png", "zone_name": "example.com" }
+  ]
+}
+```
+
+根切片的 `wrangler.jsonc` 保留 `"pattern": "docs.example.com/*"`。然后执行 `NIMBUS_BUILD_ONLY=sdk pnpm build && npx wrangler deploy --config wrangler.sdk.jsonc`。
+
+**反向代理**，为每个切片放置一个静态源站：
+
+```nginx
+location = /sdk      { proxy_pass https://sdk.internal; }
+location /sdk/       { proxy_pass https://sdk.internal; }
+location /og/sdk/    { proxy_pass https://sdk.internal; }
+location = /og/sdk.png { proxy_pass https://sdk.internal; }
+location /                { proxy_pass https://docs-root.internal; }
+```
+
+**支持重写的静态主机**，例如 Netlify 或 Vercel：把每个切片部署为独立站点，并在根站点上添加指向切片部署的重写规则，例如在 `_redirects` 中写 `/sdk/* https://sdk.example.app/sdk/:splat 200`，或在 `vercel.json` 中添加等价的 `rewrites` 条目，覆盖这四个路径。
+
+每个切片的 `_headers` 和 `_redirects` 覆盖该切片的文件；不读取这些文件的主机需要在自身配置中设置相同规则，与全站构建的做法相同（见[面向智能体的文档](/ai/docs-for-agents/#agent-discovery)）。
+
+### 在 base 路径下
+
+在 `astro.config` 中设置 `base: "/docs"` 时，切片写入的文件相同，但它提供和声明的每个 URL 都位于 base 下。每个切片的前缀变为 `<base><prefix>`：
+
+| | 位于源站根目录 | 在 `base: "/docs"` 下 |
+|---|---|---|
+| 切片的路由 | `/sdk`、`/sdk/*`、`/og/sdk/*`、`/og/sdk.png` | `/docs/sdk`、`/docs/sdk/*`、`/docs/og/sdk/*`、`/docs/og/sdk.png` |
+| 根切片的路由 | `/*` | `/docs`、`/docs/*` |
+| 切片的 sitemap | `/sdk/sitemap-index.xml` | `/docs/sdk/sitemap-index.xml` |
+
+按全站在 base 下的部署方式部署每个切片：其源站在 `/docs` 下提供输出，路由器原样传递路径。Astro 不会把 base 放进 `dist/`，因此切片的页面位于 `dist/sdk/…`，并通过 `/docs/sdk/…` 提供。
+
+**Cloudflare：**添加 `@astrojs/cloudflare`（`~14.3.0`，配套 `wrangler` `^4.127.1`）并保持 `output: "static"`。该适配器会把输出嵌套到 base 下（`dist/client/docs/…`），并把 `_headers` 和 `_redirects` 保留在 `dist/client`，Workers 会在这里读取它们；`404.html` 仍位于 base 下，Workers 的 `404-page` 处理仍能找到它。需要手动安装：`nimbus-docs add adapter-cloudflare` 还会把站点切换为 `output: "server"`。
+
+```js title="astro.config.mjs"
+import cloudflare from "@astrojs/cloudflare";
+
+export default defineConfig({
+  base: "/docs",
+  output: "static",
+  adapter: cloudflare({ prerenderEnvironment: "node" }),
+  // …
+});
+```
+
+```jsonc title="wrangler.sdk.jsonc (the sdk slice)"
+{
+  "name": "docs-site-es",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./dist/client", "not_found_handling": "404-page" },
+  "routes": [
+    { "pattern": "example.com/docs/sdk", "zone_name": "example.com" },
+    { "pattern": "example.com/docs/sdk/*", "zone_name": "example.com" },
+    { "pattern": "example.com/docs/og/sdk/*", "zone_name": "example.com" },
+    { "pattern": "example.com/docs/og/sdk.png", "zone_name": "example.com" }
+  ]
+}
+```
+
+根切片的文件具有相同的 `assets` 块，以及 `example.com/docs` 和 `example.com/docs/*` 路由。
+
+适配器还会把根切片的[发现文件](/ai/agent-discovery/)复制到源站根目录。如果源站根目录归你所有，请把 `example.com/.well-known/*` 添加到其路由；否则由拥有该根目录的站点提供它们。
+
+使用 `npx wrangler deploy --config wrangler.jsonc` 部署每个切片，包括根切片。不带 `--config` 时，wrangler 会使用适配器生成的配置，而不是你的配置。
+
+**反向代理：**使用同样的 `location` 块，并在前面加上 `/docs`（`location /docs/sdk/ { proxy_pass https://sdk.internal; }`）。不带路径的 `proxy_pass` 会原样传递请求路径（包含 base），因此每个源站在 `/docs` 下提供自己的切片。
+
+**支持重写的静态主机：**发布每个切片时把输出放在 `/docs` 下（发布前将 `dist/` 的内容移入 `dist/docs/`），并把 `/docs/sdk/*` 重写为 `https://sdk.example.app/docs/sdk/:splat`。
+
+要在本地检查切片，在 base 下提供每个输出（使用适配器时，`npx serve dist/client` 已经这样做了），并在 `compose.mjs` 中按 base 匹配每个切片。OG 图片也位于 base 下（`/docs/og/sdk/…`），因此 base 也要加在 `/og` 前面，而不仅是前缀前面：
+
+```js title="scripts/compose.mjs"
+const base = "/docs";
+// …
+const slice = slices.find(
+  ({ prefix }) =>
+    path === `${base}${prefix}` ||
+    path.startsWith(`${base}${prefix}/`) ||
+    path.startsWith(`${base}/og${prefix}/`) ||
+    path === `${base}/og${prefix}.png`,
+);
+```
+
+### 声明所有 sitemap
+
+`robots.txt` 由你提供（`src/pages/robots.txt.ts`），搜索引擎会从中读取 sitemap。为每个切片添加一行 `Sitemap:`：
+
+```ts title="src/pages/robots.txt.ts"
+`Sitemap: ${new URL(withBase("/sitemap-index.xml", import.meta.env.BASE_URL), config.site).href}`,
+`Sitemap: ${new URL(withBase("/sdk/sitemap-index.xml", import.meta.env.BASE_URL), config.site).href}`,
+```
+
+搜索引擎只从源站根目录读取 `robots.txt`。在 base 下，站点自己的文件会在 `/docs/robots.txt` 提供，因此请把 `Sitemap:` 行加到源站的 `robots.txt`，或直接向搜索引擎提交每个切片的 sitemap。
+
+### 上线前检查切片
+
+切片自己的部署只提供自己的页面，因此请在该部署的预览 URL 上检查这些页面。跨切片的组合与链接需要前面的路由层：一个具有相同前缀的预发布主机名，或在本地为每个切片的 `dist/` 启动一个静态服务器，并在前面放一个小路由器来应用规则：
+
+```js title="scripts/compose.mjs"
+// node scripts/compose.mjs  →  http://localhost:8788，每个切片的
+// dist/ 由 `npx serve -l <port> <dir>`（或任意静态服务器）提供。
+import { createServer, request } from "node:http";
+
+const slices = [
+  { prefix: "/sdk", port: 8791 },
+  { prefix: "/api", port: 8792 },
+];
+const root = 8790;
+
+createServer((req, res) => {
+  const path = new URL(req.url, "http://x").pathname;
+  const slice = slices.find(
+    ({ prefix }) =>
+      path === prefix || path.startsWith(`${prefix}/`) || path.startsWith(`/og${prefix}/`) || path === `/og${prefix}.png`,
+  );
+  const upstream = request({ port: slice?.port ?? root, path: req.url, method: req.method, headers: req.headers }, (up) => {
+    res.writeHead(up.statusCode ?? 502, up.headers);
+    up.pipe(res);
+  });
+  req.pipe(upstream);
+}).listen(8788);
+```
+
+## 跨切片搜索
+
+每个切片构建自己的 Pagefind 索引。搜索客户端加载本切片的包，并把其他切片的包合并进来，因此一个搜索框仍覆盖整个站点。合并在首次搜索时产生开销：40 页的切片约 127 KB，并随每个切片的规模增长。
+
+起始模板的 provider 会这样做。自定义 provider 从 `virtual:nimbus/config` 读取相同配置：
+
+```ts
+import { searchIndex } from "virtual:nimbus/config";
+
+searchIndex.bundle; // sdk 切片中为 "/sdk/pagefind/"，否则为 "/pagefind/"
+searchIndex.merge; // 其他切片的包；全站构建中为 []
+```
+
+两者都是实际提供的 URL：在 `base: "/docs"` 下，包为 `/docs/sdk/pagefind/`。按原样获取它们，并把 Pagefind 的 `baseUrl` 设为带一个结尾斜杠的 base（`/docs/`）。
+
+包含多个集合的切片只写一个包；其他集合的包 URL 返回 404，客户端会跳过它们。
+
+## 切片之间的链接
+
+切片构建只知道自己的路由。它会从上次构建的 `.nimbus/routes.json` 中保留其他切片的路由，因此 `nimbus-docs lint` 仍会检查指向这些切片的链接，并以警告形式报告。没有上次构建时，这些链接会被跳过并给出一次提示。全站构建会恢复完整的检查。
+
+在 CI 中，缓存基础分支全站构建产生的 `.nimbus/routes.json`，并在切片构建前恢复它；[仅构建变更切片](/publish/changed-slices/)展示了该工作流。
+
+## 仅构建拉取请求触及的内容
+
+要仅构建和预览拉取请求更改的切片，参见[仅构建变更切片](/publish/changed-slices/)。
+
+## 限制
+
+- 按请求渲染只覆盖该切片：切片的服务器在请求时渲染自己集合的页面，不渲染其他内容。Nimbus 没有需要失效的缓存层。
+- 站点的 WebMCP 搜索使用根切片的包。
+- 不支持跨切片的版本选择器：docs 版本集合必须一起构建。
+- 切片不能横跨集合的一部分。
+- 切片只获取其集合和 `api` 条目读取的内容源；当 `src/content.config.ts` 以构建无法读取的方式设置内容源时，会获取所有源：参见[无内容源构建](/content-sources/git/#build-without-a-source)。

@@ -1,0 +1,103 @@
+---
+title: "Frontmatter"
+description: "页面 frontmatter 支持的全部字段及其类型、默认值和用法。"
+sidebar:
+  order: 2
+---
+
+Frontmatter 会在构建时按 Zod schema 校验，报错信息面向内容作者——缺失字段会被点名，出错的值会原样回显。只有 `title` 是必填项。
+
+## 字段 {#fields}
+
+| 字段 | 类型 | 默认值 | 说明 |
+|---|---|---|---|
+| `title` | string | — | **必填。** 页面标题，也是侧边栏的默认标签。 |
+| `description` | string | — | Meta 描述与搜索摘要。 |
+| `slug` | string | — | 覆盖 Astro 的条目 ID。用页面 URL 代替文件路径，例如保留 `1.2.3/` 文件夹中的点，否则 Astro 会把它当作 `/123/` 提供。 |
+| `mode` | `"doc"` \| `"custom"` | `"doc"` | `custom` 会去掉所有文档框架。 |
+| `sidebar` | `false` \| object | — | `false` 移除本页的侧边栏栏位；用 `sidebar.hidden` 把页面从侧边栏隐藏。见下文。 |
+| `hideChildren` | boolean | — | `sidebar.hideChildren` 的顶层别名——把分区折叠为单个链接。 |
+| `head` | array | `[]` | 额外的 `<head>` 元素；会与 `config.head` 合并。 |
+| `banner` | object | — | 显示在页头上方的单页公告。见下文。 |
+| `draft` | boolean | `false` | 从生产构建与 `llms.txt` 索引中排除。 |
+| `noindex` | boolean | `false` | 输出 `<meta name="robots" content="noindex">`。 |
+| `searchable` | boolean | 由 `noindex` 推导 | 是否加入站点搜索索引。 |
+| `tableOfContents` | `false` \| object | — | `{ minHeadingLevel, maxHeadingLevel }`（默认 2–3）。 |
+| `lastUpdated` | date | — | 覆盖由 git 推导出的日期。 |
+| `socialImage` | string | — | 单页 OG 图片，可以是绝对 URL 或不带 base 的逻辑路径。 |
+| `prev` / `next` | string \| object \| `false` | — | 覆盖或禁用分页链接。 |
+| `previousSlug` | string \| string[] | — | 版本重命名入口——参见[重定向](/navigation/redirects/)。 |
+| `external_link` | URL \| `/path` | — | 重写侧边栏链接目标。 |
+| `nimbusDisableRules` | string[] | — | 在本页跳过的规则代码，例如 `["nimbus/bare-url"]`。参见 [Lint](/writing/linting/)。 |
+
+## `sidebar` 对象 {#the-sidebar-object}
+
+```yaml
+sidebar:
+  order: 2
+  label: Quickstart           # 在侧边栏中覆盖 title
+  badge:
+    text: New
+    variant: tip              # default | info | note | success | tip | warning | caution | danger
+  hidden: false               # 保留页面但从侧边栏隐藏
+  hideChildren: false         # 把分区折叠为单个链接
+  group:                      # 当本页是目录的 index.mdx 时
+    label: Getting started
+    badge: Beta
+    icon: ph:rocket-launch    # astro-icon 名称，显示在标签前
+    hideIndex: false          # true：分组标题不链接到本页
+```
+
+## 横幅 {#banner}
+
+用 `banner` 显示单页公告，例如版本发布、迁移通知或弃用警告：
+
+```yaml
+---
+title: Workers
+banner:
+  content: This API is in beta and may change.
+  type: caution
+---
+```
+
+`content` 是按原样插入的 HTML：`<a>`、`<code>` 等内联标签可用，Markdown 不可用。它和站点其他内容一样受信任；绝不要用外部输入构造它。`type` 接受 `note`、`tip`、`caution` 或 `danger`。
+
+添加 `dismissible` 可让读者关闭横幅：
+
+```yaml
+banner:
+  content: v2 is out — see the migration guide.
+  type: tip
+  dismissible:
+    id: v2-release
+    days: 7
+```
+
+`id` 标识这次关闭。消息变化时请更换 `id`，横幅才会再次出现。`days` 控制关闭状态的持续时间；省略它则永久记住关闭状态。
+
+需要全站通知时，改为在 `BaseLayout` 中渲染 `Banner` 组件。参见[布局](/styling/layouts/)。
+
+## 示例 {#example}
+
+```yaml
+---
+title: Configuration
+description: Every option defineConfig accepts.
+sidebar:
+  order: 9
+  badge:
+    text: New
+    variant: tip
+tableOfContents:
+  maxHeadingLevel: 2
+---
+```
+
+## 已移除的键 {#removed-keys}
+
+一些旧键现在会抛出带迁移指引的错误，而不是静默失败：
+
+- `template` → `mode`（`splash` → `custom`）
+- `pagefind` → `searchable`
+- `llms`、`aiDeprioritize`、`hero`——已移除；改用 `noindex`，或在正文中自行组织内容。

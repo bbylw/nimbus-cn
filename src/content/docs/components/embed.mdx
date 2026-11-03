@@ -1,0 +1,40 @@
+---
+title: "Embed"
+description: "锁定比例的 iframe 容器，为视频、地图与外部内容提供合理默认值。"
+sidebar:
+  order: 14
+---
+
+Embed 把外部内容放进带比例锁的 iframe：宽度跟随容器，高度按比例计算，视频、地图和演示文稿都不会在加载时跳布局。
+
+## 安装
+
+```bash
+nimbus-docs add embed
+```
+
+源码位于 `src/components/ui/embed/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `src` | string | — | 是 | iframe 中嵌入的 URL。 |
+| `title` | string | — | 是 | iframe 的可访问名称。 |
+| `ratio` | string | `"16/9"` | 否 | CSS 宽高比，例如 `"16/9"`、`"4/3"`、`"1/1"`。 |
+| `allow` | string | `"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"` | 否 | 传给 iframe 的权限策略。 |
+| `allowfullscreen` | boolean | `true` | 否 | 是否允许嵌入内容进入全屏。 |
+
+## 示例
+
+```mdx
+<Embed
+  src="https://www.youtube.com/embed/example"
+  title="Nimbus 介绍视频"
+  ratio="16/9"
+/>
+```
+
+`title` 为必填：iframe 需要一个可访问名称，读屏软件靠它说明这是哪块内容。需要额外权限时再调整 `allow`。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

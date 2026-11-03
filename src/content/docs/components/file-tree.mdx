@@ -1,0 +1,36 @@
+---
+title: "FileTree"
+description: "用嵌套 Markdown 列表书写的可折叠目录树，支持文件夹、文件、高亮与占位行。"
+sidebar:
+  order: 15
+---
+
+FileTree 把一段嵌套 Markdown 列表渲染成可折叠的目录树：列表的每一行是一个文件夹或文件，缩进决定层级。
+
+## 安装
+
+```bash
+nimbus-docs add file-tree
+```
+
+源码位于 `src/components/ui/file-tree/`。
+
+## 属性
+
+FileTree 没有公开属性，结构与内容全部来自子元素里的嵌套列表。
+
+## 示例
+
+```mdx
+<FileTree>
+- src/
+  - content/
+    - docs/
+      - index.mdx
+  - components/
+    - ui/
+- package.json
+</FileTree>
+```
+
+文件夹可以展开收起，单个文件行也可以用来强调重点或占位。FileTree 未默认注册，使用前记得在 `src/components.ts` 登记或在页面顶部导入，否则构建会因未知组件失败。

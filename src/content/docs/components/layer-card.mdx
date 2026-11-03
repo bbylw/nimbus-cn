@@ -1,0 +1,35 @@
+---
+title: "LayerCard"
+description: "双层卡片容器，凹陷的头部条位于抬升的内容面板之上，供 PackageManagers 等组件复用。"
+sidebar:
+  order: 19
+---
+
+LayerCard 是两层的卡片：上方是凹陷的头部条，下方是抬升的内容面板。`CodeGroup` 与 `PackageManagers` 都用它搭外框，因此这些组件的圆角、描边与层次保持一致。
+
+## 安装
+
+```bash
+nimbus-docs add layer-card
+```
+
+源码位于 `src/components/ui/layer-card/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+LayerCard 没有公开属性，结构由 `LayerCard`、`LayerCardHeader`、`LayerCardContent` 三个部件组成。
+
+## 示例
+
+```mdx
+<LayerCard>
+  <LayerCardHeader>命令</LayerCardHeader>
+  <LayerCardContent>
+    在这里放代码块或其他内容。
+  </LayerCardContent>
+</LayerCard>
+```
+
+头部条用于放标题、标签页或复制按钮，内容面板的内边距与背景已经处理好，直接把正文内容放进 `LayerCardContent` 即可。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

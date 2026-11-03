@@ -1,0 +1,36 @@
+---
+title: "Banner"
+description: "站点公告条，提供语义类型、HTML 内容与可选的持久关闭。"
+sidebar:
+  order: 4
+---
+
+Banner 在页面顶部呈现一条公告：语义类型决定配色，正文按 HTML 渲染，可选的关闭按钮会把“已关闭”记在读者浏览器里。
+
+## 安装
+
+```bash
+nimbus-docs add banner
+```
+
+源码位于 `src/components/ui/banner/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `content` | string | — | 是 | 作为公告正文渲染的 HTML 字符串，会经过净化。 |
+| `variant` | `"note"` \| `"tip"` \| `"caution"` \| `"danger"` | `"note"` | 否 | 传达意图的视觉样式。 |
+| `dismissible` | `{ id: string; days?: number }` | — | 否 | 显示关闭按钮；按给定 `id` 把关闭状态写入 localStorage，并在指定天数后失效。 |
+
+## 示例
+
+```mdx
+<Banner
+  content="<strong>Nimbus 2.0 已发布</strong>。查看升级指南了解迁移步骤。"
+  variant="note"
+  dismissible={{ id: "release-2", days: 30 }}
+/>
+```
+
+`caution` 与 `danger` 会以 `role="alert"` 渲染，读屏软件会优先播报。安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

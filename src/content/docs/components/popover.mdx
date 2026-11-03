@@ -1,0 +1,39 @@
+---
+title: "Popover"
+description: "锚定在触发元素旁的浮层，基于原生 Popover API，滚动与缩放时自动重定位。"
+sidebar:
+  order: 25
+---
+
+Popover 把浮层内容锚定在触发元素旁，基于原生 Popover API，不需要额外的定位依赖。页面滚动或窗口缩放时会重新计算位置，点击外部或按 Escape 关闭。
+
+## 安装
+
+```bash
+nimbus-docs add popover
+```
+
+源码位于 `src/components/ui/popover/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `placement` | `"bottom-start"` \| `"bottom-end"` \| `"top-start"` \| `"top-end"` | `"bottom-start"` | 否 | `PopoverContent` 的属性，决定浮层相对触发元素锚定的位置。 |
+
+## 示例
+
+三个部件组合使用：`Popover` 包住整体，`PopoverTrigger` 是触发元素，`PopoverContent` 是浮层：
+
+```mdx
+<Popover>
+  <PopoverTrigger>查看详情</PopoverTrigger>
+  <PopoverContent placement="bottom-end">
+    <p>这里放浮层内容。</p>
+  </PopoverContent>
+</Popover>
+```
+
+浮层贴近右边缘时用 `placement="bottom-end"`，需要向上展开时用 `top-start` 或 `top-end`。触发元素保持可聚焦，并带有展开状态，读屏软件可以感知浮层的出现与关闭。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

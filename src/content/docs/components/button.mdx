@@ -1,0 +1,36 @@
+---
+title: "Button"
+description: "带变体、尺寸与形状选项的操作按钮，与 LinkButton 共用样式。"
+sidebar:
+  order: 6
+---
+
+Button 触发页面内的操作：提交、保存、打开模态框。变体决定强调程度，尺寸与形状覆盖从紧凑工具栏到纯图标按钮的各种场景。
+
+## 安装
+
+```bash
+nimbus-docs add button
+```
+
+源码位于 `src/components/ui/button/`；样式定义在同目录的 `variants.ts` 中，`LinkButton` 复用同一份。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `variant` | `"primary"` \| `"secondary"` \| `"ghost"` \| `"destructive"` \| `"secondary-destructive"` \| `"outline"` | `"secondary"` | 否 | 视觉样式。 |
+| `size` | `"xs"` \| `"sm"` \| `"base"` \| `"lg"` | `"base"` | 否 | 相对尺寸，影响内边距与字号。 |
+| `shape` | `"base"` \| `"square"` \| `"circle"` | `"base"` | 否 | 只放图标时用 `square` 或 `circle`，并传入 `aria-label`。 |
+| `icon` | string | — | 否 | 标签前渲染的 Iconify 名称，例如 `"ph:plus"`。 |
+| `loading` | boolean | `false` | 否 | 显示旋转图标并禁用交互。 |
+
+## 示例
+
+```mdx
+<Button variant="primary" icon="ph:plus">新建页面</Button>
+<Button variant="ghost" loading>保存中…</Button>
+<Button variant="outline" shape="square" icon="ph:gear" aria-label="设置" />
+```
+
+需要跳转而不是触发操作时，用 [`LinkButton`](/components/link-button/)，它复用同一套变体与尺寸。安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

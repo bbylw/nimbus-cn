@@ -1,0 +1,76 @@
+---
+title: "术语表"
+description: "Nimbus 文档中的核心术语及其含义。"
+---
+
+### 集合 {#collection}
+
+同类页面的集合，在 `src/content.config.ts` 中定义：文档、变更日志、旧版本或 API 参考。每个集合有自己的文件夹、schema 和路由。
+
+### 组件 {#component}
+
+页面界面的一部分，例如标签页或卡片。起始模板组件随你的站点提供，其他组件从[注册表](#registry)安装。参见[组件目录](/components/)。
+
+### 内容来源 {#content-source}
+
+`src/content` 之外、集合从中读取页面的地方，例如另一个 git 仓库或 Notion 数据库。参见[来自其他来源的内容](/content-sources/git/)。
+
+### 坐标 {#coordinate}
+
+API 页面的稳定名称，例如操作的 `operationId`。指向 API 页面的链接使用坐标，因此能经受 URL 变化。参见[引用 API 页面](/api-reference/citations/)。
+
+### 功能 {#feature}
+
+一种注册表条目，会在多个位置改变你的站点，例如添加变更日志。`nimbus-docs add` 把它作为[配方](#recipe)交给你的编码智能体，而不是复制文件。
+
+### llms.txt {#llmstxt}
+
+站点页面在 `/llms.txt` 的纯文本索引，供 AI 工具使用。参见 [Markdown 与 llms.txt](/ai/publish-markdown/)。
+
+### Markdown 版本 {#markdown-version}
+
+Nimbus 在 HTML 之外发布的页面 Markdown 副本，位于 `<page>/index.md`。
+
+### nimbus.json {#nimbusjson}
+
+站点文件来源和已安装内容的提交记录。参见 [`nimbus.json`](/project-structure/#nimbusjson--the-provenance-record)。
+
+### 片段 {#partial}
+
+在 `src/content/partials/` 中写一次、通过 `<Render>` 包含在多个页面中的段落。参见[可复用片段](/writing/reusable-snippets/)。
+
+### 预生成页面 {#prepared-page}
+
+API 页面的数据在构建时由规格算出，因此按请求提供页面时不必再次解析规格。
+
+### 配方 {#recipe}
+
+编码智能体遵循的 Markdown 指令，用于按站点自己的风格向站点添加[功能](#feature)。也指[内容风格指南](/style-guide/)中的内容类型指南。
+
+### 注册表 {#registry}
+
+`nimbus-docs add` 安装所依据的目录。其条目包括组件、库、功能和内容来源。参见[注册表](/registry/)。
+
+### 按请求渲染 {#rendering-on-request}
+
+在有读者请求时于服务器上构建页面，而不是在构建时一次完成。参见[选择构建时或按请求渲染](/reference/rendering/)。
+
+### Sätteri {#satteri}
+
+Nimbus 使用的 Markdown 解析器。它很快，这也意味着传给 `mdx()` 的 remark 插件不会生效；参见 [Markdown 与 MDX](/writing/markdown-and-mdx/)。
+
+### 切片 {#slice}
+
+站点中独立构建和部署的一部分，例如某个产品的指南。参见[部分构建](/publish/partial-builds/)。
+
+### 起始模板 {#starter}
+
+脚手架写入新站点的文件：布局、组件、样式、路由和示例内容。从那时起它们就属于你。参见[归属](/styling/how-customization-works/)。
+
+### 模板标签 {#templates-tag}
+
+Nimbus 仓库中的标签，例如 `templates-v0.7.0`，标记某次脚手架发布的起始模板文件。`outdated --to <tag>` 将你的文件与指定发布版本比较。
+
+### 升级条目 {#upgrade-entry}
+
+迁移到更新版本时 `nimbus-docs migrate` 列出的步骤：必需的，或可选、可稍后采纳的改进。参见[升级](/publish/upgrading/)。

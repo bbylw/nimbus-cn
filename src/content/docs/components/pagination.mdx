@@ -1,0 +1,50 @@
+---
+title: "Pagination"
+description: "页面底部的上一篇与下一篇导航，顺序由侧边栏树决定。"
+sidebar:
+  order: 24
+---
+
+Pagination 在正文末尾把上一页与下一页合成一条导航条：高亮块会滑向指针所在的一侧，焦点在条内时按 `[` 与 `]` 可直接翻页。顺序来自侧边栏树。
+
+## 安装
+
+```bash
+nimbus-docs add pagination
+```
+
+源码位于 `src/components/ui/pagination/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `prevNext` | `{ prev?: { label: string; href: string }; next?: { label: string; href: string } }` | — | 否 | 相邻页面的引用，首尾页可以缺一侧。传入 `PaginationLink` 子元素时忽略。 |
+| `prevLabel` | string | `"Previous"` | 否 | 上一篇标题上方的说明文字。 |
+| `nextLabel` | string | `"Next"` | 否 | 下一篇标题上方的说明文字。 |
+| `keys` | boolean | `true` | 否 | 焦点在导航条内时，`[` 和 `]` 跳转到上一篇与下一篇。设为 `false` 可关闭。 |
+
+## 示例
+
+先由 `getPrevNext()` 取到相邻页面，再传给组件：
+
+```astro title="src/layouts/DocsLayout.astro"
+import { getPrevNext } from "@cloudflare/nimbus-docs";
+
+const prevNext = await getPrevNext(currentSlug, { sidebarTree: sidebar });
+```
+
+```astro
+<Pagination prevNext={prevNext} />
+```
+
+需要自定义链接时，直接放 `PaginationLink` 子元素，此时 `prevNext` 被忽略：
+
+```astro
+<Pagination>
+  <PaginationLink rel="prev" href="/blog/older/" label="更早">更早的文章</PaginationLink>
+  <PaginationLink rel="next" href="/blog/newer/" label="更新">更新的文章</PaginationLink>
+</Pagination>
+```
+
+首尾页面只有一侧时，导航条会自动收窄并靠向对应的一边。安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

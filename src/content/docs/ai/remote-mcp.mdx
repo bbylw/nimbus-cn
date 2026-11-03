@@ -1,0 +1,148 @@
+---
+title: "远程 MCP 服务器"
+description: "在 /mcp 提供无状态、公开的 MCP 服务器，让智能体用 list_pages 和 get_page 读取文档。"
+sidebar:
+  order: 6
+---
+
+设置 `agents: { mcp: true }` 后，站点会在 `/mcp` 提供一个远程 [MCP](https://modelcontextprotocol.io/) 服务器。任何支持 Streamable HTTP 的 MCP 客户端都能无需密钥连接，并通过两个工具读取文档：`list_pages` 和 `get_page`。服务器运行在站点自身的服务端输出中，因此无需额外部署其他内容。
+
+服务器读取构建已经发布的内容：`llms.txt` 与站点搜索背后的页面和 Markdown 版本。它没有搜索工具；智能体列出页面并读取它们，或直接获取 `llms.txt` 与 `.md` URL。
+
+## 开启
+
+服务器需要服务器适配器，因为 `/mcp` 在运行时响应请求。如果站点是静态的，请为部署的主机添加适配器：`cloudflare`、`netlify`、`node` 或 `vercel`。以 Node 服务器为例：
+
+```sh
+npx @cloudflare/nimbus-docs add adapter-node
+yarn nimbus-docs add adapter-node
+pnpm nimbus-docs add adapter-node
+bunx @cloudflare/nimbus-docs add adapter-node
+```
+
+在尚未设置 `rendering` 策略的站点上，`add adapter-cloudflare` 还会设置 `rendering: { default: "request" }`，使文档与 API 页面在请求时渲染。服务器并不需要这样：若要让它们保持预渲染，请设置 `rendering: { default: "build" }`。服务器本身只需要 `/mcp` 及其卡片按请求响应。
+
+在项目中安装 MCP 服务器 SDK。它是 Nimbus 的可选依赖：没有该服务器的站点不会安装它。
+
+```sh
+npm i @modelcontextprotocol/server@2
+yarn add @modelcontextprotocol/server@2
+pnpm add @modelcontextprotocol/server@2
+bun add @modelcontextprotocol/server@2
+```
+
+然后在 Nimbus 配置中开启服务器：
+
+```ts title="astro.config.ts"
+const nimbusConfig = defineNimbusConfig({
+  site: "https://docs.example.com",
+  title: "Example",
+  agents: { mcp: true },
+});
+```
+
+设置了 `agents.mcp` 但没有服务器适配器，或未安装 SDK 时，构建会停止并说明需要添加什么；`nimbus-docs check` 会在构建前报告这两种情况。
+
+要关闭它，请把 `agents.mcp` 设为 `false`：`/mcp`、卡片和“Copy MCP URL”操作都会消失。之后你可以移除 `@modelcontextprotocol/server`，如果站点上没有其他内容需要按请求渲染，也可以移除适配器。
+
+## 本地试用
+
+`astro dev` 会从最近一次内容同步启动 `/mcp`，无需适配器。使用 MCP Inspector 在 `astro dev` 打印的地址上列出工具，注意带上 `base` 路径，在 `trailingSlash: "always"` 下则为 `/mcp/`：
+
+```sh
+npx @modelcontextprotocol/inspector --cli http://localhost:4321/mcp --transport http --method tools/list
+yarn dlx @modelcontextprotocol/inspector --cli http://localhost:4321/mcp --transport http --method tools/list
+pnpm dlx @modelcontextprotocol/inspector --cli http://localhost:4321/mcp --transport http --method tools/list
+bunx @modelcontextprotocol/inspector --cli http://localhost:4321/mcp --transport http --method tools/list
+```
+
+要试用生产构建，请按适配器在生产环境中的方式运行它：Node 上使用 `node dist/server/entry.mjs`（设置 `HOST` 和 `PORT`），Cloudflare 上使用 `wrangler dev`。
+
+服务器返回的 URL 以及“Copy MCP URL”操作使用的是 `site`，而不是本地地址，因此需要你自行把客户端指向本地地址。
+
+## 站点提供的内容
+
+| 路径 | 内容 |
+| --- | --- |
+| `/mcp` | 服务器本身。`POST` 发送 JSON-RPC 消息；每个应答是一个 `application/json` 主体，通知则得到 `202`；`GET` 和 `DELETE` 返回 `405`，因为服务器是无状态的、不保留会话。若 `POST` 的 `Content-Type` 不是 `application/json`，或 `DELETE` 不带 `Content-Type`，且请求不是来自站点自身的 `Origin`，则改为得到 Astro 的源检查 `403`。`OPTIONS` 响应浏览器预检。 |
+| `/mcp/server-card` | [Server Card](https://github.com/modelcontextprotocol/ext-server-card)：服务器名称、已安装的 Nimbus 版本、描述与端点 URL，按请求以 `application/mcp-server-card+json` 提供，带 `Access-Control-Allow-Origin: *`，可缓存五分钟（`Cache-Control: public, max-age=300, s-maxage=300`）。 |
+
+该卡片会列在 `/.well-known/ai-catalog.json` 中（除非 `agents.discovery` 为 `false`），`llms.txt` 也会写明端点，因此从任一处出发的智能体都能找到服务器。服务器名称是站点主机名的反转加上 `/docs`：`docs.example.com` 变为 `com.example.docs/docs`。位于 `localhost` 或 IP 地址的站点则为 `local.nimbus/docs`。
+
+使用 `base` 时，两个路径都位于其下：`https://docs.example.com/docs/mcp`。使用 `trailingSlash: "always"` 时为 `/mcp/` 和 `/mcp/server-card/`。
+
+请使用完全对应的形式。另一种形式在 `astro dev` 中会得到 `404`，在生产环境则会得到 MCP 客户端无法跟随的重定向。卡片、`llms.txt` 与“Copy MCP URL”操作给出的都是正确形式。
+
+在任一路径上存在页面、内容条目或公开文件会让构建失败，因为服务器会遮蔽它。
+
+## 工具
+
+**`list_pages`** 每次返回 200 个页面，每项包含 `title`、`url`、`markdownUrl` 和 `section`，有则还包含 `description` 和 `version`。把返回的 `nextCursor` 作为 `cursor` 传入以获取下一批。
+
+- **`section`** 按第一个路径段过滤：`/guide/install/` 对应 `guide`，根页面则为 `index`。
+- **`version`** 按站点的某个[文档版本](/reference/configuration/#site-config)过滤。文档版本之外的页面（例如 API 参考）只在不加过滤时出现。
+
+```json
+{ "section": "guide" }
+```
+
+**`get_page`** 以 Markdown 返回单个页面：`{ "title", "url", "markdownUrl", "content" }`。可传入 `list_pages` 返回的 `url`，或像 `/guide/` 这样的站点相对路径；绝对 URL 只使用其路径部分。超过约 100,000 个字符的页面会被截断并带 `"truncated": true`；`markdownUrl` 提供完整页面。
+
+```json
+{ "url": "https://docs.example.com/guide/" }
+```
+
+两个工具都在文本内容块中返回 JSON。错误会以 `isError` 置位的形式出现在结果中，形如 `{ "error": { "code", "message" } }`：
+
+| 代码 | 含义 |
+|---|---|
+| `invalid_input` | 未知版本，或来自其他过滤条件的游标。不符合 schema 的参数会改为返回 MCP SDK 的消息。 |
+| `not_found` | 该 URL 没有已发布的页面。 |
+| `unavailable` | 无法读取站点的已发布文件。 |
+
+## 包含哪些页面
+
+这些工具能看到有 Markdown 版本的页面：用 `docsCollection()` 和 `apiCollection()` 创建的集合，任何渲染模式下都包括。用 Astro 的 `defineCollection` 手工定义的集合没有 Markdown 版本，不会列出，与 `llms.txt` 一致。
+
+`list_pages` 与站点搜索一致：除非 `noindex` 页面设置了 `searchable: true`，否则会被排除；已弃用的版本除非你明确请求，否则也会被排除。草稿和隐藏版本从不列出或提供。
+
+`get_page` 还可按 URL 读取 `noindex` 页面。带 `?version=` 的 API URL 会解析为默认版本，即带有 Markdown 的版本。
+
+在 `src/pages` 中而非内容条目中创建的主页不算这里的页面：用 `/` 调用 `get_page` 找不到内容，而 `/index.md` 会改为提供 `llms.txt` 索引。
+
+## 连接客户端
+
+按客户端自身的远程 MCP 设置说明，把端点 URL 提供给它。各客户端的配置格式不同。
+
+启用服务器时，脚手架的文档布局会显示一个 **Copy MCP URL** 页面操作。点击它会复制端点 URL，并将标签短暂变为 **Copied**。
+
+然后在 `src/layouts/DocsLayout.astro` 中把它传给 `PageActions`，后者会在自身操作之后渲染它：
+
+```astro title="src/layouts/DocsLayout.astro"
+---
+import ConnectMcp from "@/components/ConnectMcp.astro";
+import { capabilities } from "virtual:nimbus/agent-capabilities";
+---
+
+<PageActions markdownUrl={markdownUrl} lastUpdated={lastUpdated} class={description ? undefined : "mt-3"}>
+  {capabilities.mcpUrl && <ConnectMcp />}
+</PageActions>
+```
+
+这个判断可避免在没有服务器的站点上加载该操作的脚本。在 slot 出现之前复制的 `PageActions` 不会渲染子元素：请用 `nimbus-docs add page-actions --overwrite` 更新它，或把 `<ConnectMcp />` 放在它后面。
+
+## 限制与安全性
+
+服务器是只读且公开的。它提供站点已经发布的内容，并带 `Access-Control-Allow-Origin: *`，以便浏览器客户端连接。没有身份验证，因此请把私有文档放在你自己的访问控制之后。
+
+格式错误或为 `null` 的 `Origin` 响应头会得到 `403`，超过 64 KB 的正文会得到 `413`。
+
+速率限制由主机负责：在其防火墙中为 `/mcp` 路径添加规则，或在站点前方的代理中处理。服务器本身不做任何限制。
+
+## 适配器
+
+Nimbus 在 Node 与 Cloudflare 适配器上测试该服务器。Node 从 `dist/client` 读取已发布的 Markdown；Cloudflare 通过 assets 绑定读取。
+
+当服务器能读取 `dist/client` 或从站点的 URL 获取它时，其他适配器也可用；请在部署后的站点上测试一次 `tools/call`。受访问保护后的预览环境会让该获取返回 `401`，工具则会报告 `unavailable`。
+
+启用服务器后，服务端打包产物会带上 MCP SDK（gzip 后约 140 KB），在首次调用 `/mcp` 时加载。

@@ -1,0 +1,39 @@
+---
+title: "TOC"
+description: "页内目录，随滚动高亮当前标题，并按标题层级缩进。"
+sidebar:
+  order: 31
+---
+
+TOC 渲染“本页内容”导航：随滚动高亮当前读到的标题，活动指示器在标题之间平滑移动，并按标题深度逐级缩进。
+
+## 安装
+
+```bash
+nimbus-docs add toc
+```
+
+源码位于 `src/components/ui/toc/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `headings` | `TOCItem[]` | — | 是 | 扁平的 `{ depth, text, slug }` 列表，通常来自 `getTOC(headings)`。 |
+
+## 示例
+
+```astro title="src/pages/[...slug].astro"
+import { getTOC } from "@cloudflare/nimbus-docs";
+---
+
+const headings = getTOC(entryHeadings, entry.data.tableOfContents);
+```
+
+```astro
+<TOC headings={headings} />
+```
+
+目录项由正文的标题生成，`depth` 决定缩进层级，`slug` 用作锚点。`headings` 为空时 TOC 不渲染任何内容。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

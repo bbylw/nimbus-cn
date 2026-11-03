@@ -1,0 +1,81 @@
+---
+title: "Notion"
+description: "把 Notion 数据库作为页面集合接入，包括 token、属性映射、渲染差异与同步方式。"
+sidebar:
+  order: 2
+---
+
+Notion 数据库可以作为一个页面集合：每一行是一个页面，其区块是页面正文。Notion 页面是 Markdown：它们像其他页面一样拥有路由、侧边栏、搜索、Markdown 版本、`llms.txt`、引用与链接，但没有 MDX 组件、没有提示块、没有编辑链接，也没有最后更新日期。
+
+## 添加 {#add-it}
+
+```sh
+npx @cloudflare/nimbus-docs add source notion --print | claude
+yarn nimbus-docs add source notion --print | claude
+pnpm nimbus-docs add source notion --print | claude
+bunx @cloudflare/nimbus-docs add source notion --print | claude
+```
+
+该指南会让你的智能体安装 `@notionhq/client` 与 `notion-to-md`，并编写 `src/loaders/notion.ts`：一个用 Notion SDK 读取数据库、再用 notion-to-md 把每个页面转成 Markdown 的 loader。Nimbus 不含任何 Notion 代码；loader 由你自行修改。其余部分像任何集合一样接好：
+
+```ts title="src/content.config.ts"
+import { defineCollection } from "astro:content";
+import { docsCollection, withNimbusMarkdown } from "@cloudflare/nimbus-docs/content";
+import { notionLoader } from "./loaders/notion";
+
+export const collections = {
+  docs: defineCollection(docsCollection()),
+  handbook: defineCollection({
+    loader: withNimbusMarkdown(notionLoader({ database: "8f2c1e0a9b3d4e5f6a7b8c9d0e1f2a3b" })),
+    schema: docsCollection().schema,
+  }),
+};
+```
+
+此外还需要一个路由文件与一条侧边栏条目，与任何集合一样（`nimbus-docs add new-collection` 会写入两者）。
+
+## Token 与数据库 {#token-and-database}
+
+在 [notion.so/profile/integrations](https://www.notion.so/profile/integrations) 创建一个具有读取权限的内部连接，在数据库的“Connections”菜单中把该数据库分享给它，并把 token 放入 `NOTION_TOKEN`：本地放在 `.env`，CI 中放在构建环境。缺少它时构建会失败并指出该变量。
+
+数据库 id 是数据库 URL 中的 32 个字符的十六进制字符串。一个数据库包含一个或多个数据源；loader 会使用其中唯一的一个，包含多个数据源的数据库会失败并列出它们，因此请用 `notionLoader({ dataSource: "<id>" })` 选定一个。
+
+## 属性 {#properties}
+
+| 属性（默认名称） | 类型 | 变成 |
+| --- | --- | --- |
+| 标题 | title | `title` |
+| `Description` | rich text | `description` |
+| `Slug` | rich text | 页面的 URL；没有它时使用 slug 化的标题 |
+| `Order` | number | `sidebar.order` |
+| `Status` | status、select 或 checkbox | 该行是否发布 |
+
+用 `notionLoader({ database, properties: { slug: "URL", status: "State" } })` 重命名它们。你指定的属性缺失或类型错误会让构建失败，并列出该数据源的属性。
+
+**发布是失败关闭的。** 只有当某行的 `Status` 为 `Published`，或其 checkbox 被勾选时，该行才会发布。其他所有行都是草稿：在 `astro dev` 中显示并带有 Draft 徽标，在 `astro build` 中被排除。
+
+- Notion 自带的状态选项是 Not started、In progress 与 Done。如果 Done 表示已发布，请设置 `publishedValue: "Done"`。
+- 完全没有状态属性时，每一行都会发布，日志会说明这一点。状态属性用了其他名称则会让构建失败，因此重命名绝不会把草稿发布出去。
+- 没有任何行发布时，构建会发出警告并列出它找到的值。
+
+两行使用同一个 slug 会让构建失败，并指出两个 Notion 页面 id（包括草稿），且发生在写入任何内容之前。没有 slug 且标题为空的行会失败并指出其页面 id。没有 `Slug` 时，重命名页面会改变它的 URL。
+
+## 渲染内容 {#what-renders}
+
+大多数区块会转成对应的 Markdown。少数有所不同：
+
+- 一级标题会变成 `##`，因为页面标题就是 `#`。
+- 提示块（callout）会变成引用，折叠块（toggle）会变成 `<details>` 区块。
+- 音频、目录、面包屑与子页面会被省略，并给出警告。要渲染其中之一，请在 loader 中给 notion-to-md 提供自定义 transformer。
+
+文本会被转义，因此 `{`、`<`、`*` 与 `$` 会按输入原样渲染。
+
+站点开启数学公式时，公式会变成数学（参见 [Markdown 与 MDX](/writing/markdown-and-mdx/)）；否则会以 TeX 源码显示。图片保留 Notion 的 URL。上传到 Notion 的文件会得到一小时后过期的 URL，因此需要长期存在的图片应放在自己的主机上。
+
+## 同步 {#syncing}
+
+每次构建都会读取整个数据库，并在拿到所有行与区块之前不写入任何内容：重试后仍失败的请求会让构建失败，开发服务器则保留上一份可用内容。loader 会对速率限制以及读取页面内容时的服务器错误进行重试；仍然失败的构建可以重新运行。
+
+Notion 变化时站点不会跟着变。请按计划重新构建，或通过自动化把一个 Notion webhook 指向你的部署钩子。
+
+`nimbus-docs lint` 与 `check` 读取磁盘上的文件，因此会把 Notion 集合标记为未检查。

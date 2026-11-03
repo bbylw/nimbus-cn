@@ -1,0 +1,33 @@
+---
+title: "Badge"
+description: "紧凑的状态或分类标签，用于标注与行内强调。"
+sidebar:
+  order: 3
+---
+
+Badge 是圆角的胶囊状标签，适合标记版本状态、内容分类，或在行内强调一两个词。
+
+## 安装
+
+```bash
+nimbus-docs add badge
+```
+
+源码位于 `src/components/ui/badge/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `text` | string | — | 是 | 标签内显示的文字。 |
+| `variant` | `"default"` \| `"info"` \| `"note"` \| `"success"` \| `"tip"` \| `"warning"` \| `"caution"` \| `"danger"` | `"default"` | 否 | 传达意图的视觉样式。常用别名映射到同一套颜色：`note`→`info`、`tip`→`success`、`caution`→`warning`。 |
+| `size` | `"small"` \| `"medium"` \| `"large"` | `"small"` | 否 | 相对尺寸，影响内边距与字号。 |
+
+## 示例
+
+```mdx
+<Badge text="New" variant="info" />
+<Badge text="已废弃" variant="warning" size="medium" />
+```
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

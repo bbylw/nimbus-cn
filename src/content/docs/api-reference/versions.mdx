@@ -1,0 +1,80 @@
+---
+title: "API 版本"
+description: "在 api 条目内声明版本家族，配置版本选择器、路径或查询模式，并处理发现与索引行为。"
+sidebar:
+  order: 3
+---
+
+API 版本位于 `api` 条目内部。这与用于手写文档的顶层 `versions` 选项不同。一个条目接受 `spec`（单版本）或 `versions`（版本家族），不能同时使用两者。此示例使用默认的 operation-ID 路由；路由策略在每个版本上独立设置：
+
+```ts title="astro.config.ts"
+api: [
+  {
+    collection: "api",
+    label: "Acme API",
+    requireOperationId: true,
+    versions: [
+      {
+        version: "v2",
+        spec: "./src/api/openapi-v2.yaml",
+        default: true,
+        status: "ga",
+      },
+      {
+        version: "v1",
+        spec: "./src/api/openapi-v1.yaml",
+        status: "deprecated",
+      },
+    ],
+  },
+],
+```
+
+被标记 `default: true` 的版本拥有 `/api`；其他版本挂载在其版本之下，例如 `/api/v1`。如果没有任何版本被标记，则第一个版本为默认版本。已弃用的版本会在参考界面中渲染其状态。
+
+版本选择器位于每个 API 页面头部搜索框旁边，在所有宽度下都如此；方案的路由会把它传给 `Header` 的 `actions` 插槽。切换版本时，它会让读者停留在同一页面。Nimbus 按以下顺序跨版本链接页面：
+
+1. **相同坐标。** 共享同一坐标的页面（例如相同的 `operationId`）是同一页面。此链接始终优先。
+2. **相同方法和路径。** 当 `operationId` 发生变化时，操作会链接到方法和路径相同的那个，前提是该匹配唯一。整个路径段的参数可能被重命名，因此 `/zones/{zone_id}` 会匹配 `/zones/{id}`。链接可以串联，因此 v1 可以通过 v2 到达 v3。
+3. **无匹配。** 歧义或冲突的匹配不链接任何页面，选择器会打开另一个版本的落地页。
+
+路由策略属于版本家族中的每个版本。这样，当两个规格使用不同的基础路径或需要不同的覆盖时，URL 决策是明确的。
+
+### 查询中的版本
+
+按请求渲染的家族可以让每个操作保持一个路径，并通过查询参数选择版本，而不是使用路径前缀。查询模式需要该家族设置 `versions` 并按请求渲染，因为静态文件无论查询说什么都是同一个：
+
+```ts title="astro.config.ts"
+rendering: { default: "request" },
+api: [
+  {
+    collection: "api",
+    label: "Acme API",
+    versionUrl: { in: "query" },
+    versions: [
+      { version: "v2", spec: "./src/api/openapi-v2.yaml", default: true },
+      { version: "v1", spec: "./src/api/openapi-v1.yaml" },
+      { version: "2026-11-30.preview", spec: "./src/api/openapi-preview.yaml", hidden: true },
+    ],
+  },
+],
+```
+
+每个版本都从家族自己的路径提供：`/api/pets/` 是默认版本，`/api/pets/?version=v1` 是 `v1`。未知 id 返回 404 页面，空的 `version` 选择默认版本。此模式下没有 `/api/v1/` 路径。
+
+只要操作的 slug 不变，它跨版本保持其路径。重命名的操作在每个版本中路径不同，版本选择器会将它们链接起来。
+
+在非默认版本内，每个生成的链接都会携带其 `version` 查询，因此读者会停留在他们选择的版本中。
+
+要使用其他参数名，可用 `versionUrl: { in: "query", param: "api-version" }` 设置（任意小写名称）。避免使用 `lang`：起始模板的代码示例用它表示所选语言。
+
+站点地图、Markdown 版本、`llms.txt` 和 `llms-full.txt` 只描述默认版本，使用普通 URL。
+
+- **目录。** API 目录列出每个可见版本；非默认版本使用其查询 URL，其规格位于 `/api/v1/openapi.json`。首页的 `Link` 头只列出默认版本。
+- **搜索引擎。** 非默认页面带有 `noindex`；存在默认页面时，以默认页面为 canonical。
+- **Markdown。** 只有默认版本有 Markdown。`.md` URL 无论其 `version` 说什么都提供默认版本，或者在 `bundle: false` 时返回 404。
+- **隐藏版本**只能通过其查询访问，但 `hidden` 不是访问控制：`/nimbus-api/coordinates.json` 会列出它们，而且除非 `publishSpec: false`，否则其规格会发布。
+
+如果站点前面有缓存，其缓存键必须保留版本参数，并按 `Accept` 区分，否则读者会得到另一个版本的页面或错误的格式。
+
+不设置 `versionUrl` 时，版本位于路径中（`{ in: "path" }`，默认值）。在两种模式下，版本 id 使用小写字母、数字、点和短横线，并以字母或数字开头和结尾（`2026-11-30.air`）。

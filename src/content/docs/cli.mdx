@@ -1,113 +1,397 @@
 ---
-title: CLI 与检查
-description: 用 nimbus-docs 添加组件、检查内容、追踪上游变更并安全升级。
-sidebar:
-  order: 5
+title: "CLI"
+description: "nimbus-docs 命令行：列出与安装注册表内容、添加内容来源、检查项目、追踪上游变更并安全升级。"
 ---
 
-在站点目录中运行 `nimbus-docs` 命令。使用 Bun 时通过 `bunx` 调用项目里安装的版本：
-
-```sh
-bunx nimbus-docs <command>
-```
-
-<Aside type="note" title="先安装依赖">
-  `bunx` / `npx` 会优先使用项目本地安装的 `nimbus-docs`。如果依赖还没安装，它可能临时下载最新版，结果会与站点当前版本不一致。
-</Aside>
-
-## 添加组件与功能
-
-`add` 会把组件及其依赖以源码形式复制到你的仓库。
-
-```sh
-# 列出可安装的项目
-bunx nimbus-docs add
-
-# 安装一个组件
-bunx nimbus-docs add tabs
-
-# 打印功能配方（不修改文件）
-bunx nimbus-docs add new-version --print
-```
-
-功能（feature）是写给编码智能体看的 Markdown 配方。运行 `add <feature> --print` 可以把它打印出来交给你或你的智能体执行。
-
-也可以直接从其他来源加载页面：
-
-```sh
-bunx nimbus-docs add source github --print
-bunx nimbus-docs add source notion --print
-```
-
-安装服务端适配器：
-
-```sh
-bunx nimbus-docs add adapter-cloudflare
-```
-
-## 检查内容
-
-`check` 不需要构建就能检查环境、结构、内容、类型和待升级项：
-
-```sh
-bunx nimbus-docs check
-bunx nimbus-docs check --fix
-bunx nimbus-docs check --json
-```
-
-- `--fix` 会应用安全的修复。
-- `--json` 输出结构化结果，方便智能体读取并逐条处理。
-
-`lint` 根据 `astro.config.ts` 中启用的规则报告写作问题，不会阻断构建：
-
-```sh
-bunx nimbus-docs lint
-bunx nimbus-docs lint --fix
-bunx nimbus-docs lint --format json
-```
-
-<Aside type="tip">
-  第一次构建后再运行 `lint`，它才有完整的链接映射可用来检查内部链接。
-</Aside>
-
-## 追踪上游变更
-
-站点里的布局、组件和路由都来自脚手架模板。模板会随 Nimbus 版本更新，你需要知道哪些文件已经落后于上游。
-
-```sh
-# 列出落后的起始模板文件、注册表组件和包变更
-bunx nimbus-docs outdated
-
-# 查看某个起始文件的上游改动
-bunx nimbus-docs diff src/layouts/DocsLayout.astro
-
-# 在你没有手动修改过该文件时，直接采用上游版本
-bunx nimbus-docs diff src/layouts/DocsLayout.astro --apply
-```
-
-## 升级 Nimbus
-
-升级前先备份或提交当前改动，然后按顺序执行：
-
-1. 用包管理器更新 `@cloudflare/nimbus-docs`。
-2. 预览完整的升级计划：`bunx nimbus-docs migrate --dry-run --diff`。
-3. 逐条审阅版本变更，处理被阻塞或需要手动完成的项。
-4. 应用安全的改动：`bunx nimbus-docs migrate --yes`，然后检查改动结果。
-5. 没有剩余迁移项时，再次运行 `bunx nimbus-docs migrate --yes`，在 `nimbus.json` 中记录本次审阅。
-6. 跑一遍类型检查与生产构建，再运行 `bunx nimbus-docs check` 做构建后的检查。
-
-<Aside type="caution" title="不要手改 nimbus.json">
-  `nimbus.json` 里的 `lastReviewedNimbusVersion` 是升级审阅的基线，不是依赖版本锁。不要手动编辑它，也不要通过修改它来跳过版本。
-</Aside>
-
-## 命令速查
+`nimbus-docs` CLI 可以列出注册表中的内容、安装它们、在 [`nimbus.json`](/project-structure/) 中记录你拥有的内容、显示哪些已落后于上游，并检查你的 MDX 内容。
 
 | 命令 | 作用 |
 | --- | --- |
-| `add` | 列出、安装组件，或打印功能配方。 |
-| `check` | 不构建的预检；`--fix` 修复，`--json` 供智能体读取。 |
-| `lint` | 按配置的写作规则检查页面。 |
-| `outdated` | 列出落后于上游的模板文件与组件。 |
-| `diff <file>` | 查看某个起始模板文件的上游改动。 |
-| `migrate` | 应用新版本要求的迁移。 |
-| `init` | 为旧站点补上 `nimbus.json`。 |
+| [`list`](#nimbus-docs-list) | 列出注册表中的内容。 |
+| [`add <slug>`](#nimbus-docs-add-slug) | 安装组件、工具、功能或服务端适配器。 |
+| [`add source <name\|url>`](#nimbus-docs-add-source-nameurl) | 把某个内容来源的指南交给你的编码智能体。 |
+| [`init`](#nimbus-docs-init) | 为缺少记录的项目写入 `nimbus.json`。 |
+| [`migrate`](#nimbus-docs-migrate) | 应用包 API 迁移并列出升级审阅项。 |
+| [`outdated`](#nimbus-docs-outdated) | 列出上游已变更的起始模板文件、组件和包 API 工作。 |
+| [`diff [file]`](#nimbus-docs-diff-file) | 显示或采用起始模板文件的上游变更。 |
+| [`check`](#nimbus-docs-check) | 不构建即可检查项目的环境、配置和内容。 |
+| [`lint`](#nimbus-docs-lint) | 运行你已启用的写作规则。 |
+
+## `nimbus-docs list`
+
+列出所有可安装的组件、工具、功能和内容来源。
+
+```sh
+npx @cloudflare/nimbus-docs list
+yarn nimbus-docs list
+pnpm nimbus-docs list
+bunx @cloudflare/nimbus-docs list
+```
+
+按类型过滤：
+
+```sh
+npx @cloudflare/nimbus-docs list --type ui
+yarn nimbus-docs list --type ui
+pnpm nimbus-docs list --type ui
+bunx @cloudflare/nimbus-docs list --type ui
+```
+```sh
+npx @cloudflare/nimbus-docs list --type lib
+yarn nimbus-docs list --type lib
+pnpm nimbus-docs list --type lib
+bunx @cloudflare/nimbus-docs list --type lib
+```
+```sh
+npx @cloudflare/nimbus-docs list --type feature
+yarn nimbus-docs list --type feature
+pnpm nimbus-docs list --type feature
+bunx @cloudflare/nimbus-docs list --type feature
+```
+```sh
+npx @cloudflare/nimbus-docs list --type source
+yarn nimbus-docs list --type source
+pnpm nimbus-docs list --type source
+bunx @cloudflare/nimbus-docs list --type source
+```
+
+不带 slug 运行 `nimbus-docs add` 会显示同样的列表。
+
+## `nimbus-docs add <slug>`
+
+注册表条目根据类型使用两种安装模式。特殊的 `adapter-<id>` slug 使用第三种流程，会改写项目配置。
+
+### 组件与工具
+
+对于 `registry:ui` 和 `registry:lib` slug，CLI 会解析依赖、把文件复制到你的仓库，并安装它们需要的 npm 包。
+
+```sh
+npx @cloudflare/nimbus-docs add badge
+yarn nimbus-docs add badge
+pnpm nimbus-docs add badge
+bunx @cloudflare/nimbus-docs add badge
+```
+
+1. **解析依赖**
+
+   遍历 slug 的 `registryDependencies` 以及它需要的任何 npm `dependencies`。
+2. **复制文件**
+
+   把每个文件放到 `src/components/ui/`、`src/lib/` 或条目声明的位置下的正确路径。
+3. **更新 package.json**
+
+   如果 npm 依赖尚不存在，则添加它们。
+
+#### 已经安装
+
+`add` 绝不覆盖你拥有的文件。它会补上缺失的文件，保留与注册表不同的文件，并把两者都列出。已经与注册表一致的组件会报告为最新。
+
+#### 替换你的副本
+
+`--overwrite` 用注册表版本替换不同的文件，并逐个列出。在终端中，如果你编辑过组件或其依赖，它会先询问。
+
+在没有终端的情况下（例如智能体、CI 或管道），已编辑的组件会保留，被列出并附上替换它们的命令，命令以 `1` 退出。`--overwrite --yes` 会替换它们，并说明有多少个存在编辑。
+
+`add` 会从 `nimbus.json` 的安装记录中找出你的修改。对于随起始模板提供的组件，它会与你从 GitHub 下载的起始模板发布版本比较。如果该下载受到速率限制，设置 `GIGET_AUTH` 为 GitHub token，或传入 `--template-dir <path>` 使用本地检出。两者都没有时，它会在终端中询问，否则保留文件。
+
+先提交，再运行，然后用 `git diff` 审阅改动：
+
+```sh
+npx @cloudflare/nimbus-docs add badge --overwrite
+yarn nimbus-docs add badge --overwrite
+pnpm nimbus-docs add badge --overwrite
+bunx @cloudflare/nimbus-docs add badge --overwrite
+```
+
+对于 `add`，`--yes` 表示同意依赖安装等提示，但仍会保留现有文件。当你确实想“替换我的文件”时使用 `--overwrite`；只有在你已决定丢弃自己的编辑时，才使用 `--overwrite --yes`。
+
+安装后，组件就归你所有，可以随意编辑；不存在会被破坏的上游 API。每次 `add` 都会在 [`nimbus.json`](/project-structure/) 中记录它的 slug、注册表、发布版本和内容哈希，以便升级时判断你改了什么。
+
+### 功能
+
+对于 `registry:feature` slug，没有文件需要复制。配方是一段 Markdown 提示，由智能体读取、适配你的项目并应用。
+
+```sh
+npx @cloudflare/nimbus-docs add 404-page
+yarn nimbus-docs add 404-page
+pnpm nimbus-docs add 404-page
+bunx @cloudflare/nimbus-docs add 404-page
+```
+
+如果 CLI 在环境中检测到编码智能体，它会把配方打印到 stdout 供智能体使用。否则会打印你可以自行运行的管道指令：
+
+```sh
+npx @cloudflare/nimbus-docs add 404-page --print | claude
+yarn nimbus-docs add 404-page --print | claude
+pnpm nimbus-docs add 404-page --print | claude
+bunx @cloudflare/nimbus-docs add 404-page --print | claude
+```
+```sh
+npx @cloudflare/nimbus-docs add 404-page --print | codex
+yarn nimbus-docs add 404-page --print | codex
+pnpm nimbus-docs add 404-page --print | codex
+bunx @cloudflare/nimbus-docs add 404-page --print | codex
+```
+
+使用 `--print` 可强制输出 Markdown，跳过检测。
+
+### 服务端适配器
+
+按你部署的主机添加适配器：`adapter-cloudflare`、`adapter-netlify`、`adapter-node` 或 `adapter-vercel`。CLI 会安装 Astro 适配器，并改写 `astro.config` 中带标记的 `output` 块。它拒绝替换其他适配器或非字面量的 `output` 值。
+
+```sh
+npx @cloudflare/nimbus-docs add adapter-cloudflare
+yarn nimbus-docs add adapter-cloudflare
+pnpm nimbus-docs add adapter-cloudflare
+bunx @cloudflare/nimbus-docs add adapter-cloudflare
+```
+
+`adapter-cloudflare` 还会做两件事：
+
+- **渲染策略。** 当 Nimbus 配置中没有渲染策略时，它会添加请求渲染。已有策略会保留；如果配置是导入的或无法确定，则改为交给编码智能体处理。
+- **`wrangler.jsonc`。** 不存在时写入一个服务端兼容版本，或替换来自 Nimbus 且未被修改的静态版本。自定义的 `wrangler.jsonc`，或 JSON、TOML 配置，保持不动。
+
+完成适配器安装后，预期结果：
+
+```ts
+const nimbusConfig = defineNimbusConfig({
+  rendering: { default: "request" },
+  // ...
+});
+
+export default defineConfig({
+  output: "server",
+  adapter: cloudflare({ prerenderEnvironment: "node" }),
+  integrations: [nimbus(nimbusConfig)],
+});
+```
+
+编码智能体运行适配器命令时，得到的编辑与在 shell 中相同。
+
+有时 `adapter-cloudflare` 无法安全地编辑配置：没有带标记的 `output` 块、`output` 不是字面量、配置是 CommonJS 或是符号链接、写入失败，或 Nimbus 配置是被导入的。此时它会说明原因，打印供智能体完成工作的配方，并以 `0` 退出。`--print` 会打印该配方而不修改任何内容：
+
+```sh
+npx @cloudflare/nimbus-docs add adapter-cloudflare --print | claude
+yarn nimbus-docs add adapter-cloudflare --print | claude
+pnpm nimbus-docs add adapter-cloudflare --print | claude
+bunx @cloudflare/nimbus-docs add adapter-cloudflare --print | claude
+```
+
+之后始终运行项目的生产构建。按集合覆盖构建与请求渲染的设置参见[渲染策略](/reference/rendering/)。
+
+等价的长形式是 `nimbus-docs add server-output --adapter <cloudflare|vercel|netlify|node>`。
+
+## `nimbus-docs add source <name|url>`
+
+添加内容来源：站点的一部分由另一个 git 仓库、一个 Notion 数据库或任何提供方构建。参见[其他来源的内容](/content-sources/git/)。
+
+```sh
+npx @cloudflare/nimbus-docs add source github --print | claude
+yarn nimbus-docs add source github --print | claude
+pnpm nimbus-docs add source github --print | claude
+bunx @cloudflare/nimbus-docs add source github --print | claude
+```
+
+| 名称 | 来源 |
+|---|---|
+| `git`、`github`、`gitlab`、`bitbucket` | 另一个 git 仓库。这些别名会打印同一份指南，但使用相应主机的取值。 |
+| `notion` | 一个 Notion 数据库。智能体会安装 `@notionhq/client` 和 `notion-to-md`，并编写 `src/loaders/notion.ts`。 |
+| 一个 URL | 某个提供方的文档：从该 URL 开始，给出编写其加载器的指南。 |
+
+单独运行 `add source` 会列出这些来源。与功能一样，指南会交给你的编码智能体，由智能体编写来源所需的代码；`add source` 本身不写任何文件。只写来源名称（例如 `add notion`）会提示你改用 `add source notion`。
+
+## `nimbus-docs init`
+
+为缺少记录的项目写入 [`nimbus.json`](/project-structure/)：记录机制出现之前搭建的仓库、采用 Nimbus 的现有 Astro 站点，或记录被删除的情况。全新脚手架已包含该文件，因此 `init` 是其余情况的入口。
+
+```sh
+npx @cloudflare/nimbus-docs init
+yarn nimbus-docs init
+pnpm nimbus-docs init
+bunx @cloudflare/nimbus-docs init
+```
+
+它会扫描已安装的组件，逐一与注册表匹配，并写入能够恢复的信息——只做标记，绝不猜测：
+
+- **matched** —— 与注册表副本字节完全一致。
+- **modified** —— 你编辑过；记录保留来源身份，以便升级时仍能比较。
+- **hand-authored** —— 你自己的，不来自任何注册表。
+
+起始模板版本、`templates-v*` 标签和上次审阅的 Nimbus 版本无法仅从仓库恢复，因此留空（并标记为 `reconstructed`）。使用 `migrate --from <version>` 建立升级范围。
+
+```sh
+# 扫描嵌套的包（monorepo）
+npx @cloudflare/nimbus-docs init --root packages/docs
+yarn nimbus-docs init --root packages/docs
+pnpm nimbus-docs init --root packages/docs
+bunx @cloudflare/nimbus-docs init --root packages/docs
+```
+```sh
+# 重建已有记录
+npx @cloudflare/nimbus-docs init --force
+yarn nimbus-docs init --force
+pnpm nimbus-docs init --force
+bunx @cloudflare/nimbus-docs init --force
+```
+
+## 保持最新
+
+这些命令让站点保持最新。[升级 Nimbus](/publish/upgrading/) 会按发布顺序组织它们。
+
+### `nimbus-docs migrate`
+
+组合项目 `lastReviewedNimbusVersion` 与已安装 Nimbus 版本之间的所有已声明破坏性变更。对于可静态证明的编辑，它显示完整 diff；其余部分给出有边界的审阅任务。自定义或难以确定的代码绝不会被强制修改。
+
+没有已审阅基线的现有项目，必须提供其上次完成迁移的确切 Nimbus 版本：
+
+```sh
+pnpm nimbus-docs migrate --from PREVIOUS_VERSION
+```
+
+| 标志 | 作用 |
+|---|---|
+| `--dry-run`、`--diff` | 显示计划而不修改文件。 |
+| `--yes --json` | 应用并以 JSON 报告，供智能体使用。 |
+| `--print` | 把剩余工作打印为一份 Markdown 交接文档，交给智能体。 |
+| `--src-dir <relative-dir>` | 当配置计算 `srcDir` 时，指定 Astro 的 `srcDir`。 |
+
+输出会列出版本范围、必需审阅、计划中的 diff、阻塞项与错误。未被报告扫描覆盖的文件不会被声称已检查。
+
+可选的升级条目排在必需工作之后。它们永远不会阻止构建，但请逐条阅读：有些描述的是该版本自行完成的变更，例如新发布的文件。`migrate --yes` 会将它们记录为已审阅。
+
+完成所有报告的工作后，明确确认并推进已提交的审阅基线：
+
+```sh
+pnpm nimbus-docs migrate --from PREVIOUS_VERSION --yes
+```
+
+只有当项目没有记录基线时才传 `--from`。在终端中，`migrate` 会在把审阅版本写入 `nimbus.json` 前询问；没有终端时，只有 `--yes` 才会记录。只要有迁移尚未完成，它绝不会记录。
+
+待处理的必需审阅也会阻止 `astro dev`。使用 `astro dev --background` 时，服务器只会报告它已退出，因此请运行 `nimbus-docs check` 查看是哪项审阅。
+
+接下来，运行 `outdated`，然后运行 `nimbus-docs check`、`astro check` 和生产构建。
+
+### `nimbus-docs outdated`
+
+只读的“我落后了吗？”概览，覆盖包 API、起始模板文件和注册表组件：
+
+```sh
+npx @cloudflare/nimbus-docs outdated
+yarn nimbus-docs outdated
+pnpm nimbus-docs outdated
+bunx @cloudflare/nimbus-docs outdated
+```
+
+- **包 API** —— 待处理的迁移与审阅，由 `migrate` 处理。它还会说明 npm 上是否有更新的 Nimbus 发布。当 `src/content.config.*` 明显未使用 `apiCollection` 时，关于 API 参考页面的审阅会被跳过。
+- **注册表组件** —— 上游已变更的组件，以及比组件所需版本更旧的 npm 依赖，并给出更新命令。更新保持为仅审阅模式，因为覆盖也可能改变依赖。
+- **起始模板文件** —— 你的 `src/` 文件、`AGENT.md`、`CLAUDE.md` 和 `tsconfig.json`，与上游 `templates-v*` 标签比较。`git diff` 无法显示这些差异，因为该标签从未出现在你的历史中。除非传入 `--all`，否则内容文件会被隐藏。每个站点都会改写的文件（如 `package.json`、`wrangler.jsonc` 和 `nimbus.json`）不参与比较。
+
+`--json` 提供智能体可读的发现。`summary.packageApis` 统计每项迁移和审阅，`summary.requiredPackageApis` 统计必需项。`starter-needs-newer-package` 警告表示较新的起始模板需要比你现有版本更新的包，它会阻止 `diff --apply`。没有完整的 `nimbus.json` 时，你仍会得到包 API 结果，但标记为部分。
+
+### `nimbus-docs diff [file]`
+
+起始模板文件的只读详情：你改了什么，以及上游改了什么：
+
+```sh
+# 所有已变更的起始模板文件
+npx @cloudflare/nimbus-docs diff
+yarn nimbus-docs diff
+pnpm nimbus-docs diff
+bunx @cloudflare/nimbus-docs diff
+```
+```sh
+# 单个文件
+npx @cloudflare/nimbus-docs diff src/components/ui/aside/Aside.astro
+yarn nimbus-docs diff src/components/ui/aside/Aside.astro
+pnpm nimbus-docs diff src/components/ui/aside/Aside.astro
+bunx @cloudflare/nimbus-docs diff src/components/ui/aside/Aside.astro
+```
+
+| 状态 | 含义 |
+|---|---|
+| clean to pull | 上游改了它，你没改。 |
+| added or removed upstream | 文件在上游新增，或已不存在。 |
+| hand-merge | 双方都改了。 |
+| your changes | 你改了它，上游没改。没有可拉取的内容。 |
+
+对于干净的更新、新增或删除，CLI 可以针对单个文件应用变更：
+
+```sh
+npx @cloudflare/nimbus-docs diff src/components/ui/aside/Aside.astro --apply
+yarn nimbus-docs diff src/components/ui/aside/Aside.astro --apply
+pnpm nimbus-docs diff src/components/ui/aside/Aside.astro --apply
+bunx @cloudflare/nimbus-docs diff src/components/ui/aside/Aside.astro --apply
+```
+
+`--apply` 一次只处理一个文件，且从不合并：它会重新确认该文件仍未被编辑，然后写入。它会把标签记录在 `nimbus.json`（`templatesTagByFile`），以便后续 diff 从那里开始。之后用 `git diff` 审阅。起始模板路由文件按你站点的渲染模式比较，因此被 `check --fix` 更新过的路由不会显示为你的改动。
+
+`--to <templates-vX.Y.Z>` 用于与特定标签比较，`--template-dir <path>` 用于与本地检出比较。
+
+## `nimbus-docs check`
+
+不构建的预检。它检查环境、项目结构、待处理迁移、写作规则和类型，然后报告站点能否构建：
+
+```sh
+pnpm nimbus-docs check
+```
+
+传入 `--env`、`--structure`、`--migrations`、`--lint` 或 `--types` 只运行对应类别。`--fix` 应用它能安全完成的修复，并在需要取值或安装依赖的修复前询问。没有终端时，它跳过这些询问，只有带 `--yes` 才安装。`--quiet` 只显示错误。
+
+`check` 会报告 Nimbus 管理的、模式与 [`rendering`](/reference/rendering/) 不一致的每个路由文件（`nimbus/route-file-mode`）。没有 `rendering` 时，这表示把它们全部提前构建。`--fix` 更新文件并列出它写入的每个文件。对于无法完整编辑的路由，它会做能做的修改，并列出剩余部分。
+
+`--types` 使用你自己的 TypeScript 对 `.ts` 和 `.tsx` 文件做类型检查。它不读取 `.astro` 文件；这些文件请运行 `astro check`。
+
+当仍存在 `error` 级别的发现项时，`check` 以 `1` 退出，否则以 `0`。警告、信息性发现项以及无法运行的检查从不会改变退出码。
+
+传 `--json` 获得智能体可读的输出。`status` 为 `passed`、`failed` 或 `partial`（部分检查无法运行），`readiness` 为 `buildable`、`blocked` 或 `unknown`。每个发现项属于三种严重级别之一：
+
+| 严重级别 | 含义 |
+|---|---|
+| `error` | 必须修复。计入 `summary.errors`，并把退出码设为 `1`。 |
+| `warn` | 提示性，例如占位符 `site` URL。计入 `summary.warnings`。 |
+| `info` | 仅信息，例如来自 `migrate` 的可选升级条目。不计入汇总。 |
+
+无法运行的检查会作为其作用域上的 `notes` 列出，而不是发现项，每项都带有被跳过的原因。在终端中，带 notes 的作用域显示 `◐ ok, partly checked`。
+
+只有当先前的 `astro build` 留下了 `.nimbus/routes.json` 时，`check` 才检查链接；没有该文件时，链接检查只是一个 note，而不是错误。要在 CI 中以链接作为门禁，先运行 `astro build`，再运行 `nimbus-docs lint`；参见[检查链接](/writing/linting/#check-links)。
+
+## `nimbus-docs lint`
+
+对你启用的写作规则运行检查，范围包括 `src/content/`，以及从其他位置加载的集合（例如[内容来源](/content-sources/git/)）。当仍存在 `error` 发现项时，它以非零码退出。Lint 从不阻止构建。
+
+```sh
+npx @cloudflare/nimbus-docs lint
+yarn nimbus-docs lint
+pnpm nimbus-docs lint
+bunx @cloudflare/nimbus-docs lint
+```
+
+标志——与 `lint` 组合使用：
+
+| 标志 | 作用 |
+|---|---|
+| `--format=json` | 智能体可读的诊断信息 |
+| `--rule=nimbus/single-h1` | 只运行一条规则 |
+| `--fix` | 就地应用自动修复 |
+| `--quiet` | 只显示错误，抑制警告 |
+
+你在集成中设置规则（`nimbus(config, { rules })`），`astro build`、`astro dev` 或 `astro sync` 会把它们写入 `.nimbus/lint.json`。没有该文件时，`lint` 以 `1` 退出并提示先构建，除非 `--rule` 指定了规则。如果规则此后有变化，它会提示运行 `astro sync`。
+
+`nimbusDisableRules` frontmatter 和行内注释可以在单个文件中关闭规则，无需改配置。
+
+`nimbus/internal-link` 和 `nimbus/redirected-link` 需要先运行 `astro build`。没有构建写出的路由列表时，lint 会以 `1` 退出，并在 `.nimbus/routes.json` 上报错。
+
+## 帮助与版本
+
+```sh
+npx @cloudflare/nimbus-docs --help
+yarn nimbus-docs --help
+pnpm nimbus-docs --help
+bunx @cloudflare/nimbus-docs --help
+```
+```sh
+npx @cloudflare/nimbus-docs --version
+yarn nimbus-docs --version
+pnpm nimbus-docs --version
+bunx @cloudflare/nimbus-docs --version
+```

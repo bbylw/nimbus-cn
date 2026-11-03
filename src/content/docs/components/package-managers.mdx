@@ -1,0 +1,38 @@
+---
+title: "PackageManagers"
+description: "每个包管理器一个标签页的安装命令块，标签选择在页面内同步。"
+sidebar:
+  order: 22
+---
+
+PackageManagers 把同一条安装命令按 npm、yarn、pnpm、bun 生成四个标签页，读者切到自己使用的包管理器即可复制。标签选择会在同一页面的多个实例之间同步。
+
+## 安装
+
+```bash
+nimbus-docs add package-managers
+```
+
+源码位于 `src/components/ui/package-managers/`。安装时会一并带上注册表依赖：`layer-card`、`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `pkg` | string | — | 否 | 要安装或运行的包名。 |
+| `type` | `"add"` \| `"create"` \| `"dlx"` \| `"exec"` \| `"install"` \| `"remove"` \| `"run"` | `"add"` | 否 | 命令形状，按各包管理器的等价写法生成。 |
+| `args` | string | — | 否 | 追加到命令末尾的额外参数。 |
+| `dev` | boolean | `false` | 否 | 对 `add`、`install` 命令标记为开发依赖。 |
+| `comment` | string | — | 否 | 在命令上方预置的注释行。 |
+
+## 示例
+
+```mdx
+<PackageManagers pkg="pagefind" dev />
+<PackageManagers pkg="astro" type="run" args="dev" />
+<PackageManagers pkg="create-nimbus-docs" type="create" args="my-docs" comment="# 创建新站点" />
+```
+
+`add`、`install`、`remove` 用于依赖操作，`create` 用于创建项目，`dlx`、`exec`、`run` 用于直接运行命令。切换标签后选择会记在会话中，其他实例随之更新。
+
+本站已在 `src/components.ts` 中默认注册 PackageManagers，可直接在任意 `.mdx` 中使用；需要修改样式时再执行上面的安装命令。

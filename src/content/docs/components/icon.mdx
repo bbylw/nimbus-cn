@@ -1,0 +1,43 @@
+---
+title: "Icon"
+description: "从本地 SVG 文件或 Iconify 图标集渲染内联图标，可补充无障碍标题与描述。"
+sidebar:
+  order: 17
+---
+
+Icon 把 SVG 图标渲染成内联标记：裸名称读取站点的 `src/icons/`，带前缀的名称读取已安装的 Iconify 图标集。可以统一设置尺寸，也可以分别覆盖宽高。
+
+## 引入
+
+Icon 随 `@cloudflare/nimbus-docs` 提供，无需通过 CLI 安装，也不需要写入 `src/components.ts`；在文件顶部直接导入即可：
+
+```astro
+import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
+```
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `name` | string | — | 是 | 图标名称。裸名称（如 `workers`）解析到本地 `src/icons/*.svg`；带前缀的名称（如 `ph:rocket`）解析到已安装的 `@iconify-json/*` 图标集。 |
+| `size` | number \| string | — | 否 | 同时设置 `width` 与 `height` 的简写。 |
+| `width` | number \| string | — | 否 | 覆盖 SVG 宽度。 |
+| `height` | number \| string | — | 否 | 覆盖 SVG 高度。 |
+| `is:inline` | boolean | `false` | 否 | 仅为兼容 astro-icon 的 API 而接受。SVG 始终内联，该属性不影响输出。 |
+| `title` | string | — | 否 | 渲染在 `<title>` 中的无障碍标题。 |
+| `desc` | string | — | 否 | 渲染在 `<desc>` 中的无障碍描述。 |
+
+## 示例
+
+```mdx
+<Icon name="ph:rocket" size={20} />
+<Icon name="workers" width={24} height={24} />
+```
+
+图标单独承载信息时补上 `title`，读屏软件会朗读它；旁边已有可见文字说明时通常可以省略：
+
+```mdx
+<Icon name="ph:warning" title="警告" desc="此操作不可撤销" />
+```
+
+`ph:` 这类前缀要求先安装对应的 `@iconify-json/*` 图标集，裸名称则必须在 `src/icons/` 中存在同名 `.svg` 文件。

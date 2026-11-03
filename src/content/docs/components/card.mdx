@@ -1,0 +1,34 @@
+---
+title: "Card"
+description: "带图标、标题与内容插槽的卡片，配合 CardGrid 组成响应式布局。"
+sidebar:
+  order: 8
+---
+
+Card 是带标题的方框内容块，可以加一个图标，也可以整张卡片变成链接。放进 `CardGrid` 后会自动排成响应式网格。
+
+## 安装
+
+```bash
+nimbus-docs add card
+```
+
+源码位于 `src/components/ui/card/`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `title` | string | — | 否 | 卡片顶部的标题；需要格式时改用 `title` 插槽。 |
+| `icon` | string | — | 否 | 标题上方渲染的 Iconify 名称（如 `ph:lightning`）；自定义图标用 `icon` 插槽。 |
+| `href` | string | — | 否 | 让整张卡片成为链接。带链接时标题按文本渲染而不是标题元素，因为链接本身已经提供了名称。 |
+
+## 示例
+
+```mdx
+<Card title="快速开始" icon="ph:rocket" href="/quickstart/">
+  三步搭好第一个页面。
+</Card>
+```
+
+需要多张卡片并排时，把它们放进 [`CardGrid`](/components/card-grid/)。Card 已在 `src/components.ts` 中默认注册。

@@ -1,0 +1,41 @@
+---
+title: "Sidebar"
+description: "递归渲染的文档导航树，支持可折叠分组、开启状态持久与滚动位置恢复。"
+sidebar:
+  order: 27
+---
+
+Sidebar 把 `SidebarItem[]` 渲染成递归导航树：分组可以折叠，当前页面高亮；打开 `persist` 后，展开的分组和滚动位置会在会话内保留。
+
+## 安装
+
+```bash
+nimbus-docs add sidebar
+```
+
+源码位于 `src/components/ui/sidebar/`。安装时会一并带上注册表依赖：`badge`、`collapsible`、`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `items` | `SidebarItem[]` | — | 是 | 链接与分组组成的树，由 `getSidebar()` 根据集合内容生成。 |
+| `persist` | boolean | `false` | 否 | 把展开与滚动状态写入 `sessionStorage`，跨页面导航后恢复。 |
+
+## 示例
+
+树由 `getSidebar()` 生成，直接传给 `items`：
+
+```astro title="src/layouts/DocsLayout.astro"
+import { getSidebar } from "@cloudflare/nimbus-docs";
+import { Sidebar } from "@/components/ui/sidebar";
+
+const sidebar = await getSidebar(currentSlug, { collection: entry.collection });
+---
+
+<Sidebar items={sidebar} persist />
+```
+
+分组使用原生 `<details>` 与 `<summary>`，关闭的分组不依赖 JavaScript 也能浏览。`persist` 只作用于桌面侧边栏，移动端抽屉复用同一棵树。导航树的结构、排序与转换见[侧边栏](/navigation/sidebar/)。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

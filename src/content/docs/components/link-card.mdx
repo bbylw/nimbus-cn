@@ -1,0 +1,47 @@
+---
+title: "LinkCard"
+description: "整张卡片都是链接，可带前置图标、标题与说明，悬停时标题和图标转为强调色。"
+sidebar:
+  order: 21
+---
+
+LinkCard 把一整张卡片变成链接：可选的图标、标题与说明组成内容区，悬停时标题与图标切到强调色。需要多张入口卡片并排时，把它放进 [`CardGrid`](/components/card-grid/)。
+
+## 安装
+
+```bash
+nimbus-docs add link-card
+```
+
+源码位于 `src/components/ui/link-card/`。安装时会一并带上注册表依赖：`cn`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `title` | string | — | 否 | 作为卡片标签渲染的标题；需要格式时改用 `title` 插槽。 |
+| `description` | string | — | 否 | 标题下方的可选说明，也可以使用 `description` 插槽。 |
+| `href` | string | — | 是 | 目标 URL，整张卡片都会成为链接。 |
+| `icon` | string | — | 否 | 标题前渲染的可选 Iconify 名称（如 `ph:rocket-launch`）。 |
+
+## 示例
+
+```mdx
+<LinkCard
+  href="/components/"
+  title="组件参考"
+  description="按组件查看安装命令、属性与示例。"
+  icon="ph:squares-four"
+/>
+```
+
+标题或说明需要格式时改用插槽：
+
+```mdx
+<LinkCard href="/writing/markdown-and-mdx/">
+  <Fragment slot="title">Markdown 与 <code>MDX</code></Fragment>
+  <Fragment slot="description">两种写法各自的适用场景。</Fragment>
+</LinkCard>
+```
+
+整块卡片都可点击，因此标题按文本渲染而不是标题元素，避免与链接本身的可访问名称重复。安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

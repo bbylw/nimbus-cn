@@ -1,0 +1,68 @@
+---
+title: "添加组件与功能"
+description: "用 nimbus-docs add 从注册表安装组件与工具，或让编程智能体执行功能配方。"
+sidebar:
+  order: 5
+---
+
+`nimbus-docs add <slug>` 从[注册表](/registry/)安装。根据所添加的内容，它有两种模式——复制文件，或把配方交给编程智能体执行。
+
+## 组件与工具
+
+对于 `registry:ui` 和 `registry:lib` 类型的 slug，CLI 会解析依赖、把文件复制到你的仓库，并安装它们所需的 npm 包：
+
+```sh
+npx @cloudflare/nimbus-docs add accordion
+yarn nimbus-docs add accordion
+pnpm nimbus-docs add accordion
+bunx @cloudflare/nimbus-docs add accordion
+```
+
+1. **解析依赖**
+
+   CLI 会递归遍历 slug 的 `registryDependencies` 和 npm `dependencies`。
+2. **复制文件**
+
+   每个文件落到其声明路径——`src/components/ui/<slug>/`、`src/lib/` 等。
+3. **注册全局组件**
+
+   在 MDX 中无需 import 即可使用的组件必须加入 `src/components.ts`。CLI 会告诉你哪些。
+
+安装后，组件就存在于你的仓库中——可随意编辑。要重新安装已有组件，传入 `--overwrite`：它会替换你未编辑过的文件，并对编辑过的文件进行询问。单独使用 `--yes` 仍会保留你的文件；`--overwrite --yes` 则连编辑过的文件也会替换。[CLI](/cli/#nimbus-docs-add-slug)包含所有标志。
+
+## 功能
+
+对于 `registry:feature` 类型的 slug，没有文件需要复制。配方是一段 Markdown 提示词，由编程智能体阅读、适配你的项目并应用：
+
+```sh
+npx @cloudflare/nimbus-docs add 404-page
+yarn nimbus-docs add 404-page
+pnpm nimbus-docs add 404-page
+bunx @cloudflare/nimbus-docs add 404-page
+```
+
+如果在环境中检测到编程智能体，CLI 会把配方打印到 stdout 供其消费。否则自行通过管道传入：
+
+```sh
+npx @cloudflare/nimbus-docs add 404-page --print | claude
+yarn nimbus-docs add 404-page --print | claude
+pnpm nimbus-docs add 404-page --print | claude
+bunx @cloudflare/nimbus-docs add 404-page --print | claude
+```
+
+## 浏览可用内容
+
+```sh
+npx @cloudflare/nimbus-docs list
+yarn nimbus-docs list
+pnpm nimbus-docs list
+bunx @cloudflare/nimbus-docs list
+```
+```sh
+npx @cloudflare/nimbus-docs list --type ui
+yarn nimbus-docs list --type ui
+pnpm nimbus-docs list --type ui
+bunx @cloudflare/nimbus-docs list --type ui
+```
+
+每个随附组件在 [/components](/components/) 都有展示页——预览、props 和安装命令。所有标志参见 [CLI](/cli/) 参考。
