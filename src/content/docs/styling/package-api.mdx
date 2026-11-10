@@ -35,6 +35,7 @@ sidebar:
 | `getEditUrl(entry)` | 页面的编辑链接，来自 `editPattern`，否则为 `undefined`。 |
 | `getLastUpdated(entry)` | 页面最后一次 git 提交日期，git 无法确定时为 `undefined`。 |
 | `getVersionStatus(key)` | 版本是当前、已弃用还是隐藏，用于横幅。 |
+| `getPageLanguage(locale?)` | 页面的语言，来自 `locale` 或 `config.locale`；从右到左书写时带 `dir: "rtl"`：返回用于 `<html lang dir>` 的 `{ lang, dir }`。 |
 | `getCollectionLlmsUrl(collection)` | 索引某个集合的 `llms.txt`。 |
 
 ## URL
@@ -95,6 +96,7 @@ const socialImage = entry.data.socialImage ?? ogImageUrl;
 | `getApiStaticPaths(collection)` | API 参考路由的 `getStaticPaths`，覆盖其各版本。 |
 | `getApiRoute(Astro)` | API 路由的页面和侧边栏，或重定向、`404` `Response`。 |
 | `getApiRoot(Astro, { collection, version })` | 某个版本的根页面，包含所有端点的索引，可从任意路由调用。 |
+| `getApiNav(Astro, { collection, href })` | 在某个 API 页面处展开的 API 侧边栏，可从任意路由调用，并返回该页面的版本。 |
 | `getApiVersions(collection)` | API 的各个版本，用于版本选择器。 |
 | `getVersionSwitchUrl({ collection, sourceVersion, id, targetVersion })` | 同一页面在另一版本中的地址，或该版本的落地页。 |
 | `getApiVersionHead(collection, version, coordinate, request)` | 规范链接和替代版本，用于自定义 API head。 |
@@ -118,6 +120,34 @@ const rows = root ? apiIndexRows(root.index) : [];
   ))}
 </ul>
 ```
+
+### 在自己的页面上显示 API 侧边栏
+
+你自己的页面可以显示与 API 页面相同的侧边栏。`getApiNav` 会返回它，并在 `href` 指定的 API 页面处展开，同时展开该页面及其父级，不标记任何当前项：
+
+```astro title="src/pages/cli.astro"
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import { ApiSidebarPanel } from "@/components/ui/api-sidebar";
+import { getApiNav } from "@cloudflare/nimbus-docs/runtime";
+
+const result = await getApiNav(Astro, { collection: "api", href: "/api/d1/" });
+if (!result) return Astro.redirect("/404");
+---
+
+<DocsLayout title="D1 CLI">
+  <ApiSidebarPanel slot="sidebar" nav={result.nav} version={result.version} />
+  <!-- the page -->
+</DocsLayout>
+```
+
+`ApiSidebarPanel` 就是 `ApiLayout` 渲染的侧边栏：筛选框（分组按需加载时会搜索整个 API）、打开时才加载的分组，以及跨页面保留的展开分组和滚动位置。你放在其中的 `<li>` 行（例如概览链接）会排在 API 的行之前。
+
+`href` 要按侧边栏书写自身链接的方式书写：API 的挂载路径，以及在查询参数版本模式下它的 `?version=`，不含站点 base。`result.version` 是它解析到的版本。
+
+当集合或页面不存在，或 `href` 发生重定向时，它返回 `null`。它只读取侧边栏，从不读取页面，因此在任何路由上都很轻，包括使用 `bundle: false` 时。
+
+构建损坏时它会抛出错误。使用 `bundle: false` 时，服务器达到读取上限也会抛出，错误名为 `PageAssetReadOverloadError`。API 页面会以 `503` 和 `Retry-After: 1` 回应，你自己的页面也可以这样做。
 
 ### 链接到另一版本中的同一页面
 
@@ -154,6 +184,10 @@ const href = await getVersionSwitchUrl({
 | `mount(selector, init)` | 在每个页面上为所有匹配元素运行 `init`，包括客户端导航之后，并在页面离开时运行其清理函数。参见[自定义组件](/styling/custom-components/)。 |
 | `initTabs(config)` | 标签列表的键盘和选择行为。 |
 | `makeDisclosure(options)` | 展开项的打开与关闭行为。 |
+| `onShortcut(key, handler, { within? })` | 当 `key` 在页面任意位置按下时运行 `handler`，或在焦点位于 `within` 内时运行：可以是 `"/"` 这样的字符，也可以是 `"Mod+K"` 这样的组合键（macOS 上为 ⌘，其他平台为 Ctrl）。返回一个解绑函数。参见[键盘快捷键](/styling/layouts/#keyboard-shortcuts)。 |
+| `syncShortcutHints(root?)` | 把每个 `data-nb-shortcut-hint` 写成本平台显示的键位，并写入每个 `data-nb-shortcut-for` 控件的 `aria-keyshortcuts`；两者随后都会跟随读者的开关。 |
+| `shortcutLabel(key)`, `ariaKeyShortcuts(key)` | 键位在读者眼中的样子（`⌘K`、`Ctrl K`、`[`），以及 `aria-keyshortcuts` 使用的名称。 |
+| `singleKeyShortcutsEnabled()`, `setSingleKeyShortcutsEnabled(on)` | 读者关闭单键快捷键的选择。 |
 
 ## Markdown 插件
 
@@ -166,10 +200,12 @@ const href = await getVersionSwitchUrl({
 | `titleFigure(options)` | 把带标题的图片转为带说明的 figure。 |
 | `math(options)` | 构建时将数学渲染为 MathML；同时开启 `features: { math: true }`。 |
 
+用同一个入口的 `HastPluginDefinition` 和 `HastVisitorContext` 为你自己的插件标注类型。
+
 ## 组件
 
 | 组件 | 作用 |
 | --- | --- |
 | `@cloudflare/nimbus-docs/components/Icon.astro` | 按名称渲染图标，例如 `ph:check`。 |
-| `@cloudflare/nimbus-docs/components/NimbusHead.astro` | 页面的 head：标题、描述、canonical、分享卡片和智能体发现标签。 |
+| `@cloudflare/nimbus-docs/components/NimbusHead.astro` | 页面的 head：标题、描述、canonical、分享卡片和智能体发现标签。`locale` 与 `socialImageAlt` 设置页面的语言和分享图片替代文本。 |
 | `@cloudflare/nimbus-docs/components/NestedContent.astro` | 在当前页面内显示另一页面的内容，例如变更日志列表中的一条发布：其 `h1` 和 `h2` 会变为 `headingLevel` 并去掉 id，指向其各节的链接会指向 `sourceUrl`。 |

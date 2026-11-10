@@ -65,7 +65,9 @@ declare module "@cloudflare/nimbus-docs/types" {
 
 ## 操作顺序
 
-分区页面、侧边栏、[API 首页的索引](/api-reference/large-apis/#the-api-home)和 Markdown 版本会按规格中的路径顺序列出一个分区的操作。操作上的 `x-nimbus-order` 会把它提前：数字越小越靠前，没有该字段的操作按路径顺序随后；相同值也保持路径顺序。不是数字的值会被忽略。分区保持其顺序，webhook 保持规格中的顺序。可在规格中设置，或在 Nimbus 读取规格之前的某个步骤中设置，例如根据 CRUD 等级，让 list、get、create、update 和 delete 在每个分区中领先。
+分区页面、侧边栏、[API 首页的索引](/api-reference/large-apis/#the-api-home)和 Markdown 版本会按规格中的路径顺序列出一个分区的操作。操作上的 `x-nimbus-order` 会把它提前：数字越小越靠前，没有该字段的操作按路径顺序随后；相同值也保持路径顺序。分区保持其顺序，webhook 保持规格中的顺序。
+
+不是数字的值，或 `x-nimbus-order` 出现在路径操作以外的位置，会被忽略，并产生一条构建警告，指出它所在的位置。可在规格中设置，或在 Nimbus 读取规格之前的某个步骤中设置，例如根据 CRUD 等级，让 list、get、create、update 和 delete 在每个分区中领先。
 
 ```yaml title="openapi.yaml"
 paths:

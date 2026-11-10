@@ -1,0 +1,63 @@
+---
+title: "Switch"
+description: "即时生效的开关控件，状态放在 aria-checked 上，可换尺寸或禁用。"
+sidebar:
+  order: 29
+---
+
+Switch 是用于立即生效设置的开关控件。它渲染为带 `aria-checked` 的 `<button role="switch">`，点击会翻转状态并触发挥泡的 `change` 事件；由脚本掌管状态时，也可以自行设置 `aria-checked`。标签就是放进按钮里的内容，位于轨道之后，因此点击标签同样会切换。
+
+## 安装
+
+```bash
+nimbus-docs add switch
+```
+
+源码位于 `src/components/ui/switch/`。安装时会一并带上注册表依赖：`cn`、`variants`。
+
+## 属性
+
+| 属性 | 类型 | 默认值 | 必填 | 说明 |
+|---|---|---|---|---|
+| `checked` | boolean | `false` | 否 | 开关是否初始为开。当前状态就是按钮的 `aria-checked`。 |
+| `size` | `"sm" \| "base" \| "lg"` | `"base"` | 否 | 轨道尺寸。`sm` 适合放在小字号文本旁，例如对话框页脚。 |
+| `disabled` | boolean | `false` | 否 | 让开关变淡并阻止翻转。 |
+
+## 示例
+
+开、关与禁用三种状态：
+
+```mdx
+<Switch>关</Switch>
+<Switch checked>开</Switch>
+<Switch disabled>禁用</Switch>
+```
+
+三种尺寸：
+
+```mdx
+<Switch size="sm" checked>小</Switch>
+<Switch checked>默认</Switch>
+<Switch size="lg" checked>大</Switch>
+```
+
+点击会翻转 `aria-checked` 并触发 `change` 事件。由别处掌管状态的脚本自行设置 `aria-checked`：
+
+```astro
+<Switch id="compact-mode">紧凑模式</Switch>
+
+<script>
+  const toggle = document.getElementById("compact-mode")!;
+  toggle.addEventListener("change", () => {
+    document.documentElement.dataset.compact = toggle.getAttribute("aria-checked")!;
+  });
+</script>
+```
+
+## 无障碍
+
+- 它是带 `aria-checked` 的 `<button role="switch">`，屏幕阅读器会播报“开关，开”或“开关，关”。
+- 空格键和 Enter 键可以切换，与其他按钮一致。
+- 没有可见标签时，请提供 `aria-label`。
+
+安装后记得在 `src/components.ts` 中注册，或在页面文件顶部导入。

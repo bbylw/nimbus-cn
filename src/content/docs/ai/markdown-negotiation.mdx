@@ -55,6 +55,8 @@ content-type: text/markdown; charset=utf-8
 vary: Accept
 ```
 
+当按请求渲染的路由找不到页面时，它会以 `404` 和一段简短的 Markdown 正文回应同一请求，正文链接 `/llms.txt` 与 sitemap。起始模板的文档路由会应答每个 URL，因此每个缺失页面都会得到它。如果你的文档位于 `/guides/` 这样的前缀下，该前缀之外的 URL 会得到你的 HTML 404 页面。
+
 如果 `content-type` 是 `text/html`，说明该页面仍被预渲染：请检查其集合是否设为 `"request"`。浏览器的 `Accept: */*` 始终得到 HTML。
 
 ## 静态站点

@@ -16,7 +16,7 @@ Nimbus 通过一系列端点提供文档，AI 工具无需解析 HTML 站点就�
 - **每个可发现页面的备用 Markdown/MDX 版本**——`/<slug>/index.md` 是干净的 Markdown，组件已转换为文本；`/<slug>/index.mdx` 保留 import、JSX 和指令，`.md` 会链接到它。API 参考页面只有 `.md`，隐藏版本则两者都没有。
 - **站点级 `llms.txt` 索引**——列出当前文档的顶层页面和分区索引。每个分区索引把其可发现页面链接到对应的备用 Markdown 版本。较早的文档版本不会列出；每个版本各有自己的索引 `/<version>/llms.txt`。
 - **`llms-full.txt`**——当前站点的全部页面合成一个 Markdown 文档，适合一次请求取回全部内容的工具。超过 25 MiB 时，它会变成按分区分文件的索引，因此没有文件会超过限制。参见[添加 llms-full.txt](/ai/publish-markdown/#3-add-llms-fulltxt)。
-- **`/<section>/llms.txt` 下的分区索引**——每个顶层分组和集合（例如 `blog` 或某个文档版本）都有自己的索引，其下每个文件夹（如 `/reference/functions/llms.txt`）也有，并由上级索引链接。
+- **`/<section>/llms.txt` 下的分区索引**——每个顶层分组和集合（例如 `blog` 或某个文档版本）都有自己的索引，其下每个文件夹（如 `/reference/functions/llms.txt`）也有，并由上级索引链接。API 操作列在其资源或标签的索引中，与侧边栏一致；文档文件夹仍按分区处理。
 - **版本标签**——在带版本的站点上，每个备用 Markdown 版本的 frontmatter 都带 `version:` 键（由你的 `versions` 清单解析而来），使智能体能锁定版本。无版本的站点不输出任何标签。
 - **每个页面 head 中的 JSON-LD**——结构化数据，让搜索和智能体工具识别所看到的内容。
 - **`/robots.txt` 与 sitemap**——设置 `site` 后自动接入。
@@ -25,7 +25,7 @@ Nimbus 通过一系列端点提供文档，AI 工具无需解析 HTML 站点就�
 ```text title="/llms.txt"
 # Nimbus
 
-A way to build documentation sites on top of Astro.
+> A way to build documentation sites on top of Astro.
 
 ## Pages
 - [Quickstart](https://nimbus-docs.com/quickstart/index.md)

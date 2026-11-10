@@ -6,7 +6,7 @@ Nimbus 是一个基于 [Astro](https://astro.build) 构建的文档写作工具�
 
 ## 快速开始
 
-需要 Node.js 22.12.0 或更高版本。
+需要 Node.js 22.23.4 或更高版本。
 
 ```sh
 npx @cloudflare/create-nimbus-docs@latest my-docs --yes --package-manager npm
@@ -58,7 +58,7 @@ Pre-1.0（尚未发布 1.0）。公开 API 可能在次版本之间发生变化�
 
 ## 贡献
 
-从一个 issue 或 discussion 开始。一旦维护者批准，你的 pull request 会进入正常的评审流程。关于架构与智能体相关背景，请参阅 [CONTRIBUTING.md](https://github.com/cloudflare/nimbus/blob/main/CONTRIBUTING.md) 与 [CLAUDE.md](https://github.com/cloudflare/nimbus/blob/main/CLAUDE.md)。
+欢迎 pull request；如果改动不止于小修复，请先从一个 issue 或 discussion 开始。关于架构与智能体相关背景，请参阅 [CONTRIBUTING.md](https://github.com/cloudflare/nimbus/blob/main/CONTRIBUTING.md) 与 [CLAUDE.md](https://github.com/cloudflare/nimbus/blob/main/CLAUDE.md)。
 
 ## 许可证
 

@@ -180,6 +180,16 @@ nimbus(config, {
 });
 ```
 
+用同一个入口的 `HastPluginDefinition` 为你的插件标注类型：
+
+```ts
+import type { HastPluginDefinition } from "@cloudflare/nimbus-docs/markdown";
+
+export function mermaidFence(): HastPluginDefinition {
+  // …
+}
+```
+
 传给 `mdx()` 的 Remark 和 rehype 插件会静默失效，因为 Nimbus 使用 Sätteri 而非 unified 解析 Markdown。请改用 `markdown.mdastPlugins` 和 `markdown.hastPlugins`。
 
 如果要保留无法替换的 unified 插件，请把 `markdown.processor` 设为某个 unified 处理器，并关闭需要 Sätteri 的功能，例如提示框。

@@ -64,7 +64,7 @@ bunx @modelcontextprotocol/inspector --cli http://localhost:4321/mcp --transport
 
 | 路径 | 内容 |
 | --- | --- |
-| `/mcp` | 服务器本身。`POST` 发送 JSON-RPC 消息；每个应答是一个 `application/json` 主体，通知则得到 `202`；`GET` 和 `DELETE` 返回 `405`，因为服务器是无状态的、不保留会话。若 `POST` 的 `Content-Type` 不是 `application/json`，或 `DELETE` 不带 `Content-Type`，且请求不是来自站点自身的 `Origin`，则改为得到 Astro 的源检查 `403`。`OPTIONS` 响应浏览器预检。 |
+| `/mcp` | 服务器本身。`POST` 每个请求发送一条 JSON-RPC 消息（批次数组会得到 `400`）；每个应答是一个 `application/json` 主体，通知则得到 `202`；`GET` 和 `DELETE` 返回 `405`，因为服务器是无状态的、不保留会话。若 `POST` 的 `Content-Type` 不是 `application/json`，或 `DELETE` 不带 `Content-Type`，且请求不是来自站点自身的 `Origin`，则改为得到 Astro 的源检查 `403`。`OPTIONS` 响应浏览器预检。 |
 | `/mcp/server-card` | [Server Card](https://github.com/modelcontextprotocol/ext-server-card)：服务器名称、已安装的 Nimbus 版本、描述与端点 URL，按请求以 `application/mcp-server-card+json` 提供，带 `Access-Control-Allow-Origin: *`，可缓存五分钟（`Cache-Control: public, max-age=300, s-maxage=300`）。 |
 
 该卡片会列在 `/.well-known/ai-catalog.json` 中（除非 `agents.discovery` 为 `false`），`llms.txt` 也会写明端点，因此从任一处出发的智能体都能找到服务器。服务器名称是站点主机名的反转加上 `/docs`：`docs.example.com` 变为 `com.example.docs/docs`。位于 `localhost` 或 IP 地址的站点则为 `local.nimbus/docs`。

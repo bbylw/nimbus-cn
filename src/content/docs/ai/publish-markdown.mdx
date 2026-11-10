@@ -14,9 +14,11 @@ sidebar:
 | `/<slug>/index.md` | 页面作为干净的 Markdown，组件已转换为文本。链接到其 `.mdx` 源文件。 |
 | `/<slug>/index.mdx` | 页面的撰写源码，包含 import、JSX 和指令。API 页面不发布。 |
 | `/llms.txt` | 当前文档的索引：顶层页面，以及指向每个分区索引的链接。 |
-| `/<section>/llms.txt` | 每个顶层分组和集合、以及其下每个文件夹的索引，由上级索引链接。 |
+| `/<section>/llms.txt` | 每个顶层分组和集合、以及其下每个文件夹的索引，由上级索引链接。API 操作列在其资源或标签的索引中，与侧边栏一致；文档文件夹仍按分区处理。 |
 | `/llms-full.txt` | 当前所有页面合成一个 Markdown 文档。超过 25 MiB 时，它变成每个分区一个 `llms-full.txt` 的索引。 |
 | `/<version>/llms.txt` | 每个较早文档版本的索引，站点索引不列出它们。 |
+
+Markdown 版本中的链接是绝对地址（`/writing/openapi` 变为 `https://docs.example.com/writing/openapi`），因此智能体在站点之外读取文件时仍然可用。`/llms.txt` 会把站点的 `description` 作为 `> ` 摘要引用，每个分区的 `llms.txt` 会引用其索引页面的 `description`。
 
 在带版本的站点上，每个 Markdown 版本的 frontmatter 都带 `version:` 键，智能体因此可以锁定版本。每个页面的 head 也带有 JSON-LD 结构化数据。设置 `draft: true` 或 `noindex: true` 的页面不会出现在索引中；完整规则见[面向智能体的文档](/ai/docs-for-agents/#how-pages-are-indexed)。
 

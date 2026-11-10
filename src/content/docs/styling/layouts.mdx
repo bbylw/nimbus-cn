@@ -14,6 +14,23 @@ sidebar:
 
 因为这些文件归你所有，移除某块界面元素的方式就是把它从布局中删除——从 `DocsLayout` 中去掉 `<Pagination />`，全站就不再显示。
 
+### 在自己的页面上
+
+`src/pages/` 下的页面只需传一个标题就能使用 `DocsLayout`。它会得到页头和内容列，在你传入之前没有侧边栏、目录、面包屑或上一页/下一页：
+
+```astro title="src/pages/status.astro"
+---
+import DocsLayout from "@/layouts/DocsLayout.astro";
+import { getSidebar } from "@cloudflare/nimbus-docs/runtime";
+---
+
+<DocsLayout title="Status" sidebar={await getSidebar("/status")}>
+  <p>All systems normal.</p>
+</DocsLayout>
+```
+
+要显示文档侧边栏，请传入 `sidebar`，其值来自 `getSidebar`（参数为页面路径，不含站点 base），或者用你自己的侧边栏填充 `sidebar` 栏位，例如 [API 侧边栏](/styling/package-api/#show-the-api-sidebar-on-your-own-pages)。
+
 ## 按页面开关
 
 Frontmatter 可以在不碰布局的情况下关闭单个列：
@@ -50,3 +67,35 @@ const nimbusConfig = defineNimbusConfig({
 ```
 
 无法通过单页设置覆盖全站的 `false`：全站关闭某一列后，它就保持关闭。
+
+## 键盘快捷键
+
+每个快捷键都在同一个文件 `src/lib/shortcuts.ts` 中。可以改键，或设为 `false` 连同提示一起移除：
+
+```ts title="src/lib/shortcuts.ts"
+export const shortcuts = {
+  search: "Mod+K", // ⌘K on macOS, Ctrl K elsewhere
+  filterSidebar: "/",
+  previousPage: "[",
+  nextPage: "]",
+} satisfies Shortcuts;
+```
+
+键可以是单个字符，例如 `"/"` 或 `"?"`，也可以是组合键，例如 `"Mod+K"` 或 `"Shift+Alt+P"`。读者在输入框中打字时不会触发任何快捷键，组合键除外。
+
+不带 Ctrl、⌘ 或 Alt 的单键快捷键，只有在读者可以关闭它们时才会在页面任意位置生效，这是无障碍指南的要求。搜索对话框中的“单键快捷键”开关负责这件事；搜索关闭时，页头中的同一开关负责。
+
+没有该开关的页面，在其获得焦点时保留 `[` 和 `]` 用于上一页/下一页导航，并让 `/` 保持未绑定。对话框打开时，单键快捷键也会等待。
+
+要添加自己的快捷键，在 `src/lib/shortcuts.ts` 中为它命名，并用 `@cloudflare/nimbus-docs/client` 的 `onShortcut` 绑定它。给提示加上 `data-nb-shortcut-hint`，给控件加上 `data-nb-shortcut-for`，然后调用 `syncShortcutHints`：提示会按读者所在平台显示对应键位，并与其他单键快捷键一起隐藏。
+
+```ts title="src/components/help.client.ts"
+import { mount, onShortcut, syncShortcutHints } from "@cloudflare/nimbus-docs/client";
+import { shortcuts } from "@/lib/shortcuts";
+
+// <button data-help data-nb-shortcut-for="?">Help <kbd data-nb-shortcut-hint="?">?</kbd></button>
+mount("[data-help]", (button) => {
+  syncShortcutHints(button);
+  return onShortcut(shortcuts.help, () => button.click());
+});
+```

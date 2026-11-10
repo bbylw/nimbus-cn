@@ -49,7 +49,7 @@ API 侧轨渲染与文档侧边栏相同的标记：分组是原生 `<details>`/
 
 每个分组页面都会列出其操作和子分区，并且 [API 首页](#the-api-home)会列出每个操作，因此在所有模式下所有页面都保持可达。
 
-`"on-demand"` 需要已安装版本中的 `api-layout` 和 `api-sidebar` 组件；构建会指出过时的文件。这些组件使用 0.19 起始模板的样式，因此在 0.19.0 之前搭建的站点要先采用重新设计的起始模板；`nimbus-docs migrate` 会列出其步骤。
+`"on-demand"` 需要已安装版本中的 `api-layout` 和 `api-sidebar` 组件；构建会指出过时的文件。把侧边栏放到页面上的是 `ApiSidebarPanel`：它挂载负责展开分组的加载器，你自己的布局可以把它直接渲染到任意位置，或通过自己的组件渲染。构建只检查起始模板的 `ApiLayout.astro` 是否为按需侧边栏之前的结构；你重写的布局由你自己负责，包括加载器。这些组件使用 0.19 起始模板的样式，因此在 0.19.0 之前搭建的站点要先采用重新设计的起始模板；`nimbus-docs migrate` 会列出其步骤。
 
 ## API 首页
 
@@ -144,7 +144,7 @@ export const collections = {
 
 它还会收窄该 API 的发现范围。搜索、`llms.txt`、`llms-full.txt`、站点地图和 Markdown 版本只覆盖默认版本。较旧版本仍可作为带 `noindex` 的 HTML 阅读，仍会发布其规格，并保留在 API 目录中。
 
-使用 `bundle: false` 时，Nimbus 会复用你未更改的版本。在 CI 中：
+使用 `bundle: false` 时，Nimbus 会复用你未更改的版本，以及更改过的版本中已高亮的代码示例。在 CI 中：
 
 - 在构建前恢复整个 `.nimbus/cache/page-assets/` 目录。
 - 在生产部署成功后保存它，而不是在预览部署后保存，这样“上一次”指的就是线上发布。

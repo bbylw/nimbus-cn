@@ -58,6 +58,30 @@ Nimbus 还提供 OG 图片路由，因此没有显式图片的页面会得到生
 <NimbusHead title={title} socialImage="/diagrams/cover.png" socialImageSize={{ width: 1600, height: 900 }} />
 ```
 
+设置页面图片的路由可以用 `socialImageAlt` 描述它，它优先于配置中的值。
+
+## 页面语言
+
+每个页面都会声明 `config.locale`（默认 `"en"`）。另一种语言的页面在起始模板的 `DocsLayout` 或 `BaseLayout` 上通过 `locale`（BCP 47 标签）声明：
+
+```astro
+<BaseLayout title="Démarrage" locale="fr" socialImageAlt="Carte : Démarrage" />
+```
+
+页面的 `<html lang>`、JSON-LD 的 `inLanguage` 和 `og:locale` 都会跟随它。`og:locale` 采用 Open Graph 的形式，即语言加区域（`fr_FR`）；要使用其他区域，请在标签中传入区域（`ar-SA`）。从右到左书写的语言，无论在 `locale` 还是 `config.locale` 中，还会设置 `dir="rtl"`。
+
+`NimbusHead` 也接受 `locale`，但它无法改变其外部的 `<html>` 元素。你自己的布局可以从同一个值设置它：
+
+```astro
+---
+import { getPageLanguage } from "@cloudflare/nimbus-docs/runtime";
+const { lang, dir } = await getPageLanguage(Astro.props.locale);
+---
+<html lang={lang} dir={dir}>
+```
+
+搜索会按预渲染页面的 `<html lang>` 索引它，因此它会与该语言的其他页面一起被搜索。按请求渲染的页面仍按 `config.locale` 索引。
+
 ## Sitemap 与 robots
 
 设置 `site` 后，会自动接入 sitemap 集成和 `/robots.txt`。可在集成选项中用 `sitemap: false` 禁用 sitemap。
