@@ -16,7 +16,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   title="面向文档的写作工具"
   description="Nimbus 是面向文档的写作工具：写一次，自动检查、评审，并发布为面向人与智能体的 HTML 与 Markdown。"
 >
-  <div class="lp-page">
+  <div class="lp-page" id="top">
     <header class="lp-header">
       <div class="lp-container lp-header-inner">
         <a class="lp-brand" href="/" aria-label="Nimbus 首页">
@@ -37,9 +37,9 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           <a class="lp-icon-link" href="https://github.com/cloudflare/nimbus" target="_blank" rel="noopener" aria-label="GitHub">
             <Icon name="ph:github-logo" class="h-4 w-4" />
           </a>
-          <a class="lp-cta" href="/quickstart/" aria-label="开始使用">
+          <a class="lp-cta" href="/quickstart/">
             <span>开始使用</span>
-            <Icon name="ph:arrow-right" class="h-3.5 w-3.5" />
+            <Icon name="ph:arrow-right" class="h-3.5 w-3.5 lp-arrow" />
           </a>
         </div>
       </div>
@@ -52,7 +52,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
       </nav>
     </header>
 
-    <main id="main-content">
+    <main id="main-content" tabindex="-1">
       <section class="lp-hero">
         <div class="lp-container">
           <div class="lp-eyebrow">
@@ -73,7 +73,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
               </span>
             </span>
             <span class="lp-title-line lp-title-muted">
-              面向文档的
+              <span class="lp-nowrap">面向文档的</span>
               <span class="lp-select">
                 写作工具
                 <span class="lp-tag lp-tag-you" aria-hidden="true">你</span>
@@ -87,10 +87,11 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           </p>
 
           <div class="lp-command" data-copy-command data-copy-value={command}>
-            <span class="lp-command-prefix">$</span>
+            <span class="lp-command-prefix" aria-hidden="true">$</span>
             <code class="lp-command-text">{command}</code>
             <button class="lp-command-copy" type="button" data-copy-trigger aria-label="复制安装命令">
-              <Icon name="ph:copy" class="h-3.5 w-3.5" />
+              <Icon name="ph:copy" class="h-3.5 w-3.5 lp-copy-icon" />
+              <Icon name="ph:check" class="h-3.5 w-3.5 lp-check-icon" />
               <span data-copy-label aria-live="polite">复制</span>
             </button>
           </div>
@@ -98,7 +99,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           <p class="lp-note">需要 Node.js 22.12+ · MIT 许可 · 你的仓库，你的文件</p>
 
           <div class="lp-hero-links">
-            <a href="/quickstart/">快速开始 <Icon name="ph:arrow-right" class="h-3 w-3" /></a>
+            <a href="/quickstart/">快速开始 <Icon name="ph:arrow-right" class="h-3.5 w-3.5 lp-arrow" /></a>
             <a href="/writing/">写作指南</a>
             <a href="/components/">组件</a>
             <a href="/api-reference/">API 参考</a>
@@ -110,11 +111,11 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
         <div class="lp-container">
           <div class="lp-section-head">
             <p class="lp-kicker">写一次，走完整个流程</p>
-            <h2 class="lp-h2">
-              <span class="lp-h2-line">你写一次。</span>
-              <span class="lp-h2-line">Nimbus <em>检查</em>它，</span>
-              <span class="lp-h2-line">留住它等待评审，</span>
-              <span class="lp-h2-line">再发布给人和智能体。</span>
+            <h2 class="lp-h2 lp-tagline" data-lp-tagline>
+              <span class="lp-h2-line lp-phrase">你写一次。</span>
+              <span class="lp-h2-line lp-phrase">Nimbus <em>检查</em>它，</span>
+              <span class="lp-h2-line lp-phrase">留住它等待评审，</span>
+              <span class="lp-h2-line lp-phrase">再发布给人和智能体。</span>
             </h2>
           </div>
 
@@ -170,7 +171,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
                   </div>
                   <p class="lp-review-copy">无论谁写的，内容都要经过同一位评审。</p>
                   <div class="lp-review-action">
-                    <span class="lp-button-dark">通过并发布</span>
+                    <button type="button" class="lp-button-dark" data-review-btn aria-pressed="false">通过并发布</button>
                     <span class="lp-review-meta">1 份草稿 · 0 条评论</span>
                   </div>
                 </div>
@@ -249,15 +250,27 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
               <div class="lp-mini-doc" aria-hidden="true">
                 <div class="lp-mini-doc-head">
-                  <span class="lp-mini-doc-brand">Sample Co</span>
+                  <span class="lp-mini-doc-brand">晴空气象</span>
                   <span class="lp-mini-doc-chip">文档</span>
                 </div>
                 <p class="lp-mini-doc-title">天气预报</p>
                 <p class="lp-mini-doc-line">每小时天气，任意城市。</p>
                 <div class="lp-mini-doc-bars">
-                  <span style="width: 62%"></span>
-                  <span style="width: 84%"></span>
-                  <span style="width: 48%"></span>
+                  <div class="lp-mini-bar-row">
+                    <span>北京</span>
+                    <span class="lp-mini-bar-track"><i style="width: 62%"></i></span>
+                    <span>22°C</span>
+                  </div>
+                  <div class="lp-mini-bar-row">
+                    <span>上海</span>
+                    <span class="lp-mini-bar-track"><i style="width: 84%"></i></span>
+                    <span>26°C</span>
+                  </div>
+                  <div class="lp-mini-bar-row">
+                    <span>深圳</span>
+                    <span class="lp-mini-bar-track"><i style="width: 72%"></i></span>
+                    <span>29°C</span>
+                  </div>
                 </div>
                 <div class="lp-mini-doc-tags">
                   <span>客户端</span><span>Worker</span><span>KV</span>
@@ -310,22 +323,22 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
             </ul>
           </div>
 
-          <div class="lp-theme-panel" aria-hidden="true">
+          <div class="lp-theme-panel" data-theme-demo>
             <div class="lp-theme-bar">
               <span>globals.css</span>
               <span class="lp-chip">主题</span>
             </div>
-            <pre class="lp-theme-code"><code><span class="lp-theme-line">:root &#123;</span><span class="lp-theme-line">  <span class="lp-key">--nb-brand</span>: oklch(0.373 0.034 260.2);</span><span class="lp-theme-line">  <span class="lp-key">--nb-radius</span>: 0.75rem;</span><span class="lp-theme-line">  <span class="lp-key">--nb-font-sans</span>: "Inter", "PingFang SC", sans-serif;</span><span class="lp-theme-line">&#125;</span></code></pre>
-            <div class="lp-swatches">
-              <span class="lp-swatch lp-swatch-ink"></span>
-              <span class="lp-swatch lp-swatch-brand"></span>
-              <span class="lp-swatch lp-swatch-paper"></span>
-              <span class="lp-swatch lp-swatch-accent"></span>
+            <pre class="lp-theme-code"><code><span class="lp-theme-line">:root &#123;</span><span class="lp-theme-line">  <span class="lp-key">--nb-brand</span>: <span data-theme-token="brand">oklch(0.373 0.034 260.2)</span>;</span><span class="lp-theme-line">  <span class="lp-key">--nb-radius</span>: <span data-theme-token="radius">0.5rem</span>;</span><span class="lp-theme-line">  <span class="lp-key">--nb-font-sans</span>: "Inter", "PingFang SC", sans-serif;</span><span class="lp-theme-line">&#125;</span></code></pre>
+            <div class="lp-swatches" role="group" aria-label="切换主题预览配色">
+              <button type="button" class="lp-swatch lp-swatch-ink is-active" data-swatch-brand="oklch(0.24 0.01 260)" data-swatch-radius="0.5rem" data-swatch-color="#27272a" aria-label="玄墨主题" aria-pressed="true"></button>
+              <button type="button" class="lp-swatch lp-swatch-brand" data-swatch-brand="oklch(0.45 0.12 255)" data-swatch-radius="0.625rem" data-swatch-color="#3b63a8" aria-label="晴空蓝主题" aria-pressed="false"></button>
+              <button type="button" class="lp-swatch lp-swatch-paper" data-swatch-brand="oklch(0.46 0.11 162)" data-swatch-radius="0.375rem" data-swatch-color="#2b7a5b" aria-label="松石绿主题" aria-pressed="false"></button>
+              <button type="button" class="lp-swatch lp-swatch-accent" data-swatch-brand="oklch(0.62 0.15 48)" data-swatch-radius="0.75rem" data-swatch-color="#c96f2d" aria-label="琥珀橙主题" aria-pressed="false"></button>
             </div>
             <div class="lp-theme-preview">
               <div class="lp-theme-preview-head">
                 <Logo class="h-4 w-7" />
-                <span>Sample Co</span>
+                <span>晴空气象</span>
               </div>
               <p>天气预报</p>
               <span class="lp-theme-preview-line"></span>
@@ -410,15 +423,15 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
               <li><Icon name="ph:check" class="h-4 w-4" /> 构建时索引，零运行时服务</li>
               <li><Icon name="ph:check" class="h-4 w-4" /> 可替换为自有搜索后端</li>
             </ul>
-            <a class="lp-text-link" href="/navigation/search/">了解搜索 <Icon name="ph:arrow-right" class="h-3.5 w-3.5" /></a>
+            <a class="lp-text-link" href="/navigation/search/">了解搜索 <Icon name="ph:arrow-right" class="h-3.5 w-3.5 lp-arrow" /></a>
           </div>
 
-          <div class="lp-search-demo" aria-hidden="true">
-            <div class="lp-search-bar">
+          <div class="lp-search-demo">
+            <button type="button" class="lp-search-bar" data-open-search aria-label="打开站内搜索示例">
               <Icon name="ph:magnifying-glass" class="h-4 w-4" />
-              <span>如何提高速率限制？</span>
-              <kbd>⌘K</kbd>
-            </div>
+              <span data-search-query>如何提高速率限制？</span>
+              <kbd data-search-kbd>Ctrl K</kbd>
+            </button>
             <div class="lp-search-result">
               <span class="lp-search-breadcrumb">参考 / 速率限制</span>
               <p class="lp-search-title">提高你的速率限制</p>
@@ -444,7 +457,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
               <p class="lp-kicker">需要什么，什么时候需要</p>
               <h2 class="lp-h2">组件不是黑盒。</h2>
             </div>
-            <a class="lp-text-link" href="/components/">查看全部组件 <Icon name="ph:arrow-right" class="h-3.5 w-3.5" /></a>
+            <a class="lp-text-link" href="/components/">查看全部组件 <Icon name="ph:arrow-right" class="h-3.5 w-3.5 lp-arrow" /></a>
           </div>
 
           <div class="lp-component-grid">
@@ -459,7 +472,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
               <span class="lp-component-label">src/components/ui/steps/</span>
               <Steps>
                 <Step title="获取密钥">在控制台创建一个 API key。</Step>
-                <Step title="调用接口">向 `/forecast` 发送一次请求。</Step>
+                <Step title="调用接口">向 <code>/forecast</code> 发送一次请求。</Step>
               </Steps>
             </div>
 
@@ -479,17 +492,17 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
         </div>
       </section>
 
-      <section class="lp-section lp-faq">
+      <section class="lp-section lp-faq" aria-labelledby="faq-heading">
         <div class="lp-container lp-faq-grid">
           <div>
             <p class="lp-kicker">问题</p>
-            <h2 class="lp-h2">开始之前。</h2>
+            <h2 id="faq-heading" class="lp-h2">开始之前。</h2>
           </div>
 
           <div class="lp-faq-list">
             <details>
               <summary>能直接用在现有的 Markdown 上吗？<Icon name="ph:plus" class="h-4 w-4" /></summary>
-              <p>可以。把页面放进 `src/content/docs/`，补上 `title`，剩下的交给检查。缺少的字段和断掉的链接会被指出来。</p>
+              <p>可以。把页面放进 <code>src/content/docs/</code>，补上 <code>title</code>，剩下的交给检查。缺少的字段和断掉的链接会被指出来。</p>
             </details>
             <details>
               <summary>必须使用智能体吗？<Icon name="ph:plus" class="h-4 w-4" /></summary>
@@ -498,6 +511,10 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
             <details>
               <summary>支持哪些智能体？<Icon name="ph:plus" class="h-4 w-4" /></summary>
               <p>任何能读文件的智能体。配方是纯 Markdown，检查结果是 JSON，站点索引是一个固定地址的文本文件。</p>
+            </details>
+            <details>
+              <summary>支持 OpenAPI 接口文档吗？<Icon name="ph:plus" class="h-4 w-4" /></summary>
+              <p>支持。安装 <code>api-reference</code> 配方后，即可从 OpenAPI 3.x 规范自动生成多版本接口文档与在线试调面板。</p>
             </details>
             <details>
               <summary>可以部署到哪里？<Icon name="ph:plus" class="h-4 w-4" /></summary>
@@ -521,10 +538,11 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           <p class="lp-section-sub">点击复制，粘贴到终端即可。</p>
 
           <div class="lp-command lp-command-large" data-copy-command data-copy-value={command}>
-            <span class="lp-command-prefix">$</span>
+            <span class="lp-command-prefix" aria-hidden="true">$</span>
             <code class="lp-command-text">{command}</code>
             <button class="lp-command-copy" type="button" data-copy-trigger aria-label="复制安装命令">
-              <Icon name="ph:copy" class="h-3.5 w-3.5" />
+              <Icon name="ph:copy" class="h-3.5 w-3.5 lp-copy-icon" />
+              <Icon name="ph:check" class="h-3.5 w-3.5 lp-check-icon" />
               <span data-copy-label aria-live="polite">复制</span>
             </button>
           </div>
@@ -566,13 +584,17 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
             <a href="/why-nimbus/">为什么选择 Nimbus</a>
             <a href="/ai/">面向智能体</a>
             <a href="/deploy/">部署</a>
+            <a href="/llms.txt">llms.txt</a>
             <a href="https://github.com/cloudflare/nimbus" target="_blank" rel="noopener">GitHub</a>
           </div>
         </div>
 
         <div class="lp-footer-bottom">
-          <span>© 2026 Nimbus</span>
-          <span>基于 Nimbus · MIT 许可</span>
+          <span>© 2026 Nimbus · MIT 许可</span>
+          <a class="lp-back-top" href="#top">
+            <span>回到顶部</span>
+            <Icon name="ph:arrow-up" class="h-3.5 w-3.5" />
+          </a>
         </div>
       </div>
     </footer>
@@ -581,17 +603,113 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   <script>
     import { mount } from "@cloudflare/nimbus-docs/client";
 
-    // 场景演示：进入视口后依次播放「检查 → 评审 → 发布」「搜索输入」等小动画，只播放一次。
+    // 平台快捷键标签与搜索演示联动
     mount(".lp-page", (root) => {
+      const kbd = root.querySelector<HTMLElement>("[data-search-kbd]");
+      if (kbd) {
+        const isApple = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
+        kbd.textContent = isApple ? "⌘K" : "Ctrl K";
+      }
+
+      const demoSearchBtn = root.querySelector<HTMLButtonElement>("[data-open-search]");
+      const onOpenSearch = () => {
+        const headerTrigger = document.querySelector<HTMLButtonElement>("[data-search-trigger]");
+        headerTrigger?.click();
+      };
+      demoSearchBtn?.addEventListener("click", onOpenSearch);
+
+      // 主题色板交互预览
+      const themeDemo = root.querySelector<HTMLElement>("[data-theme-demo]");
+      const brandCode = themeDemo?.querySelector<HTMLElement>('[data-theme-token="brand"]');
+      const radiusCode = themeDemo?.querySelector<HTMLElement>('[data-theme-token="radius"]');
+      const swatches = Array.from(themeDemo?.querySelectorAll<HTMLButtonElement>("[data-swatch-brand]") ?? []);
+
+      const applySwatch = (btn: HTMLButtonElement) => {
+        if (!themeDemo) return;
+        const brand = btn.dataset.swatchBrand ?? "";
+        const radius = btn.dataset.swatchRadius ?? "";
+        const color = btn.dataset.swatchColor ?? "";
+        themeDemo.style.setProperty("--preview-brand", color);
+        themeDemo.style.setProperty("--preview-radius", radius);
+        if (brandCode) brandCode.textContent = brand;
+        if (radiusCode) radiusCode.textContent = radius;
+        for (const item of swatches) {
+          const active = item === btn;
+          item.classList.toggle("is-active", active);
+          item.setAttribute("aria-pressed", String(active));
+        }
+      };
+
+      const onSwatchClick = (e: Event) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        applySwatch(btn);
+      };
+      swatches.forEach((btn) => btn.addEventListener("click", onSwatchClick));
+
+      // 评审状态切换（自动演示后也可手动切换）
+      const workbench = root.querySelector<HTMLElement>(".lp-workbench");
+      const reviewBtn = workbench?.querySelector<HTMLButtonElement>("[data-review-btn]");
+      const reviewChip = workbench?.querySelector<HTMLElement>("[data-review-chip], .lp-stage-review .lp-chip");
+      const reviewMeta = workbench?.querySelector<HTMLElement>(".lp-review-meta");
+      const reviewDot = workbench?.querySelector<HTMLElement>(".lp-stage-review .lp-dot");
+
+      const setReviewApproved = (approved: boolean) => {
+        if (reviewChip) {
+          reviewChip.textContent = approved ? "Sam 已通过" : "等待 Sam";
+          reviewChip.classList.toggle("lp-chip-warn", !approved);
+          reviewChip.classList.toggle("lp-chip-ok", approved);
+        }
+        if (reviewBtn) {
+          reviewBtn.textContent = approved ? "已签核发布" : "通过并发布";
+          reviewBtn.classList.toggle("is-approved", approved);
+          reviewBtn.setAttribute("aria-pressed", String(approved));
+        }
+        if (reviewMeta) {
+          reviewMeta.textContent = approved ? "已发布 · 0 条评论" : "1 份草稿 · 0 条评论";
+        }
+        reviewDot?.classList.toggle("lp-dot-green", approved);
+      };
+
+      const onReviewClick = () => {
+        const next = reviewBtn?.getAttribute("aria-pressed") !== "true";
+        setReviewApproved(next);
+      };
+      reviewBtn?.addEventListener("click", onReviewClick);
+
       if (
         !("IntersectionObserver" in window) ||
         window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ) {
-        return () => {};
+        return () => {
+          demoSearchBtn?.removeEventListener("click", onOpenSearch);
+          swatches.forEach((btn) => btn.removeEventListener("click", onSwatchClick));
+          reviewBtn?.removeEventListener("click", onReviewClick);
+        };
       }
 
       const timers: number[] = [];
       const later = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
+
+      // 导语逐句亮起揭示
+      const tagline = root.querySelector<HTMLElement>("[data-lp-tagline]");
+      let taglineObserver: IntersectionObserver | undefined;
+      if (tagline) {
+        const phrases = Array.from(tagline.querySelectorAll<HTMLElement>(".lp-phrase"));
+        tagline.classList.add("lp-tagline-ready");
+        taglineObserver = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (!entry.isIntersecting) continue;
+              phrases.forEach((phrase, idx) => {
+                later(idx * 130, () => phrase.classList.add("is-lit"));
+              });
+              taglineObserver?.unobserve(entry.target);
+            }
+          },
+          { rootMargin: "0px 0px -15% 0px", threshold: 0.25 },
+        );
+        taglineObserver.observe(tagline);
+      }
 
       // [选择器, 起始延迟 ms, 每项间隔 ms, 动画类型]
       type Step = [string, number, number, string?];
@@ -611,28 +729,19 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           setup: (el) =>
             stage(el, [
               [".lp-stage-checks .lp-code-line", 200, 110],
-              [".lp-stage-checks .lp-check-list li", 900, 180],
-              [".lp-stage-checks .lp-stage-foot", 1700, 0],
-              [".lp-stage-review .lp-review", 1800, 0],
-              [".lp-stage-review .lp-quiet-card", 2100, 0],
-              [".lp-stage-review .lp-stage-foot", 2900, 0],
-              [".lp-stage-ship .lp-output-list li", 3000, 160],
-              [".lp-stage-ship .lp-stage-foot", 3900, 0],
+              [".lp-stage-checks .lp-check-list li", 900, 160],
+              [".lp-stage-checks .lp-stage-foot", 1600, 0],
+              [".lp-stage-review .lp-review", 1700, 0],
+              [".lp-stage-review .lp-quiet-card", 2000, 0],
+              [".lp-stage-review .lp-stage-foot", 2800, 0],
+              [".lp-stage-ship .lp-output-list li", 2900, 140],
+              [".lp-stage-ship .lp-stage-foot", 3700, 0],
             ]),
-          play: (el) => {
-            const chip = el.querySelector<HTMLElement>(".lp-chip-warn");
-            const button = el.querySelector<HTMLElement>(".lp-button-dark");
-            const meta = el.querySelector<HTMLElement>(".lp-review-meta");
-            const dot = el.querySelector<HTMLElement>(".lp-stage-review .lp-dot");
-            later(2500, () => button?.classList.add("is-pressed"));
-            later(2750, () => {
-              if (chip) {
-                chip.textContent = "Sam 已通过";
-                chip.classList.remove("lp-chip-warn");
-                chip.classList.add("lp-chip-ok");
-              }
-              if (meta) meta.textContent = "已发布 · 0 条评论";
-              dot?.classList.add("lp-dot-green");
+          play: () => {
+            later(2400, () => reviewBtn?.classList.add("is-pressed"));
+            later(2680, () => {
+              reviewBtn?.classList.remove("is-pressed");
+              setReviewApproved(true);
             });
           },
         },
@@ -640,64 +749,69 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
           selector: ".lp-audience-grid",
           setup: (el) =>
             stage(el, [
-              [".lp-check-list li", 150, 120],
-              [".lp-mini-doc-brand, .lp-mini-doc-chip, .lp-mini-doc-title, .lp-mini-doc-line", 300, 120],
-              [".lp-mini-doc-bars span", 800, 140, "grow"],
-              [".lp-mini-doc-tags span", 1300, 100],
-              [".lp-mini-code pre", 600, 0],
-              [".lp-tagcode", 1500, 0],
+              [".lp-check-list li", 150, 110],
+              [".lp-mini-doc-brand, .lp-mini-doc-chip, .lp-mini-doc-title, .lp-mini-doc-line", 300, 110],
+              [".lp-mini-bar-track i", 750, 140, "grow"],
+              [".lp-mini-doc-tags span", 1250, 90],
+              [".lp-mini-code pre", 550, 0],
+              [".lp-tagcode", 1400, 0],
             ]),
         },
         {
           selector: ".lp-theme-panel",
           setup: (el) =>
             stage(el, [
-              [".lp-theme-line", 200, 200],
-              [".lp-swatch", 1200, 120, "scale"],
-              [".lp-theme-preview", 1700, 0],
-              [".lp-theme-preview-card", 2000, 0],
+              [".lp-theme-line", 200, 180],
+              [".lp-swatch", 1100, 100, "scale"],
+              [".lp-theme-preview", 1550, 0],
+              [".lp-theme-preview-card", 1850, 0],
             ]),
         },
         {
           selector: ".lp-search-demo",
           setup: (el) => {
             stage(el, [
-              [".lp-search-result:not(.lp-search-result-muted)", 2000, 0],
-              [".lp-search-result-muted", 2300, 0],
-              [".lp-search-foot", 2600, 0],
+              [".lp-search-result:not(.lp-search-result-muted)", 1800, 0],
+              [".lp-search-result-muted", 2100, 0],
+              [".lp-search-foot", 2400, 0],
             ]);
           },
           play: (el) => {
-            const span = el.querySelector<HTMLElement>(".lp-search-bar span");
-            const kbd = el.querySelector<HTMLElement>(".lp-search-bar kbd");
+            const span = el.querySelector<HTMLElement>("[data-search-query]");
+            const searchKbd = el.querySelector<HTMLElement>("[data-search-kbd]");
             if (!span) return;
             const full = span.textContent ?? "";
             span.textContent = "";
             span.classList.add("is-typing");
-            later(200, () => kbd?.classList.add("is-pressed"));
-            later(450, () => kbd?.classList.remove("is-pressed"));
+            later(200, () => searchKbd?.classList.add("is-pressed"));
+            later(450, () => searchKbd?.classList.remove("is-pressed"));
             [...full].forEach((_, i) => {
-              later(600 + i * 70, () => {
+              later(550 + i * 65, () => {
                 span.textContent = full.slice(0, i + 1);
               });
             });
-            later(600 + full.length * 70 + 400, () => span.classList.remove("is-typing"));
+            later(550 + full.length * 65 + 350, () => span.classList.remove("is-typing"));
           },
         },
       ];
 
       const entries = new Map<Element, (typeof scenes)[number]>();
+      const playScene = (el: HTMLElement) => {
+        if (el.classList.contains("is-playing")) return;
+        const scene = entries.get(el);
+        el.classList.add("is-playing");
+        scene?.play?.(el);
+        observer.unobserve(el);
+      };
+
       const observer = new IntersectionObserver(
         (list) => {
           for (const item of list) {
             if (!item.isIntersecting) continue;
-            const scene = entries.get(item.target);
-            item.target.classList.add("is-playing");
-            scene?.play?.(item.target as HTMLElement);
-            observer.unobserve(item.target);
+            playScene(item.target as HTMLElement);
           }
         },
-        { rootMargin: "0px 0px -15% 0px", threshold: 0.3 },
+        { rootMargin: "0px 0px -8% 0px", threshold: 0.1 },
       );
 
       for (const scene of scenes) {
@@ -705,12 +819,38 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
         if (!el) continue;
         scene.setup(el);
         entries.set(el, scene);
-        observer.observe(el);
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.92) {
+          playScene(el);
+        } else {
+          observer.observe(el);
+        }
       }
+
+      let sceneRaf = 0;
+      const onSceneScroll = () => {
+        if (sceneRaf) return;
+        sceneRaf = window.requestAnimationFrame(() => {
+          sceneRaf = 0;
+          for (const el of entries.keys()) {
+            const htmlEl = el as HTMLElement;
+            if (htmlEl.classList.contains("is-playing")) continue;
+            if (htmlEl.getBoundingClientRect().top < window.innerHeight * 0.92) {
+              playScene(htmlEl);
+            }
+          }
+        });
+      };
+      window.addEventListener("scroll", onSceneScroll, { passive: true });
 
       return () => {
         observer.disconnect();
+        taglineObserver?.disconnect();
+        window.removeEventListener("scroll", onSceneScroll);
+        if (sceneRaf) window.cancelAnimationFrame(sceneRaf);
         timers.forEach((id) => window.clearTimeout(id));
+        demoSearchBtn?.removeEventListener("click", onOpenSearch);
+        swatches.forEach((btn) => btn.removeEventListener("click", onSwatchClick));
+        reviewBtn?.removeEventListener("click", onReviewClick);
       };
     });
 
@@ -720,24 +860,54 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
       );
       if (!("IntersectionObserver" in window) || targets.length === 0) return () => {};
 
+      const revealEl = (el: Element) => {
+        el.classList.add("is-visible");
+        observer.unobserve(el);
+      };
+
       const observer = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
             if (!entry.isIntersecting) continue;
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
+            revealEl(entry.target);
           }
         },
-        { rootMargin: "0px 0px -12% 0px", threshold: 0.05 },
+        { rootMargin: "0px 0px -4% 0px", threshold: 0.01 },
       );
 
+      const pending: HTMLElement[] = [];
       for (const el of targets) {
         // 已在首屏内的区块不做动画，避免闪烁
-        if (el.getBoundingClientRect().top < window.innerHeight * 0.9) continue;
+        if (el.getBoundingClientRect().top < window.innerHeight * 0.95) continue;
         el.classList.add("lp-reveal");
+        pending.push(el);
         observer.observe(el);
       }
-      return () => observer.disconnect();
+
+      // 锚点跳转或快速滚动越过某区块时，确保视口内及上方的区块都会显现
+      let revealRaf = 0;
+      const syncVisible = () => {
+        if (revealRaf) return;
+        revealRaf = window.requestAnimationFrame(() => {
+          revealRaf = 0;
+          const cutoff = window.innerHeight * 0.96;
+          for (const el of pending) {
+            if (el.classList.contains("is-visible")) continue;
+            if (el.getBoundingClientRect().top < cutoff) {
+              revealEl(el);
+            }
+          }
+        });
+      };
+      window.addEventListener("scroll", syncVisible, { passive: true });
+      window.addEventListener("hashchange", syncVisible);
+
+      return () => {
+        observer.disconnect();
+        window.removeEventListener("scroll", syncVisible);
+        window.removeEventListener("hashchange", syncVisible);
+        if (revealRaf) window.cancelAnimationFrame(revealRaf);
+      };
     });
 
     mount("[data-copy-command]", (root) => {
@@ -776,9 +946,11 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
         }
 
         label.textContent = copied ? "已复制" : "复制失败";
+        button.dataset.copied = copied ? "true" : "false";
         if (timer) window.clearTimeout(timer);
         timer = window.setTimeout(() => {
           label.textContent = original;
+          delete button.dataset.copied;
         }, 1600);
       };
 
@@ -795,24 +967,43 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-page {
     --lp-max: 1200px;
     --lp-line: var(--nb-border);
-    --lp-soft: color-mix(in oklch, var(--nb-muted) 58%, transparent);
+    --lp-line-strong: var(--nb-border-strong);
+    --lp-surface: var(--nb-background);
+    --lp-surface-alt: var(--nb-muted);
+    --lp-card: var(--nb-card);
+    --lp-elevated: var(--nb-card);
+    --lp-muted-surface: var(--nb-muted);
     --lp-ink: var(--nb-foreground);
+    --lp-muted-ink: var(--nb-muted-foreground);
     --lp-accent: #f08a3c;
-    background: var(--nb-background);
-    color: var(--nb-foreground);
+    --lp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    background: var(--lp-surface);
+    color: var(--lp-ink);
     overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  :global([data-mode="dark"]) .lp-page {
+    --lp-surface: #000000;
+    --lp-surface-alt: #181818;
+    --lp-card: #181818;
+    --lp-elevated: #1f1f1f;
+    --lp-muted-surface: #272727;
+    --lp-line: #272727;
+    --lp-line-strong: #313131;
   }
 
   .lp-page ::selection {
     background: color-mix(in oklch, var(--nb-brand) 24%, transparent);
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
   }
 
   .lp-page a:focus-visible,
-  .lp-page button:focus-visible {
+  .lp-page button:focus-visible,
+  .lp-page summary:focus-visible {
     outline: 2px solid var(--nb-ring);
-    outline-offset: 3px;
-    border-radius: 0.3rem;
+    outline-offset: 2px;
+    border-radius: 0.375rem;
   }
 
   .lp-container {
@@ -820,12 +1011,13 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     margin-inline: auto;
   }
 
+  /* ---- Header ---- */
   .lp-header {
     position: sticky;
     top: 0;
     z-index: 40;
     border-bottom: 1px solid var(--lp-line);
-    background: color-mix(in oklch, var(--nb-background) 82%, transparent);
+    background: color-mix(in oklch, var(--lp-surface) 84%, transparent);
     backdrop-filter: blur(16px);
   }
 
@@ -834,109 +1026,133 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    height: 4.25rem;
+    height: 4rem;
   }
 
   .lp-brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.5rem;
     min-width: 0;
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
     text-decoration: none;
+    transition: opacity 300ms var(--lp-ease);
+  }
+
+  .lp-brand:hover {
+    opacity: 0.8;
   }
 
   .lp-brand-name {
-    font-size: 0.9375rem;
+    font-size: 1rem;
     font-weight: 600;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
+    line-height: 1.5rem;
   }
 
   .lp-nav {
     display: flex;
     align-items: center;
-    gap: 1.4rem;
-    margin-inline-start: 1.6rem;
+    gap: 0.25rem;
+    margin-inline-start: 1.5rem;
     margin-inline-end: auto;
   }
 
   .lp-nav a {
-    position: relative;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.375rem;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     font-weight: 500;
     text-decoration: none;
-    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .lp-nav a::after {
-    position: absolute;
-    right: 0;
-    bottom: -0.42rem;
-    left: 0;
-    height: 1px;
-    background: var(--nb-foreground);
-    content: "";
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      color 300ms var(--lp-ease),
+      background-color 300ms var(--lp-ease);
   }
 
   .lp-nav a:hover {
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
+    background: var(--nb-accent);
   }
 
-  .lp-nav a:hover::after {
-    transform: scaleX(1);
+  .lp-nav a:active {
+    transform: scale(0.98);
   }
 
   .lp-actions {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.25rem;
   }
 
   .lp-icon-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 0.45rem;
-    color: var(--nb-muted-foreground);
-    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    color: var(--lp-muted-ink);
+    transition:
+      color 300ms var(--lp-ease),
+      background-color 300ms var(--lp-ease),
+      transform 300ms var(--lp-ease);
   }
 
   .lp-icon-link:hover {
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
     background: var(--nb-accent);
+  }
+
+  .lp-icon-link:active {
+    transform: scale(0.96);
   }
 
   .lp-cta {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    margin-inline-start: 0.45rem;
-    min-height: 2.25rem;
-    padding: 0.52rem 0.95rem;
-    border-radius: 0.55rem;
+    gap: 0.375rem;
+    margin-inline-start: 0.5rem;
+    min-height: 2rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
     background: var(--nb-primary);
     color: var(--nb-primary-foreground);
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     font-weight: 600;
     text-decoration: none;
-    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    white-space: nowrap;
+    transition:
+      transform 300ms var(--lp-ease),
+      opacity 300ms var(--lp-ease);
   }
 
   .lp-cta:hover {
-    transform: translateY(-1px);
     opacity: 0.9;
+  }
+
+  .lp-cta:active {
+    transform: scale(0.98);
+  }
+
+  .lp-arrow {
+    transition: transform 300ms var(--lp-ease);
+  }
+
+  .lp-cta:hover .lp-arrow,
+  .lp-text-link:hover .lp-arrow,
+  .lp-hero-links a:hover .lp-arrow {
+    transform: translateX(3px);
   }
 
   .lp-mobile-nav {
     display: none;
-    gap: 1.1rem;
-    padding: 0 1.5rem 0.75rem;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid var(--lp-line);
     overflow-x: auto;
     scrollbar-width: none;
     white-space: nowrap;
@@ -947,40 +1163,40 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-mobile-nav a {
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.375rem;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     font-weight: 500;
     text-decoration: none;
+    transition:
+      color 300ms var(--lp-ease),
+      background-color 300ms var(--lp-ease);
   }
 
+  .lp-mobile-nav a:hover {
+    color: var(--lp-ink);
+    background: var(--nb-accent);
+  }
+
+  /* ---- Hero ---- */
   .lp-hero {
     position: relative;
-    padding: clamp(4rem, 10vw, 7.5rem) 0 clamp(4rem, 8vw, 6.5rem);
-  }
-
-  .lp-hero::before {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background:
-      radial-gradient(70rem 32rem at 50% -10%, color-mix(in oklch, var(--nb-brand) 7%, transparent), transparent 70%),
-      linear-gradient(to bottom, transparent 65%, color-mix(in oklch, var(--nb-muted) 40%, transparent));
-    content: "";
-    pointer-events: none;
-  }
-
-  .lp-hero > .lp-container {
-    position: relative;
-    z-index: 1;
+    padding: clamp(4rem, 9vw, 6rem) 0 clamp(4rem, 8vw, 6rem);
+    background: var(--lp-surface);
   }
 
   .lp-eyebrow {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
-    animation: lp-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 
   .lp-avatars,
@@ -995,9 +1211,9 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     justify-content: center;
     width: 1.5rem;
     height: 1.5rem;
-    margin-inline-start: -0.35rem;
+    margin-inline-start: -0.375rem;
     border-radius: 999px;
-    border: 1px solid color-mix(in oklch, var(--nb-background) 80%, transparent);
+    border: 1.5px solid var(--lp-surface);
     color: #fff;
     font-size: 0.75rem;
     font-weight: 600;
@@ -1015,21 +1231,25 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   .lp-avatar-agent {
     background: var(--lp-accent);
+    color: #181818;
   }
 
   .lp-avatar-review {
-    background: #6e8fd6;
+    background: #3d63b8;
+    color: #fff;
   }
 
   .lp-title {
     display: flex;
     flex-direction: column;
-    margin-top: 2.6rem;
-    font-size: clamp(3.1rem, 7.4vw, 5.4rem);
-    font-weight: 500;
+    gap: 0.12em;
+    max-width: 56rem;
+    margin-top: 2rem;
+    font-size: clamp(2.5rem, 6.5vw, 4.5rem);
+    font-weight: 600;
     letter-spacing: -0.035em;
-    line-height: 1.04;
-    animation: lp-rise 800ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    line-height: 1.1;
+    text-wrap: balance;
   }
 
   .lp-title-line {
@@ -1039,117 +1259,117 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-title-strong {
     position: relative;
     display: inline-block;
-    margin-inline-start: 0.16em;
+    margin-inline-start: 0.14em;
     font-weight: 600;
   }
 
   .lp-title-muted {
-    color: var(--nb-muted-foreground);
-    font-weight: 400;
+    color: var(--lp-muted-ink);
+    font-weight: 500;
   }
 
   .lp-select {
     position: relative;
     display: inline-block;
-    padding: 0 0.12em;
-    border-radius: 0.12em;
-    background: color-mix(in oklch, var(--nb-brand) 18%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--nb-brand) 18%, transparent);
-    color: var(--nb-foreground);
+    margin-inline-start: 0.12em;
+    padding: 0 0.16em;
+    border-radius: 0.14em;
+    background: color-mix(in oklch, var(--nb-brand) 14%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--nb-brand) 28%, transparent);
+    color: var(--lp-ink);
   }
 
   .lp-select::after {
     position: absolute;
-    top: 0.08em;
-    bottom: 0.08em;
-    right: -0.07em;
-    width: 2px;
-    background: var(--nb-foreground);
+    top: 0.06em;
+    bottom: 0.06em;
+    right: -1px;
+    width: 2.5px;
+    border-radius: 1px;
+    background: var(--lp-ink);
     content: "";
-    animation: lp-caret 1.1s step-end infinite;
   }
 
   .lp-tag {
     position: absolute;
     z-index: 3;
-    padding: 0.16rem 0.4rem;
-    border-radius: 0.22rem;
-    background: var(--nb-foreground);
-    color: var(--nb-background);
+    padding: 0.1875rem 0.5rem;
+    border-radius: 0.25rem;
     font-size: 0.75rem;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: 0;
-    line-height: 1.2;
+    line-height: 1rem;
     white-space: nowrap;
-    box-shadow: 0 3px 8px rgb(0 0 0 / 0.12);
   }
 
   .lp-tag::after {
     position: absolute;
-    width: 0.3rem;
-    height: 0.3rem;
+    width: 0.375rem;
+    height: 0.375rem;
     background: inherit;
     content: "";
     rotate: 45deg;
   }
 
   .lp-tag-you {
-    right: -1.6rem;
+    right: -1.75rem;
     bottom: 0.15em;
+    background: var(--nb-foreground);
+    color: var(--nb-background);
   }
 
   .lp-tag-you::after {
-    left: -0.12rem;
-    bottom: 0.18rem;
+    left: -0.15rem;
+    bottom: 0.25rem;
   }
 
   .lp-tag-agent {
-    top: -1.55rem;
-    right: 2.5rem;
-    animation-delay: -1.4s;
+    top: -1.75rem;
+    right: 1.5rem;
+    background: var(--lp-accent);
+    color: #181818;
   }
 
   .lp-tag-agent::after {
-    right: 0.55rem;
-    bottom: -0.1rem;
+    right: 0.625rem;
+    bottom: -0.15rem;
   }
 
   .lp-lede {
-    max-width: 36rem;
-    margin-top: 2rem;
-    color: var(--nb-muted-foreground);
-    font-size: 1.0625rem;
-    line-height: 1.75;
-    animation: lp-rise 800ms 160ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    max-width: 42.5rem;
+    margin-top: 1.5rem;
+    color: var(--lp-muted-ink);
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    text-wrap: pretty;
   }
 
   .lp-command {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
+    gap: 0.75rem;
     width: fit-content;
     max-width: 100%;
-    margin-top: 2.2rem;
-    padding: 0.62rem 0.7rem 0.62rem 0.9rem;
+    margin-top: 2rem;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
     border: 1px solid var(--lp-line);
-    border-radius: 0.7rem;
-    background: color-mix(in oklch, var(--nb-card) 92%, transparent);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.03);
+    border-radius: 0.75rem;
+    background: var(--lp-card);
     font-family: var(--nb-font-mono);
-    animation: lp-rise 800ms 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
   .lp-command-prefix {
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    user-select: none;
   }
 
   .lp-command-text {
     min-width: 0;
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
     text-align: start;
-    font-size: 0.78rem;
-    line-height: 1.5;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     overflow-wrap: anywhere;
   }
 
@@ -1157,68 +1377,93 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     display: inline-flex;
     flex: none;
     align-items: center;
-    gap: 0.3rem;
-    margin-inline-start: 0.4rem;
-    padding: 0.32rem 0.48rem;
+    gap: 0.375rem;
+    min-height: 2rem;
+    margin-inline-start: 0.25rem;
+    padding: 0.375rem 0.625rem;
     border: 1px solid var(--lp-line);
-    border-radius: 0.38rem;
-    background: var(--nb-muted);
-    color: var(--nb-muted-foreground);
+    border-radius: 0.5rem;
+    background: var(--lp-muted-surface);
+    color: var(--lp-muted-ink);
     cursor: pointer;
     font-family: var(--nb-font-sans);
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 500;
-    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      color 300ms var(--lp-ease),
+      border-color 300ms var(--lp-ease),
+      background-color 300ms var(--lp-ease),
+      transform 300ms var(--lp-ease);
   }
 
   .lp-command-copy:hover {
-    border-color: var(--nb-border-strong);
-    color: var(--nb-foreground);
+    border-color: var(--lp-line-strong);
+    color: var(--lp-ink);
+  }
+
+  .lp-command-copy:active {
+    transform: scale(0.98);
+  }
+
+  .lp-check-icon {
+    display: none;
+  }
+
+  .lp-command-copy[data-copied="true"] {
+    border-color: color-mix(in oklch, var(--nb-success) 40%, transparent);
+    color: var(--nb-success);
+  }
+
+  .lp-command-copy[data-copied="true"] .lp-copy-icon {
+    display: none;
+  }
+
+  .lp-command-copy[data-copied="true"] .lp-check-icon {
+    display: block;
   }
 
   .lp-note {
-    margin-top: 0.8rem;
-    color: var(--nb-muted-foreground);
+    margin-top: 0.75rem;
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
-    animation: lp-rise 800ms 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    line-height: 1rem;
   }
 
   .lp-hero-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.45rem 1.3rem;
-    margin-top: 1.35rem;
-    animation: lp-rise 800ms 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1.5rem;
   }
 
   .lp-hero-links a {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.25rem;
     padding-block: 0.5rem;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     font-weight: 500;
     text-decoration: none;
-    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: color 300ms var(--lp-ease);
   }
 
   .lp-hero-links a:hover {
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
   }
 
-  .lp-cta:active,
-  .lp-command-copy:active {
-    transform: scale(0.98);
-  }
-
-  .lp-page {
-    scroll-behavior: smooth;
-  }
-
+  /* ---- Sections & Headings ---- */
   .lp-section {
-    padding: clamp(4rem, 9vw, 7rem) 0;
+    padding: clamp(4rem, 8vw, 6rem) 0;
     border-top: 1px solid var(--lp-line);
+    background: var(--lp-surface);
+  }
+
+  .lp-audience,
+  .lp-components {
+    background: var(--lp-surface-alt);
   }
 
   .lp-kicker {
@@ -1226,28 +1471,29 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 1rem;
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .lp-kicker::before {
-    width: 0.55rem;
+    width: 0.5rem;
     height: 1px;
-    background: var(--nb-muted-foreground);
+    background: var(--lp-muted-ink);
     content: "";
   }
 
   .lp-h2 {
-    max-width: 58rem;
-    color: var(--nb-foreground);
-    font-size: clamp(2rem, 4.4vw, 3.4rem);
-    font-weight: 500;
+    max-width: 56rem;
+    color: var(--lp-ink);
+    font-size: clamp(1.875rem, 4.2vw, 3rem);
+    font-weight: 600;
     letter-spacing: -0.03em;
-    line-height: 1.16;
+    line-height: 1.15;
     text-wrap: balance;
   }
 
@@ -1260,16 +1506,26 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     font-style: normal;
   }
 
+  .lp-tagline-ready .lp-phrase {
+    opacity: 0.28;
+    transition: opacity 600ms var(--lp-ease);
+  }
+
+  .lp-tagline-ready .lp-phrase.is-lit {
+    opacity: 1;
+  }
+
   .lp-section-sub {
     max-width: 42rem;
     margin-top: 1rem;
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-size: 1rem;
-    line-height: 1.7;
+    line-height: 1.625rem;
+    text-wrap: pretty;
   }
 
   .lp-section-head {
-    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: clamp(2rem, 4vw, 3rem);
   }
 
   .lp-section-head-split {
@@ -1279,50 +1535,53 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     gap: 2rem;
   }
 
+  /* ---- Workbench ---- */
   .lp-workbench {
     overflow: hidden;
     border: 1px solid var(--lp-line);
-    border-radius: 1.1rem;
-    background: color-mix(in oklch, var(--nb-card) 88%, var(--nb-muted));
-    box-shadow: 0 20px 60px -32px rgb(0 0 0 / 0.18);
+    border-radius: 1rem;
+    background: var(--lp-card);
   }
 
   .lp-wb-bar {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
-    height: 2.75rem;
+    gap: 0.75rem;
+    height: 3rem;
     padding: 0 1rem;
     border-bottom: 1px solid var(--lp-line);
-    background: color-mix(in oklch, var(--nb-card) 80%, transparent);
+    background: var(--lp-muted-surface);
   }
 
   .lp-wb-dots {
     display: inline-flex;
-    gap: 0.3rem;
+    gap: 0.375rem;
   }
 
   .lp-wb-dots i {
     display: block;
-    width: 0.44rem;
-    height: 0.44rem;
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 999px;
-    background: var(--nb-border-strong);
+    background: var(--lp-line-strong);
   }
 
   .lp-wb-url {
     flex: 1;
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-wb-pill {
-    padding: 0.22rem 0.5rem;
-    border-radius: 999px;
-    background: var(--nb-muted);
-    color: var(--nb-muted-foreground);
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.25rem;
+    background: var(--lp-card);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 500;
   }
 
@@ -1335,7 +1594,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     display: flex;
     min-height: 25rem;
     flex-direction: column;
-    padding: 1.45rem;
+    padding: 1.5rem;
     border-inline-end: 1px solid var(--lp-line);
   }
 
@@ -1344,34 +1603,34 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-stage-label {
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .lp-stage h3 {
-    margin-top: 0.65rem;
-    font-size: 1.02rem;
+    margin-top: 0.75rem;
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: -0.015em;
-    line-height: 1.35;
+    line-height: 1.5rem;
+    text-wrap: balance;
   }
 
   .lp-editor,
   .lp-review,
-  .lp-quiet-card,
-  .lp-mini-doc,
-  .lp-mini-code,
-  .lp-theme-panel {
+  .lp-quiet-card {
     border: 1px solid var(--lp-line);
-    border-radius: 0.8rem;
-    background: var(--nb-card);
+    border-radius: 0.75rem;
+    background: var(--lp-elevated);
   }
 
   .lp-editor {
-    margin-top: 1.1rem;
+    margin-top: 1rem;
     overflow: hidden;
   }
 
@@ -1381,58 +1640,61 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.6rem;
-    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--lp-line);
-    background: color-mix(in oklch, var(--nb-muted) 55%, transparent);
+    background: var(--lp-muted-surface);
   }
 
   .lp-file {
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-chip {
-    padding: 0.16rem 0.4rem;
+    padding: 0.125rem 0.375rem;
     border: 1px solid var(--lp-line);
     border-radius: 0.25rem;
-    background: var(--nb-card);
-    color: var(--nb-muted-foreground);
+    background: var(--lp-card);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 600;
   }
 
   .lp-chip-warn {
-    border-color: color-mix(in oklch, var(--nb-warning) 25%, transparent);
+    border-color: color-mix(in oklch, var(--nb-warning) 35%, transparent);
     background: var(--nb-warning-muted);
     color: var(--nb-warning-foreground);
   }
 
   .lp-code {
-    padding: 0.7rem 0;
+    padding: 0.75rem 0;
     overflow-x: auto;
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
-    line-height: 1.85;
+    line-height: 1.5rem;
   }
 
   .lp-code-line {
     display: flex;
-    gap: 0.7rem;
-    padding: 0 0.8rem;
+    gap: 0.75rem;
+    padding: 0 0.75rem;
     white-space: pre;
   }
 
   .lp-ln {
-    width: 0.9rem;
+    width: 1rem;
     flex: none;
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
+    font-variant-numeric: tabular-nums;
     text-align: end;
   }
 
   .lp-cm {
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
   }
 
   .lp-key {
@@ -1450,40 +1712,45 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-check-list {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
-    margin-top: 1.1rem;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 
   .lp-check-list li {
     display: flex;
     align-items: flex-start;
-    gap: 0.45rem;
+    gap: 0.5rem;
     margin: 0;
   }
 
   .lp-check-list :global(svg) {
     flex: none;
-    margin-top: 0.12rem;
+    margin-top: 0.125rem;
     color: var(--nb-success);
   }
 
   .lp-stage-foot {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     margin-top: auto;
-    padding-top: 1.1rem;
-    color: var(--nb-muted-foreground);
+    padding-top: 1rem;
+    border-top: 1px solid var(--lp-line);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
   }
 
   .lp-dot {
-    width: 0.4rem;
-    height: 0.4rem;
+    width: 0.5rem;
+    height: 0.5rem;
     border-radius: 999px;
-    background: var(--nb-border-strong);
+    background: var(--lp-line-strong);
+    flex: none;
   }
 
   .lp-dot-green {
@@ -1491,7 +1758,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-review {
-    margin-top: 1.1rem;
+    margin-top: 1rem;
     padding: 1rem;
   }
 
@@ -1499,72 +1766,101 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.6rem;
+    gap: 0.5rem;
   }
 
   .lp-review-copy {
-    margin-top: 0.8rem;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
-    line-height: 1.6;
+    margin-top: 0.75rem;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 
   .lp-review-action {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.65rem;
+    gap: 0.75rem;
     margin-top: 1rem;
-    padding-top: 0.9rem;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--lp-line);
   }
 
   .lp-button-dark {
-    padding: 0.42rem 0.7rem;
-    border-radius: 0.4rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
     background: var(--nb-primary);
     color: var(--nb-primary-foreground);
+    cursor: pointer;
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 600;
+    transition:
+      background-color 300ms var(--lp-ease),
+      color 300ms var(--lp-ease),
+      border-color 300ms var(--lp-ease),
+      transform 300ms var(--lp-ease);
+  }
+
+  .lp-button-dark:hover {
+    opacity: 0.9;
+  }
+
+  .lp-button-dark:active {
+    transform: scale(0.98);
+  }
+
+  .lp-button-dark.is-approved {
+    border-color: color-mix(in oklch, var(--nb-success) 35%, transparent);
+    background: var(--nb-success-muted);
+    color: var(--nb-success-foreground);
   }
 
   .lp-review-meta {
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
   }
 
   .lp-quiet-card {
     display: flex;
     align-items: flex-start;
-    gap: 0.65rem;
-    margin-top: 0.8rem;
-    padding: 0.85rem;
-    color: var(--nb-muted-foreground);
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    color: var(--lp-muted-ink);
   }
 
   .lp-quiet-card :global(svg) {
     flex: none;
+    margin-top: 0.125rem;
     color: var(--nb-brand);
   }
 
   .lp-quiet-card strong {
     display: block;
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 600;
   }
 
   .lp-quiet-card span {
     display: block;
-    margin-top: 0.18rem;
+    margin-top: 0.25rem;
     font-size: 0.75rem;
-    line-height: 1.5;
+    line-height: 1.25rem;
   }
 
   .lp-output-list {
     display: flex;
     flex-direction: column;
     gap: 0;
-    margin-top: 1.1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     border-top: 1px solid var(--lp-line);
   }
 
@@ -1572,12 +1868,13 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
-    gap: 0.55rem;
+    gap: 0.5rem;
     margin: 0;
-    padding: 0.62rem 0;
+    padding: 0.625rem 0;
     border-bottom: 1px solid var(--lp-line);
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-output-list li :global(svg) {
@@ -1586,135 +1883,179 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   .lp-output-name {
     overflow: hidden;
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
     font-family: var(--nb-font-mono);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .lp-output-meta {
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
-  .lp-audience {
-    background:
-      linear-gradient(to bottom, color-mix(in oklch, var(--nb-muted) 45%, transparent), transparent 55%),
-      var(--nb-background);
-  }
-
+  /* ---- Audience ---- */
   .lp-audience-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.25rem;
+    gap: 1.5rem;
   }
 
   .lp-audience-card {
-    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
     border: 1px solid var(--lp-line);
     border-radius: 1rem;
-    background: var(--nb-card);
-    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    background: var(--lp-card);
+    transition:
+      transform 500ms var(--lp-ease),
+      border-color 300ms var(--lp-ease);
   }
 
   .lp-audience-card:hover {
     transform: translateY(-2px);
-    border-color: var(--nb-border-strong);
-    box-shadow: 0 14px 34px -28px rgb(0 0 0 / 0.2);
+    border-color: var(--lp-line-strong);
   }
 
   .lp-label {
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .lp-audience-card h3 {
-    margin-top: 0.7rem;
-    font-size: 1.35rem;
+    margin-top: 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
     font-weight: 600;
     letter-spacing: -0.02em;
+    text-wrap: balance;
   }
 
   .lp-mini-doc,
   .lp-mini-code {
-    margin-top: 1.4rem;
+    margin-top: auto;
+    padding-top: 0;
+    border: 1px solid var(--lp-line);
+    border-radius: 0.75rem;
     overflow: hidden;
   }
 
+  .lp-audience-card .lp-check-list {
+    margin-bottom: 1.5rem;
+  }
+
   .lp-mini-doc {
-    padding: 0.9rem;
+    padding: 1rem;
+    background: var(--lp-elevated);
   }
 
   .lp-mini-doc-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-mini-doc-brand {
     font-weight: 600;
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
   }
 
   .lp-mini-doc-chip {
-    padding: 0.14rem 0.35rem;
+    padding: 0.125rem 0.375rem;
     border: 1px solid var(--lp-line);
-    border-radius: 0.2rem;
+    border-radius: 0.25rem;
+    background: var(--lp-card);
   }
 
   .lp-mini-doc-title {
-    margin-top: 1.3rem !important;
-    color: var(--nb-foreground);
+    margin-top: 1rem !important;
+    color: var(--lp-ink);
     font-size: 1rem;
+    line-height: 1.5rem;
     font-weight: 600;
   }
 
   .lp-mini-doc-line {
-    margin-top: 0.2rem !important;
-    color: var(--nb-muted-foreground);
+    margin-top: 0.25rem !important;
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-mini-doc-bars {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
-    margin-top: 0.9rem;
+    gap: 0.5rem;
+    margin-top: 1rem;
   }
 
-  .lp-mini-doc-bars span {
+  .lp-mini-bar-row {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) 2.5rem;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--lp-muted-ink);
+    font-family: var(--nb-font-mono);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lp-mini-bar-row > span:last-child {
+    text-align: end;
+    color: var(--lp-ink);
+  }
+
+  .lp-mini-bar-track {
     display: block;
-    height: 0.35rem;
+    height: 0.375rem;
     border-radius: 999px;
-    background: color-mix(in oklch, var(--nb-brand) 16%, transparent);
+    background: var(--lp-muted-surface);
+    overflow: hidden;
+  }
+
+  .lp-mini-bar-track i {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--nb-brand);
   }
 
   .lp-mini-doc-tags {
     display: flex;
-    gap: 0.35rem;
-    margin-top: 0.85rem;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    margin-top: 1rem;
   }
 
   .lp-mini-doc-tags span {
-    padding: 0.18rem 0.4rem;
+    padding: 0.125rem 0.5rem;
     border: 1px solid var(--lp-line);
     border-radius: 0.25rem;
-    color: var(--nb-muted-foreground);
+    background: var(--lp-card);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-mini-code {
-    background: #171717;
+    background: #181818;
+    border-color: #272727;
   }
 
   .lp-mini-code-head {
-    border-bottom-color: #2c2c2c;
-    background: #1d1d1d;
+    border-bottom-color: #272727;
+    background: #1f1f1f;
   }
 
   .lp-mini-code .lp-file {
@@ -1722,23 +2063,23 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-mini-code .lp-chip {
-    border-color: #3a3a3a;
-    background: #242424;
-    color: #d8d8d8;
+    border-color: #313131;
+    background: #272727;
+    color: #e4e4e7;
   }
 
   .lp-mini-code pre {
     margin: 0;
-    padding: 0.85rem 1rem;
+    padding: 1rem;
     overflow-x: auto;
     color: #e6e6e6;
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
-    line-height: 1.8;
+    line-height: 1.5rem;
   }
 
   .lp-mini-code .lp-cm {
-    color: #8c8c8c;
+    color: #9ca3af;
   }
 
   .lp-mini-code .lp-key {
@@ -1753,6 +2094,7 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     color: #b8a6e8;
   }
 
+  /* ---- Theme Panel ---- */
   .lp-theme-grid {
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -1761,91 +2103,119 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-theme-panel {
+    --preview-brand: var(--nb-brand);
+    --preview-radius: 0.5rem;
     overflow: hidden;
     padding: 0;
-    box-shadow: 0 20px 50px -30px rgb(0 0 0 / 0.16);
+    border: 1px solid var(--lp-line);
+    border-radius: 1rem;
+    background: var(--lp-card);
   }
 
   .lp-theme-bar span:first-child {
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
-    color: var(--nb-muted-foreground);
+    line-height: 1rem;
+    color: var(--lp-muted-ink);
   }
 
   .lp-theme-code {
     margin: 0;
-    padding: 0.9rem 1rem;
+    padding: 1rem;
     overflow-x: auto;
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
-    line-height: 1.8;
+    line-height: 1.5rem;
   }
 
   .lp-theme-line {
     display: block;
+    white-space: pre;
   }
 
   .lp-swatches {
     display: flex;
-    gap: 0.45rem;
-    padding: 0 1rem 0.9rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem 1rem;
   }
 
   .lp-swatch {
-    width: 1.2rem;
-    height: 1.2rem;
-    border-radius: 0.28rem;
-    border: 1px solid var(--lp-line);
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--lp-line-strong);
+    cursor: pointer;
+    transition:
+      transform 300ms var(--lp-ease),
+      border-color 300ms var(--lp-ease);
+  }
+
+  .lp-swatch:hover {
+    transform: translateY(-1px);
+  }
+
+  .lp-swatch:active {
+    transform: scale(0.94);
+  }
+
+  .lp-swatch.is-active {
+    outline: 2px solid var(--lp-ink);
+    outline-offset: 2px;
   }
 
   .lp-swatch-ink {
-    background: #171717;
+    background: #27272a;
   }
 
   .lp-swatch-brand {
-    background: #57647b;
+    background: #3b63a8;
   }
 
   .lp-swatch-paper {
-    background: #fafaf9;
+    background: #2b7a5b;
   }
 
   .lp-swatch-accent {
-    background: var(--lp-accent);
+    background: #c96f2d;
   }
 
   .lp-theme-preview {
     margin: 0 1rem 1rem;
-    padding: 0.9rem;
+    padding: 1rem;
     border: 1px solid var(--lp-line);
-    border-radius: 0.8rem;
-    background: var(--nb-muted);
+    border-radius: var(--preview-radius);
+    background: var(--lp-muted-surface);
+    transition: border-radius 500ms var(--lp-ease);
   }
 
   .lp-theme-preview-head {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--nb-muted-foreground);
+    color: var(--preview-brand);
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 600;
+    transition: color 300ms var(--lp-ease);
   }
 
   .lp-theme-preview p {
-    margin-top: 0.9rem !important;
-    color: var(--nb-foreground);
-    font-size: 0.9375rem;
+    margin-top: 0.75rem !important;
+    color: var(--lp-ink);
+    font-size: 1rem;
+    line-height: 1.5rem;
     font-weight: 600;
   }
 
   .lp-theme-preview-line {
     display: block;
     width: 70%;
-    height: 0.3rem;
-    margin-top: 0.45rem;
+    height: 0.375rem;
+    margin-top: 0.5rem;
     border-radius: 999px;
-    background: color-mix(in oklch, var(--nb-muted-foreground) 25%, transparent);
+    background: color-mix(in oklch, var(--lp-muted-ink) 28%, transparent);
   }
 
   .lp-theme-preview-line.short {
@@ -1853,52 +2223,65 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-theme-preview-card {
-    margin-top: 0.9rem;
-    padding: 0.6rem 0.7rem;
-    border: 1px solid var(--lp-line);
-    border-radius: 0.45rem;
-    background: var(--nb-card);
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--preview-brand) 35%, var(--lp-line));
+    border-radius: calc(max(var(--preview-radius) - 0.125rem, 0.25rem));
+    background: var(--lp-card);
+    transition:
+      border-radius 500ms var(--lp-ease),
+      border-color 300ms var(--lp-ease);
   }
 
   .lp-theme-preview-card strong {
     display: block;
+    color: var(--preview-brand);
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    transition: color 300ms var(--lp-ease);
   }
 
   .lp-theme-preview-card span {
     display: block;
-    margin-top: 0.1rem;
-    color: var(--nb-muted-foreground);
+    margin-top: 0.25rem;
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-theme-foot {
     margin: 0;
     padding: 0 1rem 1rem;
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
+  /* ---- Features ---- */
   .lp-feature-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.9rem;
+    gap: 1rem;
   }
 
   .lp-feature {
-    padding: 1.35rem;
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
     border: 1px solid var(--lp-line);
-    border-radius: 0.9rem;
-    background: var(--nb-card);
-    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    border-radius: 1rem;
+    background: var(--lp-card);
+    transition:
+      transform 500ms var(--lp-ease),
+      border-color 300ms var(--lp-ease);
   }
 
   .lp-feature:hover {
     transform: translateY(-2px);
-    border-color: var(--nb-border-strong);
-    box-shadow: 0 12px 32px -24px rgb(0 0 0 / 0.2);
+    border-color: var(--lp-line-strong);
   }
 
   .lp-feature-icon {
@@ -1910,36 +2293,37 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     border: 1px solid var(--lp-line);
     border-radius: 0.5rem;
     color: var(--nb-brand);
-    background: var(--nb-muted);
+    background: var(--lp-muted-surface);
   }
 
   .lp-feature h3 {
-    margin-top: 0.9rem;
-    font-size: 0.9375rem;
+    margin-top: 1rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
     font-weight: 600;
   }
 
   .lp-feature p {
-    margin-top: 0.35rem;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
-    line-height: 1.6;
+    margin-top: 0.25rem;
+    margin-bottom: 1rem;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
   }
 
   .lp-feature-foot {
     display: block;
-    margin-top: 1rem;
-    padding-top: 0.7rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--lp-line);
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
   }
 
-  .lp-components {
-    background: var(--lp-soft);
-  }
-
+  /* ---- Spotlight Search ---- */
   .lp-spotlight-grid {
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -1948,32 +2332,46 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-spotlight-copy .lp-text-link {
-    margin-top: 1.2rem;
+    margin-top: 1.5rem;
   }
 
   .lp-search-demo {
     padding: 1.25rem;
     border: 1px solid var(--lp-line);
-    border-radius: 1.1rem;
-    background: var(--nb-card);
-    box-shadow: 0 20px 50px -32px rgb(0 0 0 / 0.18);
+    border-radius: 1rem;
+    background: var(--lp-card);
   }
 
   .lp-search-bar {
     display: flex;
+    width: 100%;
     align-items: center;
-    gap: 0.55rem;
-    padding: 0.62rem 0.7rem;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
     border: 1px solid var(--lp-line);
-    border-radius: 0.55rem;
-    background: var(--nb-muted);
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
+    border-radius: 0.5rem;
+    background: var(--lp-muted-surface);
+    color: var(--lp-ink);
+    cursor: pointer;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    text-align: start;
+    transition:
+      border-color 300ms var(--lp-ease),
+      transform 300ms var(--lp-ease);
+  }
+
+  .lp-search-bar:hover {
+    border-color: var(--lp-line-strong);
+  }
+
+  .lp-search-bar:active {
+    transform: scale(0.99);
   }
 
   .lp-search-bar :global(svg) {
     flex: none;
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
   }
 
   .lp-search-bar span {
@@ -1986,83 +2384,97 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   .lp-search-bar kbd {
     flex: none;
-    padding: 0.14rem 0.32rem;
+    padding: 0.125rem 0.375rem;
     border: 1px solid var(--lp-line);
     border-radius: 0.25rem;
-    background: var(--nb-card);
-    color: var(--nb-muted-foreground);
+    background: var(--lp-card);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-search-result {
-    margin-top: 0.6rem;
-    padding: 0.8rem;
+    margin-top: 0.75rem;
+    padding: 0.75rem;
     border: 1px solid var(--lp-line);
-    border-radius: 0.6rem;
-    background: var(--nb-card);
+    border-radius: 0.5rem;
+    background: var(--lp-elevated);
   }
 
   .lp-search-result-muted {
-    opacity: 0.62;
+    background: var(--lp-muted-surface);
   }
 
   .lp-search-breadcrumb {
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
     letter-spacing: 0.04em;
   }
 
   .lp-search-title {
-    margin-top: 0.35rem !important;
-    color: var(--nb-foreground);
-    font-size: 0.8125rem;
+    margin-top: 0.25rem !important;
+    color: var(--lp-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     font-weight: 600;
   }
 
+  .lp-search-result-muted .lp-search-title {
+    color: var(--lp-muted-ink);
+    font-weight: 500;
+  }
+
   .lp-search-snippet {
-    margin-top: 0.2rem !important;
-    color: var(--nb-muted-foreground);
+    margin-top: 0.25rem !important;
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
-    line-height: 1.55;
+    line-height: 1.25rem;
   }
 
   .lp-search-url {
     display: block;
-    margin-top: 0.35rem;
+    margin-top: 0.5rem;
     color: var(--nb-brand);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-search-foot {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    margin-top: 0.8rem;
-    padding-top: 0.7rem;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--lp-line);
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
   }
 
   .lp-text-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.375rem;
     padding-block: 0.5rem;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     font-weight: 500;
     text-decoration: none;
     white-space: nowrap;
+    transition: color 300ms var(--lp-ease);
   }
 
   .lp-text-link:hover {
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
   }
 
+  /* ---- Components Showcase ---- */
   .lp-component-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2070,26 +2482,30 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-component-card {
+    display: flex;
+    flex-direction: column;
     min-width: 0;
-    padding: 1rem;
+    padding: 1.5rem;
     border: 1px solid var(--lp-line);
-    border-radius: 0.9rem;
-    background: var(--nb-card);
-    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    border-radius: 1rem;
+    background: var(--lp-card);
+    transition:
+      transform 500ms var(--lp-ease),
+      border-color 300ms var(--lp-ease);
   }
 
   .lp-component-card:hover {
     transform: translateY(-2px);
-    border-color: var(--nb-border-strong);
-    box-shadow: 0 14px 34px -28px rgb(0 0 0 / 0.2);
+    border-color: var(--lp-line-strong);
   }
 
   .lp-component-label {
     display: block;
-    margin-bottom: 0.9rem;
-    color: var(--nb-muted-foreground);
+    margin-bottom: 1rem;
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: 0.75rem;
+    line-height: 1rem;
   }
 
   .lp-component-card :global(.aside-card),
@@ -2098,6 +2514,33 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     margin-block: 0;
   }
 
+  .lp-component-card :global(code:not([data-nb-pm-code])),
+  .lp-faq-list details code {
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    background: var(--nb-code-tint);
+    color: var(--lp-ink);
+    font-family: var(--nb-font-mono);
+    font-size: 0.8125em;
+  }
+
+  .lp-component-card :global(kbd) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    padding: 0.125rem 0.375rem;
+    border: 1px solid var(--lp-line-strong);
+    border-radius: 0.25rem;
+    background: var(--lp-muted-surface);
+    color: var(--lp-ink);
+    font-family: var(--nb-font-mono);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+  }
+
+  /* ---- FAQ ---- */
   .lp-faq-grid {
     display: grid;
     grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
@@ -2118,22 +2561,17 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     justify-content: space-between;
     gap: 1rem;
     padding: 1rem 0;
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
     cursor: pointer;
-    font-size: 0.9375rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
     font-weight: 500;
     list-style: none;
-    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: color 300ms var(--lp-ease);
   }
 
   .lp-faq-list summary:hover {
-    color: var(--nb-muted-foreground);
-  }
-
-  .lp-faq-list summary:focus-visible {
-    outline: 2px solid var(--nb-ring);
-    outline-offset: 2px;
-    border-radius: 0.3rem;
+    color: var(--lp-muted-ink);
   }
 
   .lp-faq-list summary::-webkit-details-marker {
@@ -2142,8 +2580,8 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   .lp-faq-list summary :global(svg) {
     flex: none;
-    color: var(--nb-muted-foreground);
-    transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    color: var(--lp-muted-ink);
+    transition: transform 300ms var(--lp-ease);
   }
 
   .lp-faq-list details[open] summary :global(svg) {
@@ -2152,18 +2590,17 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   .lp-faq-list details p {
     max-width: 42rem;
-    margin: 0 0 1.1rem !important;
-    color: var(--nb-muted-foreground);
+    margin: 0 0 1.25rem !important;
+    color: var(--lp-muted-ink);
     font-size: 0.875rem;
-    line-height: 1.7;
+    line-height: 1.5rem;
   }
 
+  /* ---- Final CTA ---- */
   .lp-final {
-    padding: clamp(5rem, 12vw, 9rem) 0;
+    padding: clamp(5rem, 10vw, 7.5rem) 0;
     border-top: 1px solid var(--lp-line);
-    background:
-      radial-gradient(50rem 20rem at 50% 0%, color-mix(in oklch, var(--nb-brand) 7%, transparent), transparent 70%),
-      var(--nb-background);
+    background: var(--lp-surface-alt);
   }
 
   .lp-final-inner {
@@ -2174,22 +2611,24 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   }
 
   .lp-final-title {
-    max-width: 50rem;
-    font-size: clamp(2.2rem, 5vw, 3.8rem);
-    font-weight: 500;
+    max-width: 48rem;
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    font-weight: 600;
     letter-spacing: -0.035em;
-    line-height: 1.12;
+    line-height: 1.1;
     text-wrap: balance;
   }
 
   .lp-command-large {
     margin-top: 2rem;
-    padding: 0.7rem 0.75rem 0.7rem 1rem;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
   }
 
+  /* ---- Footer ---- */
   .lp-footer {
-    padding: 3.5rem 0 1.5rem;
+    padding: 4rem 0 2rem;
     border-top: 1px solid var(--lp-line);
+    background: var(--lp-surface);
   }
 
   .lp-footer-grid {
@@ -2201,34 +2640,36 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
   .lp-footer-brand p {
     max-width: 20rem;
     margin-top: 1rem;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
-    line-height: 1.65;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.5rem;
   }
 
   .lp-footer-col {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.25rem;
   }
 
   .lp-footer-col h3 {
-    margin-bottom: 0.3rem;
-    color: var(--nb-foreground);
+    margin-bottom: 0.5rem;
+    color: var(--lp-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
     font-weight: 600;
   }
 
   .lp-footer-col a {
     padding-block: 0.25rem;
-    color: var(--nb-muted-foreground);
-    font-size: 0.8125rem;
+    color: var(--lp-muted-ink);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
     text-decoration: none;
-    transition: color 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition: color 300ms var(--lp-ease);
   }
 
   .lp-footer-col a:hover {
-    color: var(--nb-foreground);
+    color: var(--lp-ink);
   }
 
   .lp-footer-bottom {
@@ -2237,20 +2678,162 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     justify-content: space-between;
     gap: 1rem;
     margin-top: 3rem;
-    padding-top: 1rem;
+    padding-top: 1.5rem;
     border-top: 1px solid var(--lp-line);
-    color: var(--nb-muted-foreground);
+    color: var(--lp-muted-ink);
     font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  .lp-back-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    color: var(--lp-muted-ink);
+    text-decoration: none;
+    transition:
+      color 300ms var(--lp-ease),
+      background-color 300ms var(--lp-ease);
+  }
+
+  .lp-back-top:hover {
+    color: var(--lp-ink);
+    background: var(--nb-accent);
+  }
+
+  /* ---- Motion (opt-in when reduced motion is off) ---- */
+  @media (prefers-reduced-motion: no-preference) {
+    .lp-eyebrow {
+      animation: lp-rise 600ms var(--lp-ease) both;
+    }
+
+    .lp-title {
+      animation: lp-rise 700ms 80ms var(--lp-ease) both;
+    }
+
+    .lp-lede {
+      animation: lp-rise 700ms 140ms var(--lp-ease) both;
+    }
+
+    .lp-command {
+      animation: lp-rise 700ms 200ms var(--lp-ease) both;
+    }
+
+    .lp-note {
+      animation: lp-rise 700ms 240ms var(--lp-ease) both;
+    }
+
+    .lp-hero-links {
+      animation: lp-rise 700ms 280ms var(--lp-ease) both;
+    }
+
+    .lp-select::after {
+      animation: lp-caret 1.1s step-end infinite;
+    }
+
+    .lp-faq-list details::details-content {
+      interpolate-size: allow-keywords;
+      overflow: clip;
+      contain: layout;
+      transition: block-size, content-visibility, display;
+      transition-duration: 300ms;
+      transition-timing-function: var(--lp-ease);
+      transition-behavior: allow-discrete;
+    }
+
+    .lp-faq-list details:not([open])::details-content {
+      block-size: 0;
+    }
+
+    /* 场景演示：进入视口后按顺序播放一次（由脚本添加 lp-live / is-playing） */
+    .lp-live [data-lp-step] {
+      opacity: 0;
+    }
+
+    .lp-live [data-lp-step="grow"] {
+      opacity: 1;
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+
+    .lp-live [data-lp-step="scale"] {
+      opacity: 1;
+      transform: scale(0);
+    }
+
+    .is-playing [data-lp-step] {
+      animation: lp-step-in 600ms var(--step-delay, 0ms) var(--lp-ease) both;
+    }
+
+    .is-playing [data-lp-step="grow"] {
+      animation-name: lp-step-grow;
+      animation-duration: 700ms;
+    }
+
+    .is-playing [data-lp-step="scale"] {
+      animation-name: lp-step-scale;
+      animation-duration: 500ms;
+    }
+
+    .is-playing .lp-check-list li :global(svg) {
+      animation: lp-step-scale 500ms calc(var(--step-delay, 0ms) + 120ms) var(--lp-ease) both;
+    }
+
+    .lp-live .lp-button-dark.is-pressed {
+      animation: lp-press 320ms var(--lp-ease);
+    }
+
+    .lp-reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition:
+        opacity 700ms var(--lp-ease),
+        transform 700ms var(--lp-ease);
+    }
+
+    .lp-reveal.is-visible {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .lp-chip-ok {
+    border-color: color-mix(in oklch, var(--nb-success) 35%, transparent);
+    background: var(--nb-success-muted);
+    color: var(--nb-success-foreground);
+  }
+
+  .lp-search-bar span.is-typing::after {
+    display: inline-block;
+    width: 1px;
+    height: 1em;
+    margin-inline-start: 2px;
+    background: var(--lp-ink);
+    vertical-align: -0.15em;
+    content: "";
+    animation: lp-caret 1.1s step-end infinite;
+  }
+
+  .lp-live .lp-search-bar kbd.is-pressed {
+    border-color: var(--lp-line-strong);
+    background: var(--nb-accent);
+    color: var(--lp-ink);
+    transform: scale(0.94);
+    transition:
+      transform 200ms var(--lp-ease),
+      background-color 200ms var(--lp-ease);
   }
 
   @keyframes lp-rise {
     from {
       opacity: 0;
-      transform: translateY(14px);
+      transform: translateY(16px);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: none;
     }
   }
 
@@ -2263,245 +2846,10 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
     }
   }
 
-  @media (max-width: 900px) {
-    .lp-nav {
-      display: none;
-    }
-
-    .lp-mobile-nav {
-      display: flex;
-    }
-  }
-
-  @media (max-width: 1000px) {
-    .lp-wb-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .lp-stage {
-      min-height: 0;
-      border-inline-end: 0;
-      border-bottom: 1px solid var(--lp-line);
-    }
-
-    .lp-stage:last-child {
-      border-bottom: 0;
-    }
-
-    .lp-audience-grid,
-    .lp-theme-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .lp-spotlight-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .lp-feature-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (max-width: 760px) {
-    .lp-container {
-      width: min(100% - 2rem, var(--lp-max));
-    }
-
-    .lp-nav {
-      display: none;
-    }
-
-    .lp-header-inner {
-      height: 3.75rem;
-    }
-
-    .lp-actions {
-      gap: 0.15rem;
-    }
-
-    .lp-cta {
-      min-width: 2.5rem;
-      justify-content: center;
-      min-height: 2.5rem;
-      padding: 0.45rem 0.65rem;
-    }
-
-    .lp-icon-link {
-      width: 2.5rem;
-      height: 2.5rem;
-    }
-
-    .lp-command-copy {
-      min-height: 2.25rem;
-    }
-
-    .lp-mobile-nav a {
-      padding-block: 0.5rem;
-    }
-
-    .lp-cta span {
-      display: none;
-    }
-
-    .lp-title {
-      margin-top: 2rem;
-      font-size: clamp(2.6rem, 12vw, 3.8rem);
-    }
-
-    .lp-tag,
-    .lp-tag-you,
-    .lp-tag-agent {
-      display: none;
-    }
-
-    .lp-lede {
-      font-size: 1rem;
-    }
-
-    .lp-command {
-      width: 100%;
-    }
-
-    .lp-command-text {
-      flex: 1;
-    }
-
-    .lp-feature-grid,
-    .lp-component-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .lp-section-head-split {
-      align-items: flex-start;
-      flex-direction: column;
-    }
-
-    .lp-footer {
-      padding: 2.5rem 0 1.25rem;
-    }
-
-    .lp-footer-grid {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.3fr);
-      gap: 1.5rem 1rem;
-    }
-
-    .lp-footer-brand {
-      grid-column: 1 / -1;
-    }
-
-    .lp-footer-brand p {
-      max-width: 22rem;
-      margin-top: 0.75rem;
-      font-size: 0.8rem;
-    }
-
-    .lp-footer-col {
-      gap: 0;
-    }
-
-    .lp-footer-col h3 {
-      margin-bottom: 0.2rem;
-      font-size: 0.75rem;
-    }
-
-    .lp-footer-col a {
-      padding-block: 0.4rem;
-      font-size: 0.8125rem;
-      line-height: 1.45;
-    }
-
-    .lp-footer-bottom {
-      flex-direction: row;
-      align-items: center;
-      margin-top: 1.75rem;
-      padding-top: 0.9rem;
-      font-size: 0.75rem;
-    }
-
-    .lp-final-title {
-      font-size: clamp(2.1rem, 10vw, 3rem);
-    }
-  }
-
-  @media (max-width: 359px) {
-    .lp-footer-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  .lp-page p {
-    text-wrap: pretty;
-  }
-
-  /* 场景演示：进入视口后按顺序播放一次（由脚本添加 lp-live / is-playing） */
-  .lp-live [data-lp-step] {
-    opacity: 0;
-  }
-
-  .lp-live [data-lp-step="grow"] {
-    opacity: 1;
-    transform: scaleX(0);
-    transform-origin: left;
-  }
-
-  .lp-live [data-lp-step="scale"] {
-    opacity: 1;
-    transform: scale(0);
-  }
-
-  .is-playing [data-lp-step] {
-    animation: lp-step-in 600ms var(--step-delay, 0ms) cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .is-playing [data-lp-step="grow"] {
-    animation-name: lp-step-grow;
-    animation-duration: 800ms;
-  }
-
-  .is-playing [data-lp-step="scale"] {
-    animation-name: lp-step-scale;
-    animation-duration: 500ms;
-  }
-
-  .is-playing .lp-check-list li :global(svg) {
-    animation: lp-step-scale 500ms calc(var(--step-delay, 0ms) + 120ms) cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .lp-live .lp-chip-ok {
-    border-color: color-mix(in oklch, var(--nb-success) 28%, transparent);
-    background: color-mix(in oklch, var(--nb-success) 12%, transparent);
-    color: var(--nb-success);
-  }
-
-  .lp-live .lp-button-dark.is-pressed {
-    animation: lp-press 360ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .lp-search-bar span.is-typing::after {
-    display: inline-block;
-    width: 1px;
-    height: 1em;
-    margin-inline-start: 2px;
-    background: var(--nb-foreground);
-    vertical-align: -0.15em;
-    content: "";
-    animation: lp-caret 1.1s step-end infinite;
-  }
-
-  .lp-live .lp-search-bar kbd.is-pressed {
-    border-color: var(--nb-border-strong);
-    background: var(--nb-accent);
-    color: var(--nb-foreground);
-    transform: scale(0.94);
-    transition:
-      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
-      background-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
   @keyframes lp-step-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(12px);
     }
     to {
       opacity: 1;
@@ -2529,47 +2877,149 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
 
   @keyframes lp-press {
     40% {
-      transform: scale(0.94);
+      transform: scale(0.95);
     }
   }
 
-  /* 滚动进入视口时淡入上浮，只播放一次；由下方脚本按需添加类名 */
-  .lp-reveal {
-    opacity: 0;
-    transform: translateY(32px);
-    transition:
-      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
-      transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* ---- Responsive ---- */
+  @media (max-width: 1000px) {
+    .lp-wb-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-stage {
+      min-height: 0;
+      border-inline-end: 0;
+      border-bottom: 1px solid var(--lp-line);
+    }
+
+    .lp-stage:last-child {
+      border-bottom: 0;
+    }
+
+    .lp-audience-grid,
+    .lp-theme-grid,
+    .lp-spotlight-grid,
+    .lp-faq-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
-  .lp-reveal.is-visible {
-    opacity: 1;
-    transform: none;
+  @media (max-width: 900px) {
+    .lp-nav {
+      display: none;
+    }
+
+    .lp-mobile-nav {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .lp-container {
+      width: min(100% - 2rem, var(--lp-max));
+    }
+
+    .lp-header-inner {
+      height: 3.75rem;
+    }
+
+    .lp-actions {
+      gap: 0.25rem;
+    }
+
+    .lp-icon-link {
+      display: none;
+    }
+
+    .lp-cta {
+      min-height: 2rem;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.875rem;
+    }
+
+    .lp-title {
+      margin-top: 1.5rem;
+      font-size: clamp(2.125rem, 9.5vw, 3rem);
+    }
+
+    .lp-nowrap {
+      white-space: nowrap;
+    }
+
+    .lp-tag,
+    .lp-tag-you,
+    .lp-tag-agent {
+      display: none;
+    }
+
+    .lp-lede {
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+
+    .lp-command {
+      width: 100%;
+    }
+
+    .lp-command-text {
+      flex: 1;
+      font-size: 0.75rem;
+      line-height: 1.25rem;
+    }
+
+    .lp-feature-grid,
+    .lp-component-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .lp-section-head-split {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .lp-footer {
+      padding: 3rem 0 1.5rem;
+    }
+
+    .lp-footer-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.5rem 1rem;
+    }
+
+    .lp-footer-brand {
+      grid-column: 1 / -1;
+    }
+
+    .lp-footer-brand p {
+      max-width: 24rem;
+      margin-top: 0.75rem;
+    }
+
+    .lp-footer-bottom {
+      margin-top: 2rem;
+      padding-top: 1rem;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .lp-footer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .lp-reveal {
-      transform: none;
+    .lp-page {
+      scroll-behavior: auto;
     }
 
-    .lp-eyebrow,
-    .lp-title,
-    .lp-lede,
-    .lp-command,
-    .lp-note,
-    .lp-hero-links {
-      animation: none;
-    }
-
-    .lp-select::after {
-      animation: none;
-    }
-
-    .lp-feature,
-    .lp-audience-card,
-    .lp-component-card,
-    .lp-cta {
-      transition: none;
+    .lp-tagline-ready .lp-phrase {
+      opacity: 1;
     }
   }
 </style>
