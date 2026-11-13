@@ -1,6 +1,6 @@
 # Nimbus
 
-Nimbus 是一个基于 [Astro](https://astro.build) 构建的文档写作工具。它会在你的仓库里创建一个文档站点，检查你和你的智能体所写的内容，并将其发布为面向人的 HTML 和面向智能体的 Markdown。
+Nimbus 是面向 [Astro](https://astro.build) 的文档框架：在你自己的仓库里，同时为人类和智能体提供文档。它会把站点脚手架写入你的仓库，检查你和你的智能体所写的内容，并将其发布为面向人的 HTML 和面向智能体的 Markdown。
 
 文档：[nimbus-docs.com](https://nimbus-docs.com)
 
@@ -54,7 +54,7 @@ npm run dev
 
 ## 状态
 
-Pre-1.0（尚未发布 1.0）。公开 API 可能在次版本之间发生变化。升级前请锁定版本，并阅读各软件包的更新日志（[nimbus-docs](https://github.com/cloudflare/nimbus/blob/main/packages/nimbus-docs/CHANGELOG.md)、[create-nimbus-docs](https://github.com/cloudflare/nimbus/blob/main/packages/create-nimbus-docs/CHANGELOG.md)）。
+Pre-1.0（尚未发布 1.0）。公开 API 可能在次版本之间发生变化。升级前请锁定版本，并阅读各软件包的更新日志（[nimbus-docs](https://github.com/cloudflare/nimbus/blob/main/packages/nimbus-docs/CHANGELOG.md)、[create-nimbus-docs](https://github.com/cloudflare/nimbus/blob/main/packages/create-nimbus-docs/CHANGELOG.md)）。[升级 Nimbus 站点](https://nimbus-docs.com/publish/upgrading/)一文演示了完整流程。
 
 ## 贡献
 

@@ -37,6 +37,7 @@ sidebar:
 | `getVersionStatus(key)` | 版本是当前、已弃用还是隐藏，用于横幅。 |
 | `getPageLanguage(locale?)` | 页面的语言，来自 `locale` 或 `config.locale`；从右到左书写时带 `dir: "rtl"`：返回用于 `<html lang dir>` 的 `{ lang, dir }`。 |
 | `getCollectionLlmsUrl(collection)` | 索引某个集合的 `llms.txt`。 |
+| `getPublishedLlmsUrl(collection?)` | 站点路由为某个集合提供的 `llms.txt`：该集合自己的，否则站点的，都没有则为 `null`。 |
 
 ## URL
 
@@ -89,7 +90,7 @@ const socialImage = entry.data.socialImage ?? ogImageUrl;
 
 ## API 参考页面
 
-来自 `@cloudflare/nimbus-docs/runtime`。[添加 OpenAPI 参考](/api-reference/openapi/setup/)展示了它们在 API 路由中的用法。
+来自 `@cloudflare/nimbus-docs/runtime`。[设置 OpenAPI 参考](/api-reference/openapi/setup/)展示了它们在 API 路由中的用法。
 
 | 辅助函数 | 作用 |
 | --- | --- |

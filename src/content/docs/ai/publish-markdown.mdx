@@ -142,6 +142,24 @@ curl --fail http://localhost:4321/writing/llms.txt
 
 如果缺少分区索引，请检查该分区是否有可发现页面，并且出现在 `/llms.txt` 中。
 
+## 只发布你需要的发布面 {#serve-the-surfaces-you-want}
+
+路由文件决定站点为智能体发布什么。每个发布面只在你的某个路由提供它时才存在；没有对应路由的发布面，Nimbus 不会烘焙、链接或进行内容协商：
+
+| 删除 | 停止的内容 |
+|---|---|
+| `src/pages/[...slug]/index.md.ts` | 页面 Markdown：不构建任何 `index.md` 文件，`llms.txt` 直接链接页面本身，页面不再带有 `<link rel="alternate" type="text/markdown">`，页面 URL 对 `Accept: text/markdown` 以其 HTML 应答。你的主机如何处理该请求头由主机自己决定。 |
+| `src/pages/[...slug]/index.mdx.ts` | `.mdx` 源码版本，以及每个页面 Markdown 末尾的 `Source:` 行。 |
+| `src/pages/llms.txt.ts` | 站点索引，以及每个页面 Markdown 顶部的 "Documentation Index" 说明。 |
+| `src/pages/[...section]/llms.txt.ts` | 各分区索引。 |
+| `src/pages/llms-full.txt.ts` | 完整文档。 |
+
+只服务站点一部分的 Markdown 路由（例如 `src/pages/changelog/[...slug]/index.md.ts`）只为其匹配的页面发布 Markdown，其余页面不发布。启用 `agents: { mcp: true }` 时，无论路由是否发布，MCP 服务器仍会读取每个页面的 Markdown；此时 `get_page` 不再返回 `markdownUrl`，并通过 `offset` 逐页读取长内容。
+
+路由只在 Nimbus 记录的形式下才算数：端点的最后一段必须是静态文件名，即 `[...slug]/index.md.ts`，而不是 `[...slug].md.ts`。以其他形式调用任一工厂的路由文件不会发布任何内容，而 Astro 仍可能优先于已记录的路由把请求发给它。构建和 `nimbus-docs check` 会点出这样的文件（`nimbus/agent-route-shape`），并指明应把调用移到哪个文件。若这种形式下的 Markdown 或源码路由被预渲染，构建随后会因错误中止。
+
+构建日志会说明这些路由提供哪些发布面，以及 Markdown 路由覆盖了多少页面（`Page Markdown: served for 12 of 340 pages`）；`nimbus-docs check` 以 `nimbus/agent-surfaces` 报告这些发布面。
+
 ## 直接渲染
 
 `renderEntryAsMarkdown()` 和 `getEntryMarkdown()` 仍可用于不包含 `<Render>` 的条目正文。传入包含 `<Render>` 的正文会抛出错误。请使用上面的端点获取备用撰写 Markdown 版本和 `llms.txt` 索引。`getEntryMarkdown()` 还会加载 API 引用数据，适用于预渲染路由。

@@ -107,7 +107,7 @@ location /                { proxy_pass https://docs-root.internal; }
 
 按全站在 base 下的部署方式部署每个切片：其源站在 `/docs` 下提供输出，路由器原样传递路径。Astro 不会把 base 放进 `dist/`，因此切片的页面位于 `dist/sdk/…`，并通过 `/docs/sdk/…` 提供。
 
-**Cloudflare：**添加 `@astrojs/cloudflare`（`~14.3.0`，配套 `wrangler` `^4.127.1`）并保持 `output: "static"`。该适配器会把输出嵌套到 base 下（`dist/client/docs/…`），并把 `_headers` 和 `_redirects` 保留在 `dist/client`，Workers 会在这里读取它们；`404.html` 仍位于 base 下，Workers 的 `404-page` 处理仍能找到它。需要手动安装：`nimbus-docs add adapter-cloudflare` 还会把站点切换为 `output: "server"`。
+**Cloudflare：**添加 `@astrojs/cloudflare`（`~14.3.0`，或在 Astro 7.4 及更高版本上用 `~14.4.0`，配套 `wrangler` `^4.127.1`）并保持 `output: "static"`。该适配器会把输出嵌套到 base 下（`dist/client/docs/…`），并把 `_headers` 和 `_redirects` 保留在 `dist/client`，Workers 会在这里读取它们；`404.html` 仍位于 base 下，Workers 的 `404-page` 处理仍能找到它。需要手动安装：`nimbus-docs add adapter-cloudflare` 还会把站点切换为 `output: "server"`。
 
 ```js title="astro.config.mjs"
 import cloudflare from "@astrojs/cloudflare";

@@ -99,7 +99,7 @@ curl --request GET \
 
 ## 手写示例
 
-操作的 `x-codeSamples` 会替换生成的示例，Nimbus 从不更改其文本。每个条目为 `{ lang, label?, source }`。所有条目都会按顺序显示，包括同一语言的多个条目。手写示例不需要任何生成器包；如果站点手写了所有示例，可以设置 `samples.generate: []` 并在没有这些包的情况下构建。两个包都是可选 peer，因此在 pnpm 下，移除会在 lockfile 不再列出它们后生效。
+操作的 `x-codeSamples` 会替换生成的示例，Nimbus 从不更改其文本。每个条目为 `{ lang, label?, source }`。所有条目都会按顺序显示，包括同一语言的多个条目。手写示例不需要 `openapi-sampler`；如果站点手写了所有示例，可以设置 `samples.generate: []` 并在没有它的情况下构建。它是可选 peer，因此在 pnpm 下，移除会在 lockfile 不再列出它后生效。
 
 每个条目的 `label` 会在代码栏和 Markdown 版本中命名它。没有 label 时，使用其 `lang`，重复项会编号：`Python`、`Python (2)`。
 

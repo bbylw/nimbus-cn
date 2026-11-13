@@ -7,15 +7,29 @@ sidebar:
 
 脚手架的 `src/pages/[...slug]/index.md.ts` 和 `src/pages/[...slug]/index.mdx.ts` 路由提供每个页面的 Markdown 版本与源码版本。你可以从三个层面改变它们提供的内容：
 
-- 包装共享路由，改变所有页面的输出。
+- 向共享路由传入 `body` 以改变所有页面的文本，或包装其 `GET` 以添加响应头。
 - 用自己的代码替换共享路由。
 - 添加更具体的路由文件，接管某个集合。
 
 示例使用 `.md` 路由。`.mdx` 路由以同样的方式配合 `markdownSourceRoute()` 工作。`llms.txt` 路由和 OG 卡片路由遵循相同的模式；参见[覆盖 `llms.txt` 索引](#override-an-llmstxt-index)和[自定义 OG 卡片](#customize-og-cards)。
 
+## 改变输出的文本 {#change-the-text}
+
+向共享路由传入 `body`。它接收 Nimbus 本会发送的 Markdown 以及 Astro 的 `APIContext`，返回要发送的文本，或该文本的 promise。这个示例为每个 Markdown 版本添加一行许可证信息：
+
+```ts title="src/pages/[...slug]/index.md.ts"
+import { markdownRoute } from "@cloudflare/nimbus-docs/agent-endpoints";
+
+export const { GET, getStaticPaths } = markdownRoute({
+  body: (markdown) => `${markdown}\nLicensed under CC BY 4.0.\n`,
+});
+```
+
+响应的 `ETag` 基于 `body` 返回的文本，因此持有它的客户端仅在该文本未改变时才会以 `304` 重新验证。`body` 在请求时运行；对预渲染路由也在构建时运行——每次构建都会重新渲染每个页面，因此它读到的内容是最新的。
+
 ## 包装共享路由
 
-调用共享路由的 `GET`，然后修改它的响应。这个示例为每个 Markdown 版本添加一行许可证信息：
+要添加响应头，调用共享路由的 `GET` 并修改其响应：
 
 ```ts title="src/pages/[...slug]/index.md.ts"
 import type { APIRoute } from "astro";
@@ -26,13 +40,12 @@ export const getStaticPaths = route.getStaticPaths;
 
 export const GET: APIRoute = async (context) => {
   const response = await route.GET(context);
-  if (!response.ok) return response;
-  const body = await response.text();
-  return new Response(`${body}\nLicensed under CC BY 4.0.\n`, {
-    headers: response.headers,
-  });
+  response.headers.set("X-Robots-Tag", "noai");
+  return response;
 };
 ```
+
+包装不得改动 body：Nimbus 的 `ETag` 针对它自己的字节，而且它的 `GET` 会在包装运行之前，就向持有该 `ETag` 的客户端应答 `304`。要改变文本，请使用 `body`。
 
 ## 替换共享路由
 
@@ -71,24 +84,17 @@ export const GET: APIRoute = async ({ props, request }) => {
 
 Astro 会给更具体的路由更高优先级。在某个集合的 URL 前缀下添加路由文件，它就会提供该集合的 Markdown 版本。共享路由会跳过更具体路由的模式匹配到的每个 URL。
 
-`markdownRoute()` 可在任何路由文件中使用，且只服务其路由匹配的 URL。包装它即可自定义单个集合：
+`markdownRoute()` 可在任何路由文件中使用，且只服务其路由匹配的 URL。向它传入 `body` 即可自定义单个集合：
 
 ```ts title="src/pages/blog/[...slug]/index.md.ts"
-import type { APIRoute } from "astro";
 import { markdownRoute } from "@cloudflare/nimbus-docs/agent-endpoints";
 
-const route = markdownRoute();
-export const getStaticPaths = route.getStaticPaths;
-
-export const GET: APIRoute = async (context) => {
-  const response = await route.GET(context);
-  if (!response.ok) return response;
-  const body = await response.text();
-  return new Response(`${body}\nSubscribe at https://example.com/blog/rss.xml\n`, {
-    headers: response.headers,
-  });
-};
+export const { GET, getStaticPaths } = markdownRoute({
+  body: (markdown) => `${markdown}\nSubscribe at https://example.com/blog/rss.xml\n`,
+});
 ```
+
+路由文件的最后一段必须是静态文件名，如此处所示。像 `src/pages/blog/[...slug].md.ts` 这样的文件对 Nimbus 而言不是 Markdown 路由：不会为它发布任何内容，构建和 `nimbus-docs check` 都会说明这一点。如果该文件预渲染，构建会因错误中止。
 
 也可以用公开辅助函数编写路由。这个路由自行构建 `changelog` 集合的 frontmatter。要添加页面 frontmatter 中的字段，[`markdownFields`](/ai/publish-markdown/#add-your-own-frontmatter) 无需路由；对于它无法生成的内容，才需要编写路由：
 
@@ -113,25 +119,19 @@ export async function GET({ params, props, request }: SlugContext) {
 
 ## 覆盖 `llms.txt` 索引
 
-脚手架 `llms.txt` 路由会调用 `llmsRoute()`、`llmsFullRoute()` 和 `llmsSectionRoute()`。用同样的方式包装返回的 `GET`。这个示例为 `/llms.txt` 添加一个支持链接：
+脚手架的 `llms.txt` 路由会调用 `llmsRoute()`、`llmsFullRoute()` 和 `llmsSectionRoute()`。它们都以同样的方式接收 `body`。这个示例为 `/llms.txt` 添加一个支持链接：
 
 ```ts title="src/pages/llms.txt.ts"
-import type { APIRoute } from "astro";
 import { llmsRoute } from "@cloudflare/nimbus-docs/agent-endpoints";
 
-const route = llmsRoute();
-
-export const GET: APIRoute = async (context) => {
-  const response = await route.GET(context);
-  if (!response.ok) return response;
-  const body = await response.text();
-  return new Response(`${body}\n## Support\n\n- [Contact support](https://example.com/support)\n`, {
-    headers: response.headers,
-  });
-};
+export const { GET } = llmsRoute({
+  body: (index) => `${index}\n## Support\n\n- [Contact support](https://example.com/support)\n`,
+});
 ```
 
-对于分区索引，保留 `llmsSectionRoute()` 的 `getStaticPaths`（它列出每个分区），并包装其 `GET`。要完全自行构建正文，可调用 `getLlmsPayload()`，传入 `reference`，例如 `{ scope: "section", surface: "index", section: "writing" }`（嵌套分区用 `"reference/functions"`）；未知索引会返回 `null`。
+`body` 可以是异步的，并从第二个参数读取请求，因此规格中没有的分区可以用你自己的数据列出。在拆分站点上，`llmsFullRoute()` 的 `body` 看到的是各部分组成的索引；各部分本身是 Nimbus 自己的路由，不会被改动。没有内容条目的首页会把 `/index.md` 作为 `llms.txt` 索引提供，并应用该路由的 `body`：在按请求渲染时来自路由本身，在 Cloudflare 上则是烘焙好的文件。在其他适配器上，预渲染的 `llms.txt` 无法在请求时读取，因此 `/index.md` 提供的是 Nimbus 的索引，不含你的 `body`。
+
+对于分区索引，`llmsSectionRoute({ body })` 会保留它的 `getStaticPaths`（它列出每个分区）。要完全自行构建正文，可调用 `getLlmsPayload()`，传入 `reference`，例如 `{ scope: "section", surface: "index", section: "writing" }`（嵌套分区用 `"reference/functions"`）；未知索引会返回 `null`。
 
 ## 自定义 OG 卡片
 
@@ -177,6 +177,8 @@ frontmatter 设置了 `socialImage` 的页面会改用该图片，因为页面�
 ## 覆盖会改变什么
 
 覆盖只改变该路由提供的内容。`llms-full.txt` 和托管 MCP 仍保留 Nimbus 生成的 Markdown。
+
+在自有路径下提供、且 [`rendering.collections`](/reference/rendering) 赋予其与共享路由不同模式的集合（例如 `/archive`），得到的是 Nimbus 自己的 Markdown，不带该路由的 `body` 或包装。要改变它，请在该路径下添加路由文件，例如 `src/pages/archive/[...slug]/index.md.ts`。
 
 共享路由以及调用智能体工厂的路由，渲染方式与其描述的页面一致：静态站点上提前渲染，配置 [`rendering` 策略](/reference/rendering/)时按集合的模式渲染。`nimbus-docs check --fix` 会把该模式写入文件；对于它无法编辑的路由（例如被包装的路由），它会说明需要改什么。
 

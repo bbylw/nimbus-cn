@@ -104,7 +104,7 @@ bunx @cloudflare/nimbus-docs add adapter-cloudflare
 
 安装程序还会更新 API 路由文件以按请求渲染，删除 Astro 会忽略的 `getStaticPaths`。自行修改 `rendering` 后，运行 `nimbus-docs check --fix`；参见[选择构建时或按请求渲染](/reference/rendering/)。
 
-该方案中的 API catch-all 使用 Nimbus 运行时辅助函数来解析任一模式。备用 Markdown 版本和 `llms.txt` 索引也遵循渲染策略，提供构建时准备好的内容。坐标数据、搜索记录和站点地图仍属于构建产物，请求时读取准备好的内容条目，而不是解析 OpenAPI 文档。
+该方案中的 API catch-all 使用 Nimbus 运行时辅助函数来解析任一模式。备用 Markdown 版本和 `llms.txt` 索引也遵循渲染策略：索引提供构建时准备好的内容，而按请求渲染的 API 页面在被请求时，会用与其 HTML 相同的、已准备好的页面数据来生成自己的 Markdown。坐标数据、搜索记录和站点地图仍属于构建产物，请求时读取准备好的内容条目，而不是解析 OpenAPI 文档。
 
 ## 多版本
 

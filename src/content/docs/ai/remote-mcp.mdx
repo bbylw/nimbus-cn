@@ -77,7 +77,7 @@ bunx @modelcontextprotocol/inspector --cli http://localhost:4321/mcp --transport
 
 ## 工具
 
-**`list_pages`** 每次返回 200 个页面，每项包含 `title`、`url`、`markdownUrl` 和 `section`，有则还包含 `description` 和 `version`。把返回的 `nextCursor` 作为 `cursor` 传入以获取下一批。
+**`list_pages`** 每次返回 200 个页面，每项包含 `title`、`url` 和 `section`，有则还包含 `description`、`version` 和 `markdownUrl`（仅当站点提供页面 Markdown 时才有 `markdownUrl`；参见[只发布你需要的发布面](/ai/publish-markdown#serve-the-surfaces-you-want)）。把返回的 `nextCursor` 作为 `cursor` 传入以获取下一批。
 
 - **`section`** 按第一个路径段过滤：`/guide/install/` 对应 `guide`，根页面则为 `index`。
 - **`version`** 按站点的某个[文档版本](/reference/configuration/#site-config)过滤。文档版本之外的页面（例如 API 参考）只在不加过滤时出现。
@@ -86,7 +86,7 @@ bunx @modelcontextprotocol/inspector --cli http://localhost:4321/mcp --transport
 { "section": "guide" }
 ```
 
-**`get_page`** 以 Markdown 返回单个页面：`{ "title", "url", "markdownUrl", "content" }`。可传入 `list_pages` 返回的 `url`，或像 `/guide/` 这样的站点相对路径；绝对 URL 只使用其路径部分。超过约 100,000 个字符的页面会被截断并带 `"truncated": true`；`markdownUrl` 提供完整页面。
+**`get_page`** 以 Markdown 返回单个页面：`{ "title", "url", "content" }`，站点提供页面 Markdown 时还带 `markdownUrl`。可传入 `list_pages` 返回的 `url`，或像 `/guide/` 这样的站点相对路径；绝对 URL 只使用其路径部分。超过约 100,000 个字符的页面会被截断，带 `"truncated": true` 和一个 `nextOffset`；把它作为 `offset` 传回以继续读取，或在有 `markdownUrl` 时获取它。MCP 服务器会读取每个页面的 Markdown，无论站点是否把它发布为 URL。
 
 ```json
 { "url": "https://docs.example.com/guide/" }

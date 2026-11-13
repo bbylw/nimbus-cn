@@ -55,6 +55,8 @@ content-type: text/markdown; charset=utf-8
 vary: Accept
 ```
 
+Markdown 形式在页面的 HTML 渲染之前就得到应答：请求会转到提供该页面 Markdown 的路由，因此响应带有该路由的响应头（以及该 Markdown 的 `ETag`），而不是页面为其 HTML 设置的响应头。带有指向该 `ETag` 的 `If-None-Match` 的请求会得到 `304 Not Modified`，直接请求 `.md`、`llms.txt` 或 `llms-full.txt` 也一样。包装 `markdownRoute()` 的 `GET` 可为 Markdown 形式添加响应头；若要改变其文本，传入 [`body`](/ai/override-markdown#change-the-text)，它仍会针对实际发送的字节保留 `ETag`。
+
 当按请求渲染的路由找不到页面时，它会以 `404` 和一段简短的 Markdown 正文回应同一请求，正文链接 `/llms.txt` 与 sitemap。起始模板的文档路由会应答每个 URL，因此每个缺失页面都会得到它。如果你的文档位于 `/guides/` 这样的前缀下，该前缀之外的 URL 会得到你的 HTML 404 页面。
 
 如果 `content-type` 是 `text/html`，说明该页面仍被预渲染：请检查其集合是否设为 `"request"`。浏览器的 `Accept: */*` 始终得到 HTML。

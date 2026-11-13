@@ -1,0 +1,41 @@
+---
+title: "社区配方"
+description: "其他人维护在自己 GitHub 仓库中的配方，通过 nimbus-docs add <url> 交给你的编码智能体。"
+# 列在 astro.config.ts 的侧边栏中，与展示页（一个 Astro 页面）并列。
+sidebar:
+  hidden: true
+---
+
+社区配方是其他人维护在自己公开 GitHub 仓库中的 Markdown 配方。它们不属于[注册表](/registry)：把它的 URL 交给 `nimbus-docs add` 即可安装，你的编码智能体会像应用注册表功能那样应用它。
+
+Nimbus 检查的是谁发布了配方，而不是配方写了什么，而且配方在被收录后仍可能变化。请在智能体照做之前先读一遍。
+
+[展示页](https://nimbus-docs.com/community-recipes/showcase) 列出了每个配方，每个都附有可复制进智能体的提示。
+
+## 分享配方
+
+配方是一个 Markdown 文件，里面是给编码智能体的指令，与注册表中的功能一样。要收录你的配方：
+
+1. 把它放进你自己拥有的公开 GitHub 仓库。
+2. 复制它的 URL：在 GitHub 上打开该文件，选择 **Raw** 并复制那个 URL。以版本发布附件形式发布的配方同样有效：从版本发布中复制该附件的链接。
+3. 提交一个 PR，在 [`apps/www/src/data/community-recipes.ts`](https://github.com/cloudflare/nimbus/blob/main/apps/www/src/data/community-recipes.ts) 中增加一条：
+
+```ts title="apps/www/src/data/community-recipes.ts"
+export const communityRecipes = parseRecipes([
+  {
+    name: "MCP chat",
+    description: "A chat panel that answers from your site's MCP server.",
+    url: "https://raw.githubusercontent.com/someone/mcp-chat/main/RECIPE.md",
+  },
+]);
+```
+
+配方会署名给其 URL 中的 GitHub 账号。URL 中的标签或 commit 会锁定一个版本；分支，或位于 `releases/latest/download/` 下的版本发布附件，则跟随你最新的编辑。
+
+## 移除
+
+失效链接，或由作者以外的人收录的配方，会被移除。要举报，请[提交 issue](https://github.com/cloudflare/nimbus/issues)。
+
+## 采纳
+
+如果 Nimbus 想把某个社区配方纳入注册表，会先征求作者同意、核查许可证，并在注册表条目中为该作者署名，同时把其列为该 commit 的共同作者。

@@ -135,6 +135,18 @@ bunx @cloudflare/nimbus-docs add 404-page --print | codex
 
 使用 `--print` 可强制输出 Markdown，跳过检测。
 
+#### 从 URL 安装配方
+
+`add <url>` 会把任意 https URL 上的 Markdown 配方以同样的方式交给你的智能体。它并非来自 Nimbus 注册表：请在智能体照做之前先读一遍。
+
+配方上方的一段说明会告诉你的智能体它来自哪里（包括重定向最终到达的主机），附上所提供内容的摘要，并要求它在改动 CI、部署配置、机密、环境文件、git hooks 或包脚本之前先征求你的同意。
+
+[社区配方展示页](https://nimbus-docs.com/community-recipes/showcase) 列出了其他人维护的配方。
+
+<PackageManagers pkg="@cloudflare/nimbus-docs" type="exec" args="add https://raw.githubusercontent.com/someone/mcp-chat/main/RECIPE.md" />
+
+`add source <url>` 是另一条命令：它把某个提供方的文档添加为[内容来源](/content-sources)。
+
 ### 服务端适配器
 
 按你部署的主机添加适配器：`adapter-cloudflare`、`adapter-netlify`、`adapter-node` 或 `adapter-vercel`。CLI 会安装 Astro 适配器，并改写 `astro.config` 中带标记的 `output` 块。它拒绝替换其他适配器或非字面量的 `output` 值。
@@ -236,7 +248,7 @@ bunx @cloudflare/nimbus-docs init --force
 
 ## 保持最新
 
-这些命令让站点保持最新。[升级 Nimbus](/publish/upgrading/) 会按发布顺序组织它们。
+这些命令让站点保持最新。[升级 Nimbus 站点](/publish/upgrading/) 会按顺序组织它们。
 
 ### `nimbus-docs migrate`
 

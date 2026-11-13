@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-Nimbus 配置中的每个 `api` 条目声明一个 API 参考。要设置它，参见[添加 OpenAPI 参考](/api-reference/openapi/setup/)。
+Nimbus 配置中的每个 `api` 条目声明一个 API 参考。要设置它，参见[设置 OpenAPI 参考](/api-reference/openapi/setup/)。
 
 ## `api` 条目
 
@@ -21,6 +21,7 @@ Nimbus 配置中的每个 `api` 条目声明一个 API 参考。要设置它，�
 | `sidebar` | `"full"` \| `"on-demand"` | `"full"` | 每个页面包含多少导航。参见[大型 API](/api-reference/large-apis/)。 |
 | `schemaPages` | `boolean` | `false` | 为每个 schema 发布页面，并让 schema 可被引用。 |
 | `samples` | `{ generate?, keepGenerated? }` | 全部三种语言 | Nimbus 生成哪些代码示例。参见[代码示例](/api-reference/openapi/code-samples/)。 |
+| `tryIt` | `boolean \| { servers?, credentials?, testKey?, limits?, proxy? }` | 关闭 | 让读者从操作页面发送请求。参见[试一试](/api-reference/try-it/)。 |
 | `extensions` | `string[]` | — | 要复制到页面上的 `x-*` 字段。参见[供应商扩展](/api-reference/openapi/extensions/)。 |
 | `publishSpec` | `boolean` | `true` | 将规格发布为 JSON，并在 API 目录中列出。 |
 | `bundle` | `boolean` | `true` | `false` 会把页面数据存储为静态资源，按请求读取。需要按请求渲染和 Cloudflare 或 Node 适配器。参见[大型 API](/api-reference/large-apis/#many-versions)。 |

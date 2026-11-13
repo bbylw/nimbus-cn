@@ -1,0 +1,175 @@
+---
+title: "试一试"
+description: "让读者从 API 参考页面发送请求并查看响应。"
+sidebar:
+  order: 4
+---
+
+「试一试」会在每个操作的代码栏中放一个按钮，位于请求示例与响应示例之间。点击后会打开一个面板，里面的请求与示例发送的完全一致。读者填入自己的密钥、发送，然后查看状态、耗时、响应头和正文。
+
+渲染 `ApiTryIt` 的 API 路由的每个页面都会链接面板的样式表（压缩后约 6 KB）；开启了 `tryIt` 的操作还会带有该按钮。面板的脚本和操作的请求计划会在首次点击时加载。
+
+## 启用
+
+让你的编码智能体运行这个配方：
+
+```sh
+npx @cloudflare/nimbus-docs add try-it
+```
+
+它会安装 `api-try-it` 组件、把它加入每个 API 路由、为你选择的 API 设置 `tryIt`，并对每个 API 问一个问题：它是否应答来自你文档的浏览器（CORS）请求？
+
+如果要手动操作，请自行添加组件：
+
+```sh
+npx @cloudflare/nimbus-docs add api-try-it
+```
+
+在 0.20.0 之前创建的站点还需要布局的 `try-it` 插槽。如果你没有编辑过 `ApiLayout.astro` 和 `ApiCodeRail.astro`，请替换它们：
+
+```sh
+npx @cloudflare/nimbus-docs add api-layout --overwrite
+npx @cloudflare/nimbus-docs add api-code-rail --overwrite
+```
+
+如果编辑过，`npx @cloudflare/nimbus-docs add try-it --print` 会列出需要做的修改。
+
+然后在 `api` 条目上设置 `tryIt`：
+
+```ts title="astro.config.ts"
+api: [
+  {
+    collection: "api",
+    spec: "./src/api/openapi.yaml",
+    tryIt: true,
+  },
+],
+```
+
+并在 API 路由中把面板渲染到 `ApiLayout` 内，保留该路由原本传入的 props：
+
+```astro title="src/pages/api/[...slug].astro"
+---
+import { ApiTryIt } from "@/components/ui/api-try-it";
+---
+<ApiLayout page={page} nav={nav} collection={collection} version={version} coordinate={coordinate} home={home}>
+  {page.kind === "operation" && <ApiTryIt slot="try-it" page={page} />}
+</ApiLayout>
+```
+
+没有 `tryIt` 时，页面保持不变。标记了 `x-nimbus-try-it: false` 的操作以及 webhook 都不会有按钮。
+
+## 请求如何传输
+
+请求有两种发送方式：
+
+- **经由本站点**：通过 Nimbus 在 `/_nimbus/try` 添加的代理路由。无论 API 是否允许浏览器调用，它都能工作；只要代理在运行，请求就走这条路。
+- **从浏览器直接发送**：由浏览器自己发送请求。API 必须应答来自你文档源的 CORS 请求，否则浏览器会阻止响应。静态站点上的请求，以及设置了 `proxy: false` 的 API，都走这条路。
+
+在任何人输入密钥之前，面板会在 Authorization 卡片中说明走的是哪一种。
+
+代理在每种支持按请求渲染路由的适配器上运行：Cloudflare、Node、Netlify 和 Vercel。静态站点没有代理。在静态站点上显式设置 `proxy: true` 会让构建失败。
+
+不会自动切换。如果直接请求在网络层面失败且代理在运行，面板会提供「经由本站点发送」，并说明第一个请求可能已经到达 API。
+
+### 该用哪种
+
+如果你的 API 应答来自你文档的 CORS 请求，请设置 `proxy: false`。这样读者的密钥就绝不会经过你的站点。
+
+直接发送有代理没有的限制。浏览器会隐藏重定向指向的位置，也无法发送 cookie 参数或 cookie API 密钥。需要这些的操作只能经由本站点发送。
+
+## 代理做什么
+
+代理会转发浏览器构造的请求。它只把请求发送到 API 自己的服务器：规格声明的服务器（操作、路径和文档层级，并带上每个服务器变量声明的取值）以及你列出的任何 `extraOrigins`。读者无法添加目标地址。
+
+本地地址与私有地址会被排除在该列表之外，并给出构建警告。这包括 `localhost`、单标签名称（如 `http://api:3000`）、`.local` 和 `.internal` 名称，以及回环、私有和链路本地 IP。规格里的开发服务器往往正是其中之一。如果仍要转发这类地址（例如在预发布构建中），请把它列入 `extraOrigins`。
+
+相对服务器（包括默认的 `/`）属于你文档站点自身的源。浏览器会自己发送这些请求，绝不经过代理。
+
+> 任何能访问该路由的人，都可以在下述检查范围内，向允许的源上的任意路径发送请求。这包括 `extraOrigins` 中通配符匹配到的每个主机名。Nimbus 按地址书写的形式读取，不查询 DNS：解析到内部地址的公共主机名仍会被转发。请只列出你信任的目标，或设置 `proxy: false`。
+
+它的固定检查：
+
+| 检查 | 含义 |
+| --- | --- |
+| 仅带 `Nimbus-Try: 1` 请求头的 `POST` | 其他站点的页面不经过预检就无法调用它，而路由也从不响应预检。 |
+| 同源 | 来自其他站点的 `Origin` 或 `Sec-Fetch-Site` 会被拒绝。非浏览器调用方仍可访问。 |
+| 允许的源 | 目标的协议、主机和端口必须匹配规格服务器或某个 `extraOrigins` 条目。本地与私有地址只能通过 `extraOrigins` 匹配。 |
+| 不附带环境请求头 | 文档请求的 cookie、`Authorization`、`cf-*` 和 `x-forwarded-*` 请求头绝不会被转发。只转发该请求自身的请求头。 |
+| 不带调用方请求头 | 设置了 `X-Real-IP`、`True-Client-IP`、`Forwarded`、`X-Forwarded-*` 或 `CF-Connecting-IP` 的请求会被拒绝，因此没人能向 API 伪冒成另一个地址。在文档中声明了这类请求头的操作仍可直接发送。 |
+| 不带连接请求头 | `Host`、`Content-Length`、`Transfer-Encoding`、`Connection`、`Upgrade`、`TE`、`Expect` 和 `Proxy-*` 会被拒绝。 |
+| 重定向 | 从不跟随。面板改为显示 `Location`。 |
+| 惰性应答 | 响应以仅供下载的字节流返回，并移除 `set-cookie`。面板把它当作文本显示。 |
+| 并发 16 个 | 每个实例最多 16 个在途请求；超过后，会请读者等待。 |
+
+不会记录任何内容：不记录请求、取值或正文。
+
+### 速率限制
+
+Nimbus 不对读者做速率限制。请在平台的 WAF 或速率限制设置中，或在你的反向代理里，为 `/_nimbus/try` 添加一条覆盖整个部署的规则。16 个请求的上限是按实例计，而非按读者计。
+
+### 主机限制
+
+主机的自身限制在 Nimbus 看到请求之前就已生效，Nimbus 的设置无法提高它们。Vercel 把请求体上限设为 4.5 MB。Netlify 把二进制请求体上限设为约 4.5 MB、函数设为 60 秒、流式响应设为 20 MB。
+
+在 Cloudflare 上，只有当 Workers 把请求的中止信号传给路由时，「停止」和关闭面板才会取消 API 请求。在 `wrangler.jsonc` 的 `compatibility_flags` 中加入 `enable_request_signal`，或使用 2026-11-17 及之后的兼容日期。在此之前，构建会给出警告。
+
+## 会发送和存储什么
+
+在输入任何内容之前，面板就会说明密钥会去往何处：经由你的站点到 API，还是从浏览器直接到 API。
+
+- 密钥留在内存中，按 API 和服务器分别保存。更换服务器会清空密钥字段，或把它恢复为你的 `testKey`。
+- 「在此标签页中记住」只有在读者勾选后，才会把它们保存在 `sessionStorage` 中。「清除」会移除它们。
+- 密钥绝不出现在你文档的 URL 或控制台中。实时代码示例和复制的代码会改用占位符。
+- 通过查询字符串发送的 API 密钥会随 API 的 URL 一起传输。面板会说明这一点。
+- 表单取值按操作在该标签页内保留，密钥和文件绝不保留。
+
+## 设置
+
+设置 `tryIt: true` 会使用默认值。传入对象可按名称逐项放宽：
+
+| 设置 | 默认值 | 放宽后 |
+| --- | --- | --- |
+| `servers` | `"spec"`：规格中的服务器。 | `"editable"`：读者可以输入另一个源。直接发送可到任意源；代理只到允许的源。规格服务器的路径始终保留。 |
+| `credentials` | `"omit"`：直接请求不携带浏览器 cookie。 | `"include"`：用于文档自身站点上使用会话 cookie 的 API。直接发送成为默认传递方式。代理绝不携带浏览器 cookie。 |
+| `testKey` | 无：读者在发送前输入密钥。 | 一个公开的测试密钥，API 密钥和 bearer token 字段以它为初始值，因此第一次「发送」即可工作。它会随每个操作的请求计划一起发布，所以绝不要使用机密。它会为规格列出的每个服务器填充该字段。「清除」会清空该字段。 |
+| `limits.timeout` | 整个交换过程 30 秒。 | 最高可到平台的限制。 |
+| `limits.responseBytes` | 2,000,000。更长的正文会被截断并标记。 | 最高可到平台的限制。 |
+| `limits.uploadBytes` | 4,000,000。更大的正文会在发送前被拒绝。 | 最高可到平台的限制。 |
+| `proxy` | 在支持按请求渲染路由的地方开启。 | `false` 将其关闭。 |
+| `proxy.extraOrigins` | 无。 | 规格服务器之外的源，例如上传主机。允许一个前置通配标签（`https://*.api.example.com` 匹配 `eu.api.example.com`，但不匹配 `api.example.com`）。单独一个 `*` 会让构建失败。 |
+
+```ts title="astro.config.ts"
+tryIt: {
+  servers: "editable",
+  limits: { timeout: 60 },
+  proxy: { extraOrigins: ["https://*.uploads.example.com"] },
+},
+```
+
+面板是你自己的代码。它的 props：
+
+| Prop | 默认值 | |
+| --- | --- | --- |
+| `remember` | `"tab"` | 向多数读者提供的选项：`"tab"`、`"device"`（「在此设备上记住」，`localStorage`）或 `"none"`。 |
+| `confirmWrites` | `false` | 发送 `GET`、`HEAD` 和 `OPTIONS` 之外的任何请求前先询问。 |
+| `server` | 规格中的第一个 | 按索引或 URL 开头选择的首个服务器。 |
+
+⌘↵ 或 Ctrl+↵ 会发送，与「发送」一样。在字段中按 Enter 绝不会发送。启用 `confirmWrites` 后，写入操作会先询问，从键盘触发时也一样。
+
+## 可以发送什么
+
+| 部分 | 支持 | 拒绝（并显示原因） |
+| --- | --- | --- |
+| 方法 | 除 `TRACE` 和 `CONNECT` 外的全部 | `TRACE`、`CONNECT` |
+| 服务器 | `http` 和 `https`，在代入服务器变量之后。相对服务器按你文档的源解析，浏览器直接向它们发送。 | 任何其他协议 |
+| 参数 | 路径、查询、请求头和 cookie；OpenAPI 定义的每一种风格（`matrix`、`label`、`simple`、`form`、`spaceDelimited`、`pipeDelimited`、`deepObject`）以及 `explode` 和 `allowReserved`；JSON `content` 参数 | OpenAPI 未定义的组合，例如不带 `explode` 的 `deepObject`，以及非 JSON 的 `content` 参数 |
+| Cookie | cookie 参数和 cookie API 密钥，经由本站点，合并为一个 `Cookie` 请求头 | 直接发送，以及文档自身源上的 API |
+| 请求体 | JSON、URL 编码表单、带文件的 `multipart/form-data`，以及任何其他媒体类型（作为文本或文件）。JSON 对象请求体可按 JSON 编辑，也可按字段编辑，每个属性一个字段 | `GET` 或 `HEAD` 上的请求体 |
+| 认证 | 请求头、查询或 cookie 中的 API 密钥；HTTP bearer 和 basic；以粘贴 token 形式提供的 OAuth 2 和 OpenID Connect | 双向 TLS、其他 HTTP 方案、需要同一请求头的两种方案，以及带请求体的请求中位于 `Content-Type` 的 API 密钥 |
+
+名为 `Accept`、`Content-Type` 或 `Authorization` 的请求头参数会被忽略，这是 OpenAPI 的要求。面板会在发送前检查必填字段、枚举、数字、布尔值和 JSON。取值范围以及 `email`、`date-time` 这类格式只是建议：由 API 决定。
+
+## 构建自己的面板
+
+机制位于 `@cloudflare/nimbus-docs/client`，供你构建自己的面板：`loadRequestPlan`、`serializeRequest`、`validateValues`、`renderSample` 和 `sendRequest`。`sendRequest` 从不抛错；它返回响应或一个带类型的失败，并附带任何部分输出。
