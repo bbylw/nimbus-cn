@@ -12,7 +12,7 @@ Nimbus 配置中的每个 `api` 条目声明一个 API 参考。要设置它，�
 | 键 | 类型 | 默认值 | 作用 |
 | --- | --- | --- | --- |
 | `collection` | `string` | — | **必填。** 内容集合键，与 `src/content.config.ts` 中的 `apiCollection()` 匹配。 |
-| `spec` | `string` \| `{ source, path }` \| object | — | OpenAPI 3.x 文档：项目相对路径、[内容来源](/content-sources/git/#api-specs-from-a-source)中的文件，或内联对象。设置 `versions` 时省略。 |
+| `spec` | `string` \| `{ source, path? }` \| object | — | OpenAPI 3.x 文档：项目相对路径、[内容来源](/content-sources/git/#api-specs-from-a-source)中的文件、[URL 来源](/api-reference/openapi/spec-sources/)，或内联对象。设置 `versions` 时省略。 |
 | `versions` | `ApiVersion[]` | — | 用版本家族代替单个 `spec`。参见 [API 版本](/api-reference/versions/)。 |
 | `versionUrl` | `{ in: "path" }` \| `{ in: "query", param? }` | `{ in: "path" }` | 版本在 URL 中的位置。查询模式需要按请求渲染。 |
 | `label` | `string` | `collection` | 构建消息中该 API 的名称。 |
@@ -24,6 +24,7 @@ Nimbus 配置中的每个 `api` 条目声明一个 API 参考。要设置它，�
 | `tryIt` | `boolean \| { servers?, credentials?, testKey?, limits?, proxy? }` | 关闭 | 让读者从操作页面发送请求。参见[试一试](/api-reference/try-it/)。 |
 | `extensions` | `string[]` | — | 要复制到页面上的 `x-*` 字段。参见[供应商扩展](/api-reference/openapi/extensions/)。 |
 | `publishSpec` | `boolean` | `true` | 将规格发布为 JSON，并在 API 目录中列出。 |
+| `publishCoordinates` | `boolean` | `true` | 将该 API 列入 `/nimbus-api/coordinates.json`，供其他站点读取以引用它。本站自己的 `api.ref:` 引用不受此项影响。 |
 | `bundle` | `boolean` | `true` | `false` 会把页面数据存储为静态资源，按请求读取。需要按请求渲染和 Cloudflare 或 Node 适配器。参见[大型 API](/api-reference/large-apis/#many-versions)。 |
 
 ## API 版本
@@ -33,7 +34,7 @@ Nimbus 配置中的每个 `api` 条目声明一个 API 参考。要设置它，�
 | 键 | 类型 | 默认值 | 作用 |
 | --- | --- | --- | --- |
 | `version` | `string` | — | **必填。** 版本 id：小写字母、数字、点和短横线，并以字母或数字开头和结尾。它是每个非默认 URL 的一部分。 |
-| `spec` | `string` \| `{ source, path }` \| object | — | **必填。** 该版本的文档。 |
+| `spec` | `string` \| `{ source, path? }` \| object | — | **必填。** 该版本的文档。 |
 | `default` | `boolean` | 第一个版本 | 在家族自己的路径提供此版本。默认版本不能是 `hidden`。 |
 | `status` | `"ga"` \| `"beta"` \| `"deprecated"` | — | `deprecated` 会在该版本的每个页面上显示横幅。 |
 | `hidden` | `boolean` | `false` | 使版本不出现在选择器、搜索和站点地图中。其页面仍可加载。 |

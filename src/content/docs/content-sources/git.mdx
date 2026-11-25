@@ -131,6 +131,8 @@ git 运行时不使用终端提示，因此缺少凭据会立刻以 git 自己�
 api: [{ collection: "api", spec: { source: "sdk", path: "docs/openapi.json" } }],
 ```
 
+以单文件形式发布的规范（例如发布产物）也可以直接从其 URL 读取。参见[从 URL 读取规范与转换](/api-reference/openapi/spec-sources/)。
+
 ## 编辑链接 {#edit-links}
 
 站点的 `editPattern` 指向文档仓库，因此每个来源也需要自己的配置。`{path}` 是文件在来源仓库中的路径，`{ref}` 是配置中的 `ref`。没有它时，来源的页面就没有编辑链接。

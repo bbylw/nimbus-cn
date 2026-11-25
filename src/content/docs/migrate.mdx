@@ -1,0 +1,92 @@
+---
+title: "迁移到 Nimbus"
+description: "将现有文档站迁移到 Nimbus 并保留所有 URL：页面、frontmatter、导航、组件、可复用片段、OpenAPI 参考与重定向，可使用编码智能体或手动完成。"
+audience: human
+sidebar:
+  order: 0.25
+  label: "迁移到 Nimbus"
+---
+
+如果你已经有了一个文档站，其中大部分内容都可以原样迁移：Markdown 依然是 Markdown，其余部分只是映射关系。每个页面都会保留原有的 URL。编码智能体可以用一个配方完成整个迁移；手动操作则只需七步。
+
+## 哪些内容会迁移
+
+| 旧站点中的内容 | 在 Nimbus 中 |
+|---|---|
+| Markdown 或 MDX 页面 | `src/content/docs/`，放在保留原 URL 的路径下 |
+| 导航文件，或旧配置中的侧边栏列表 | `astro.config.ts` 中的 `sidebar.items`，保持相同的分组和顺序（[侧边栏](/navigation/sidebar/)） |
+| 基于文件夹的导航，以及 frontmatter 中的排序 | 文件夹与 `sidebar.order`，与之前一致 |
+| 导航标签、隐藏页面、徽章 | `sidebar.label`、`sidebar.hidden`、`sidebar.badge`（[Frontmatter](/reference/frontmatter/)） |
+| 提示框、选项卡、步骤、卡片、折叠面板、代码组、带框图片、文件树 | 起步模板自带的 `Aside`、`Tabs`、`Steps` 和 `Card`，以及注册表组件（[注册表](/registry/)） |
+| 可复用片段 | 片段文件（Partials），通过 `<Render>` 引入（[可复用片段](/writing/reusable-snippets/)） |
+| 从 OpenAPI 文件生成的 API 页面 | 使用同一份文件的 [API 参考](/api-reference/) |
+| 发生变更的旧 URL | `astro.config.ts` 中的 `redirects`（[重定向](/navigation/redirects/)） |
+| 图片与静态文件 | `public/`，保持相同路径 |
+| 自定义 CSS 与主题色 | 不会自动翻译。主题由你自己在 `src/styles/globals.css` 中编辑（[主题与设计令牌](/styling/theme-and-tokens/)） |
+
+其他语言的页面目前暂不迁移；智能体的报告会列出它们。
+
+## Nimbus 的不同之处
+
+- **组件归你所有。** 脚手架会把它们复制到你的仓库中；没有需要配置或 fork 的主题（[所有权](/styling/how-customization-works/)）。
+- **每个页面都有对应的 Markdown 版本，并在 `llms.txt` 中占有一行。** 智能体无需插件即可阅读你的站点（[Markdown 与 llms.txt](/ai/publish-markdown/)）。
+- **内置搜索。** 无需迁移外部搜索服务商或密钥（[搜索](/navigation/search/)）。
+- **Frontmatter 会经过校验。** 未知字段会导致构建失败而不是被静默忽略，因此迁移过程会清晰列出所有被丢弃的字段。
+
+## 使用编码智能体
+
+在旧站点旁边初始化一个 Nimbus 站点，然后把配方交给你的智能体。它会把旧站点当作数据来读取，只向新站点写入内容，并在最后输出一份报告，列出所有未能迁移的项目。
+
+<PackageManagers type="create" pkg="@cloudflare/nimbus-docs@latest" args="my-docs --yes --content empty" />
+
+```sh
+cd my-docs
+```
+
+<PackageManagers pkg="@cloudflare/nimbus-docs" type="exec" args="add migrate" />
+
+`add` 会为检测到的智能体打印配方，你也可以用 `--print` 自行通过管道输出。对于能够直接读取 URL 的智能体，配方也发布在 [registry/features/migrate.md](https://nimbus-docs.com/registry/features/migrate.md)。
+
+该配方绝不会运行旧站点的脚本，也不会复制任何密钥。它仅迁移同源重定向、安全的 URL 和已知资源类型，并将原始 HTML、嵌入内容和代码列在报告中，而不是直接复制。
+
+## 手动迁移
+
+<Steps>
+  <Step title="初始化站点">
+    <PackageManagers type="create" pkg="@cloudflare/nimbus-docs@latest" args="my-docs --yes --content empty" />
+
+    ```sh
+    cd my-docs
+    ```
+  </Step>
+  <Step title="复制页面">
+    将你的 Markdown 和 MDX 文件复制到 `src/content/docs/` 中对应旧 URL 的路径下：例如 `guides/install.mdx` 会提供 `/guides/install/`。
+  </Step>
+  <Step title="重写 frontmatter">
+    每个页面都需要 `title`。将导航字段映射为 `sidebar.order`、`sidebar.label` 和 `sidebar.hidden`，草稿映射为 `draft: true`，并移除 Nimbus 不识别的键（[Frontmatter](/reference/frontmatter/)）。构建会告诉你具体有哪些。
+  </Step>
+  <Step title="重建导航">
+    如果旧站点在文件中列出了导航，请将相同的分组写成 `sidebar.items`，按 slug 引用页面（[手动编排侧边栏](/navigation/sidebar/#arrange-the-sidebar-by-hand)）。如果旧站点按文件夹组织导航，则无需任何操作。
+  </Step>
+  <Step title="映射组件与片段">
+    提示框改为 `:::tip` 指令或 `<Aside>`；选项卡、步骤和卡片改为 `<Tabs>`、`<Steps>` 和 `<Card>`（[Markdown 与 MDX](/writing/markdown-and-mdx/)）。使用 `nimbus-docs add` 从注册表安装其他用到的组件。将片段移至 `src/content/partials/` 并使用 `<Render>` 引入。
+  </Step>
+  <Step title="迁移 API 参考与重定向">
+    将 [API 参考](/api-reference/) 指向你的 OpenAPI 文件。将所有发生变更的旧路径添加到 `astro.config.ts` 的 `redirects` 中（[重定向](/navigation/redirects/)）。
+  </Step>
+  <Step title="检查、构建、再次检查">
+    <PackageManagers pkg="@cloudflare/nimbus-docs" type="exec" args="check" />
+
+    <PackageManagers pkg="build" type="run" />
+
+    <PackageManagers pkg="@cloudflare/nimbus-docs" type="exec" args="check" />
+
+    第一次 `check` 会报告 frontmatter 和内容错误；第二次会在磁盘上已有构建路由列表的情况下报告失效的内部链接。
+  </Step>
+</Steps>
+
+## 下一步
+
+- [项目结构](/project-structure/)：脚手架生成了什么，以及每个文件的作用。
+- [品牌定制](/styling/branding/)：标志、配色与字体。
+- [部署](/deploy/)：将站点发布上线。

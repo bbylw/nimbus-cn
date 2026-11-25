@@ -65,6 +65,8 @@ routes: {
 },
 ```
 
+操作也可以在规格中通过 [`x-nimbus-route`](/api-reference/openapi/extensions/#operation-and-section-urls) 指定其 URL，标签也可以通过它指定自己的路径段。优先级顺序为：`routes.operations`（或 `routes.tagSegments`），然后是 `x-nimbus-route`，最后是路由约定。
+
 没有可用的 `operationId` 时，Nimbus 会根据方法和路径推导回退坐标。`requireOperationId: true` 会拒绝该回退，但更改现有操作 ID 仍会更改坐标。Webhook 始终使用其映射键作为坐标，并发布在 `webhooks/<key>` 之下；为 webhook 配置操作覆盖会导致构建失败。
 
 重命名坐标需要更新引用，并影响跨版本匹配。只更改路由不会破坏基于坐标的引用，但会破坏指向旧 URL 的直接链接。Nimbus 不会自动创建该重定向；请在 Astro 或部署平台上添加。

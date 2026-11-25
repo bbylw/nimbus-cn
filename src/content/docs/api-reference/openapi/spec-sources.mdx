@@ -1,0 +1,64 @@
+---
+title: "从 URL 读取规范与转换"
+description: "从 URL 读取已发布的规范（例如发布产物），并在 Nimbus 渲染前通过代码进行预处理。"
+sidebar:
+  order: 4.5
+  label: "URL 与转换"
+---
+
+规范不一定必须保存在站点仓库中。将其声明为 URL 来源后，`api` 条目就可以像读取本地文件一样读取它。如果需要在 Nimbus 读取之前修改规范，可以为该条目配置转换函数。
+
+## 从 URL 读取规范
+
+在 `sources` 中用 `url` 声明该文件，然后通过 `{ source }` 读取：
+
+```ts title="astro.config.ts"
+sources: {
+  acme: { url: "https://github.com/acme/api/releases/latest/download/openapi.json" },
+},
+api: [{ collection: "api", spec: { source: "acme" } }],
+```
+
+构建会将文件保存到 `.nimbus/sources/acme/` 下。未设置 `integrity` 时，该来源处于浮动状态：每次构建会携带已保存文件的 `ETag` 或 `Last-Modified` 发送一次请求，仅在文件变更时重新下载。`nimbus-docs check` 会将浮动来源报告为 `nimbus/source-floating-ref`。
+
+设置 `integrity` 可以固定文件。构建随后只会获取一次并在后续直接复用而不发请求；如果文件内容不匹配，构建将失败：
+
+```ts title="astro.config.ts"
+acme: {
+  url: "https://github.com/acme/api/releases/download/v2.4.0/openapi.json",
+  integrity: "sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+},
+```
+
+`integrity` 是采用 Subresource Integrity 格式的文件 SHA-256 摘要。要获取该值，可运行 `openssl dgst -sha256 -binary openapi.json | openssl base64 -A` 并加上 `sha256-` 前缀。
+
+## 当 URL 无法访问时
+
+- **服务端错误、网络故障、408 或 429：** 浮动来源会使用上次保存的文件继续构建，并发出警告。只有在尚未保存过任何文件时构建才会失败。
+- **其他 4xx 响应（例如 404）：** 即使存在已保存的文件，构建也会失败，因为 URL 本身有误。
+- **`astro dev` 与 `astro sync`：** 与构建采用相同的获取方式。
+- **`astro preview`：** 不发起网络请求，直接读取已保存的文件。
+
+URL 必须使用 `https`（`localhost` 可使用 `http`），其返回的每次重定向也同样如此（最多 10 次）。带用户名或密码的 URL 会被拒绝，构建消息中也会略去查询字符串。
+
+## 转换规范
+
+转换函数接收已解析的规范，并返回交给 Nimbus 渲染的规范。在集成选项中按 `api` 条目进行配置：
+
+```ts title="astro.config.ts"
+nimbus(config, {
+  api: {
+    api: {
+      transform: (document) => ({ ...document, servers: [{ url: "https://api.acme.com" }] }),
+    },
+  },
+}),
+```
+
+键名为条目的 `collection`。转换函数在每次构建、开发服务器启动和 `astro sync` 时于 Node 中运行，每个规范执行一次。对于[版本家族](/api-reference/versions/)，每个版本都会运行一次，第二个参数会说明当前版本：`{ collection, version }`，其中 `version` 为配置的版本 id，无 `versions` 的条目则为 `null`。
+
+每次运行转换的都是原始规范：本地文件、内联对象或来源保存的文件，绝不会接收到上一次运行的结果。Nimbus 会将结果写入 `.nimbus/api-specs/` 并读取该文件。
+
+转换函数绝不会在请求时运行，因此它导入的大型依赖（例如 WebAssembly 解析器）不会进入服务端打包产物。`astro preview` 也不会运行它：它读取上一次成功构建的结果；如果上一次构建失败或从未构建过，则会报错。
+
+转换后的规范应当是自包含的。指向其他文件的 `$ref` 会相对于 `.nimbus/api-specs/` 而非原始文件进行解析。

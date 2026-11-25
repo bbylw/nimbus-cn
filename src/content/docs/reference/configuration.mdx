@@ -61,7 +61,14 @@ export default defineConfig({
 | `path` | string | 要检出的文件夹，相对于仓库根目录。默认 `""`，即整个仓库。 |
 | `editPattern` | string | 该来源页面的编辑链接：`{path}` 是仓库相对路径，`{ref}` 是配置中的 ref。 |
 
-`nimbus-docs check` 会把分支或标签形式的 `ref` 报告为 `nimbus/source-floating-ref`，把没有任何内容读取的来源报告为 `nimbus/source-unreferenced`，两者都是警告。`NIMBUS_SOURCES_RESOLVE_TIMEOUT` 与 `NIMBUS_SOURCES_FETCH_TIMEOUT` 以秒为单位设置解析与获取的超时（默认分别为 30 与 600）。
+改为使用 `url` 的来源表示单个文件，由 `api[].spec: { source }` 读取（[从 URL 读取规范与转换](/api-reference/openapi/spec-sources/)）：
+
+| 键 | 类型 | 说明 |
+| --- | --- | --- |
+| `url` | string | **必填。** 一个 `https` URL，或用于 `localhost` 的 `http` URL。带用户名或密码的 URL 会被拒绝。 |
+| `integrity` | string | 文件的 `sha256-<base64>` 摘要。设置后只获取一次并校验；未设置时每次构建都会重新验证。 |
+
+`nimbus-docs check` 会把分支或标签形式的 `ref` 或未设置 `integrity` 的 `url` 报告为 `nimbus/source-floating-ref`，把没有任何内容读取的来源报告为 `nimbus/source-unreferenced`，两者都是警告。`NIMBUS_SOURCES_RESOLVE_TIMEOUT` 与 `NIMBUS_SOURCES_FETCH_TIMEOUT` 以秒为单位设置解析与获取的超时（默认分别为 30 与 600）。
 
 ### 渲染策略 {#rendering-policy}
 

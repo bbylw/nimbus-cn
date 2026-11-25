@@ -127,7 +127,9 @@ Nimbus 随后会把每个页面的数据作为静态资源写在站点旁边，�
 
 每次构建还会附带上一次构建的页面文件，因此滚动发布期间仍运行旧版本的服务器可以继续工作。在 Cloudflare 上，每个 Worker 版本本就保留自己的文件。
 
-页面通过 Astro live collection 读取，而 Astro 只接受来自你自己的 `src/live.config.ts` 的 live collection。请添加一次；缺失时构建会显示该片段：
+Nimbus 会自行准备这些页面，因此该 API 不需要在 `src/content.config.ts` 中配置 `apiCollection()`，也不需要 `src/live.config.ts`；已配置它们的站点仍可继续工作。
+
+如需包装页面的读取方式，请在 `src/live.config.ts` 中注册 `apiPages` live collection，Nimbus 就会通过它来读取页面：
 
 ```ts title="src/live.config.ts"
 import { defineLiveCollection } from "astro:content";
@@ -138,7 +140,7 @@ export const collections = {
 };
 ```
 
-启用 Astro 的路由缓存后，每个页面会以 `nimbus-api:<collection>` 和 `nimbus-api:<collection>@<version>` 标签缓存。
+启用 Astro 的路由缓存后，无论是否使用 live collection，每个页面都会以 `nimbus-api:<collection>` 和 `nimbus-api:<collection>@<version>` 标签缓存。
 
 `bundle: false` 需要将该集合按请求渲染，并使用 Cloudflare 或 Node 适配器；否则构建会说明需要改什么。
 

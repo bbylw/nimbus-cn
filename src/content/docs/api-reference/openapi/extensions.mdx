@@ -63,6 +63,23 @@ declare module "@cloudflare/nimbus-docs/types" {
 
 `page.extensions?.["x-acme-plans"]` 的类型随后为 `string[] | undefined`；未声明的名称仍为 JSON 值。
 
+## 操作与分区 URL {#operation-and-section-urls}
+
+操作上的 `x-nimbus-route` 用于设置该页面的 URL（相对于集合）；标签上的 `x-nimbus-route` 用于设置该分区自己的路径段。它要求在 `api` 条目上配置 `routes` 策略，且标签路径段要求使用 `resource-action-v2`。未配置 `routes` 时，Nimbus 会发出一条构建警告并忽略它，继续保留旧版 URL。Webhook 页面始终路由在 `webhooks/<key>`，因此在 webhook 上使用它会被忽略并发出警告。
+
+```yaml title="openapi.yaml"
+tags:
+  - name: users
+    x-nimbus-route: people
+paths:
+  /zones/{zone_id}/dns_records:
+    get:
+      operationId: listDnsRecords
+      x-nimbus-route: dns/records/list   # → /api/dns/records/list/
+```
+
+配置中的 `routes.operations` 或 `routes.tagSegments` 优先级高于该扩展，而该扩展的优先级高于约定自身生成的 URL。其值的校验规则与覆盖项一致：小写 kebab-case 路径段、不能使用保留的首段、标签只能有一个路径段，且不能有两个页面映射到同一 URL。当你的 URL 来自路由约定不读取的数据（例如 SDK 方法名）时，可以在规格中或准备规格的步骤里写入它。参见[路由与坐标](/api-reference/openapi/routes/)。
+
 ## 操作顺序
 
 分区页面、侧边栏、[API 首页的索引](/api-reference/large-apis/#the-api-home)和 Markdown 版本会按规格中的路径顺序列出一个分区的操作。操作上的 `x-nimbus-order` 会把它提前：数字越小越靠前，没有该字段的操作按路径顺序随后；相同值也保持路径顺序。分区保持其顺序，webhook 保持规格中的顺序。
