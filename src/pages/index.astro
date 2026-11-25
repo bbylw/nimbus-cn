@@ -25,10 +25,10 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
         </a>
 
         <nav class="lp-nav" aria-label="主导航">
+          <a href="#workflow">工作流</a>
+          <a href="#capabilities">核心能力</a>
+          <a href="#components">源码组件</a>
           <a href="/quickstart/">文档</a>
-          <a href="/components/">组件</a>
-          <a href="/registry/">注册表</a>
-          <a href="/why-nimbus/">理念</a>
         </nav>
 
         <div class="lp-actions">
@@ -48,10 +48,10 @@ const command = "bun create @cloudflare/nimbus-docs@latest my-docs --yes";
       </div>
 
       <nav class="lp-mobile-nav" aria-label="移动端导航">
+        <a href="#workflow">工作流</a>
+        <a href="#capabilities">核心能力</a>
+        <a href="#components">源码组件</a>
         <a href="/quickstart/">文档</a>
-        <a href="/components/">组件</a>
-        <a href="/registry/">注册表</a>
-        <a href="/why-nimbus/">理念</a>
       </nav>
     </header>
 
@@ -392,7 +392,7 @@ description: 每小时更新的城市气象数据。
       </section>
 
       <!-- Band 2: Full-Bleed Dark Contrast Band -->
-      <section class="lp-band">
+      <section class="lp-band" id="workflow">
         <div class="lp-container">
           <div class="lp-section-head">
             <h2 class="lp-h2">把文档标准写进构建流程</h2>
@@ -485,7 +485,7 @@ description: 每小时更新的城市气象数据。
       </section>
 
       <!-- Band 3: Asymmetric Token & Ownership Atelier -->
-      <section class="lp-section">
+      <section class="lp-section" id="ownership">
         <div class="lp-container lp-atelier-grid">
           <div class="lp-atelier-copy">
             <h2 class="lp-h2">每个文件都在你的仓库里</h2>
@@ -506,10 +506,6 @@ description: 每小时更新的城市气象数据。
                 <span>通过 diff 与 upgrade 自主合并上游改进</span>
               </li>
             </ul>
-            <a class="lp-text-link" href="/styling/how-customization-works/">
-              <span>了解定制与升级机制</span>
-              <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
-            </a>
           </div>
 
           <div class="lp-theme-atelier" data-theme-atelier>
@@ -598,85 +594,127 @@ description: 每小时更新的城市气象数据。
         </div>
       </section>
 
-      <!-- Band 4: Architectural Spec Directory -->
-      <section class="lp-section lp-section-alt">
+      <!-- Band 4: OpenAPI Interactive Playground + Core Capabilities -->
+      <section class="lp-section lp-section-alt" id="capabilities">
         <div class="lp-container">
           <div class="lp-section-head">
             <h2 class="lp-h2">一个文档站需要的一切</h2>
-            <p class="lp-section-sub">开箱内置核心能力，或由一条命令交付源码与配方。</p>
+            <p class="lp-section-sub">
+              从 OpenAPI 多版本接口文档、即时全文检索到面向智能体的协议输出，核心能力全部开箱内置。
+            </p>
           </div>
 
-          <div class="lp-directory">
-            <a class="lp-directory-item" href="/navigation/search/">
-              <div class="lp-directory-head">
-                <h3>内置离线全文搜索</h3>
-                <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
+          <div class="lp-api-stage" data-api-stage>
+            <div class="lp-stage-bar">
+              <div class="lp-segmented" role="radiogroup" aria-label="选择示例接口" data-api-endpoint-group>
+                <button
+                  type="button"
+                  role="radio"
+                  class="lp-seg-btn"
+                  data-api-endpoint="forecast"
+                  aria-checked="true"
+                >
+                  GET /v2/forecast
+                </button>
+                <button
+                  type="button"
+                  role="radio"
+                  class="lp-seg-btn"
+                  data-api-endpoint="alerts"
+                  aria-checked="false"
+                >
+                  POST /v2/alerts
+                </button>
               </div>
-              <p>
-                构建时生成 Pagefind 静态索引，零外部检索服务与密钥，开箱支持中文分词与快捷键。
-              </p>
-            </a>
 
-            <a class="lp-directory-item" href="/api-reference/">
-              <div class="lp-directory-head">
-                <h3>OpenAPI 参考与在线试调</h3>
-                <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
+              <div class="lp-segmented" role="tablist" aria-label="切换请求代码示例语言" data-api-lang-group>
+                <button type="button" role="tab" class="lp-seg-btn" data-api-lang="curl" aria-selected="true">cURL</button>
+                <button type="button" role="tab" class="lp-seg-btn" data-api-lang="ts" aria-selected="false" tabindex="-1">TypeScript</button>
+                <button type="button" role="tab" class="lp-seg-btn" data-api-lang="py" aria-selected="false" tabindex="-1">Python</button>
               </div>
-              <p>
-                从本地文件、Git 或远程 URL 读取 OpenAPI 3.x 规范，支持前置转换、多版本与在线试调。
-              </p>
-            </a>
+            </div>
 
-            <a class="lp-directory-item" href="/ai/">
-              <div class="lp-directory-head">
-                <h3>面向智能体的原生表面</h3>
-                <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
+            <div class="lp-api-split">
+              <div class="lp-api-req">
+                <div class="lp-output-meta">
+                  <span>OpenAPI 3.1 自动生成示例</span>
+                  <span data-api-op-id>operationId: getForecast</span>
+                </div>
+                <pre class="lp-code-block" data-api-request><code>curl -X GET "https://api.weather.example/v2/forecast?city=shanghai" \
+  -H "Authorization: Bearer nb_live_94f2a8c" \
+  -H "Accept: application/json"</code></pre>
               </div>
-              <p>
-                自动产出页面 Markdown、分区 llms.txt、Agent Skills 发现端点与远程 MCP 服务接入。
-              </p>
-            </a>
 
-            <a class="lp-directory-item" href="/registry/">
-              <div class="lp-directory-head">
-                <h3>源码组件与功能配方</h3>
-                <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
+              <div class="lp-api-res">
+                <div class="lp-output-meta lp-api-res-bar">
+                  <span class="lp-api-status" data-api-status>待发送 · 点击按钮试调</span>
+                  <button type="button" class="lp-lint-btn" data-api-send>
+                    发送试调请求
+                  </button>
+                </div>
+                <pre class="lp-code-block lp-api-json" data-api-response><code>&#123;
+  "city": "Shanghai",
+  "temperature_c": 26,
+  "condition": "Clear",
+  "updated_at": "2026-11-25T15:00:00Z"
+&#125;</code></pre>
               </div>
-              <p>
-                31 个可自由修改的 UI 组件，功能配方以纯 Markdown 交付给编码智能体并接受代码评审。
-              </p>
-            </a>
+            </div>
+          </div>
 
-            <a class="lp-directory-item" href="/content-sources/git/">
-              <div class="lp-directory-head">
-                <h3>多来源内容聚合</h3>
-                <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
-              </div>
+          <div class="lp-cap-grid">
+            <article class="lp-cap-item">
+              <h3>内置离线全文搜索</h3>
               <p>
-                直接从外部 Git 仓库或 Notion 同步页面与 OpenAPI 规范，支持固定 commit 与增量构建。
+                构建期自动生成 Pagefind 静态索引，零外部搜索服务与密钥开销，开箱支持中文分词与版本过滤。
               </p>
-            </a>
+            </article>
 
-            <a class="lp-directory-item" href="/migrate/">
-              <div class="lp-directory-head">
-                <h3>保留全部链接的整站迁移</h3>
-                <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
-              </div>
+            <article class="lp-cap-item">
+              <h3>OpenAPI 多版本与试调</h3>
               <p>
-                使用内置 migrate 配方迁入现有文档站，保留全部原有 URL 并自动汇总重定向映射。
+                支持从本地文件、Git 仓库或远程 URL 读取 OpenAPI 3.x 规范，内置前置转换函数与多语言请求示例。
               </p>
-            </a>
+            </article>
+
+            <article class="lp-cap-item">
+              <h3>面向智能体的原生协议</h3>
+              <p>
+                每个页面同步产出纯净 Markdown 与 llms.txt 索引，内置 WebMCP 工具声明与远程 MCP 服务端点。
+              </p>
+            </article>
+
+            <article class="lp-cap-item">
+              <h3>源码组件与功能配方</h3>
+              <p>
+                31 个 UI 组件以源码复制进仓库，扩展功能通过可读 Markdown 配方交付给编码智能体审阅落地。
+              </p>
+            </article>
+
+            <article class="lp-cap-item">
+              <h3>多来源内容聚合</h3>
+              <p>
+                直接从外部 Git 仓库或 Notion 同步文档页面与规范，支持固定 commit 校验与大规模分片增量构建。
+              </p>
+            </article>
+
+            <article class="lp-cap-item">
+              <h3>保留全部链接的整站迁移</h3>
+              <p>
+                使用内置迁移配方自动映射页面、Frontmatter、导航与重定向规则，完整保留既有网站全部 URL。
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
-      <!-- Band 5: Interactive Search Workbench -->
-      <section class="lp-section">
+      <!-- Band 5: Live Search Sandbox -->
+      <section class="lp-section" id="search">
         <div class="lp-container lp-search-grid">
           <div class="lp-search-copy">
             <h2 class="lp-h2">按下快捷键，直达具体章节</h2>
             <p class="lp-section-sub">
-              搜索索引在构建阶段直接生成，无需维护独立检索集群。读者按下快捷键即可在全站文档与标题层级中即时定位。
+              搜索索引在构建阶段直接生成，无需维护独立检索集群。支持关键词即时匹配、片段高亮与版本状态隔离。
             </p>
             <ul class="lp-check-list">
               <li>
@@ -685,102 +723,95 @@ description: 每小时更新的城市气象数据。
               </li>
               <li>
                 <Icon name="ph:check" class="h-4 w-4" />
-                <span>自动过滤已弃用版本，保留当前与指定版本结果</span>
+                <span>默认隐藏已弃用版本，保留当前与指定版本结果</span>
               </li>
               <li>
                 <Icon name="ph:check" class="h-4 w-4" />
-                <span>可按需替换为自有搜索服务或 AI 问答后端</span>
+                <span>可在右侧输入框直接体验过滤与版本切换效果</span>
               </li>
             </ul>
-            <a class="lp-text-link" href="/navigation/search/">
-              <span>查看搜索配置</span>
-              <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
-            </a>
           </div>
 
           <div class="lp-search-bench" data-search-bench>
             <div class="lp-search-bench-top">
-              <button
-                type="button"
-                class="lp-search-trigger-bar"
-                data-open-search
-                aria-label="打开全站真实搜索对话框"
-              >
+              <label class="lp-search-input-wrap" for="lp-search-sandbox">
                 <Icon name="ph:magnifying-glass" class="h-4 w-4" />
-                <span data-search-query>如何把现有文档站迁移到 Nimbus？</span>
+                <input
+                  id="lp-search-sandbox"
+                  name="search-sandbox"
+                  type="search"
+                  class="lp-search-input"
+                  data-sandbox-input
+                  placeholder="输入关键词试试：迁移、OpenAPI、MCP、v1"
+                  aria-label="在搜索沙盒中输入关键词"
+                />
                 <kbd data-search-kbd>Ctrl K</kbd>
-              </button>
+              </label>
 
-              <div class="lp-segmented lp-search-presets" role="tablist" aria-label="选择示例搜索词">
-                <button
-                  type="button"
-                  role="tab"
-                  class="lp-seg-btn"
-                  data-search-preset="migrate"
-                  aria-selected="true"
-                >
-                  迁移现有文档
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  class="lp-seg-btn"
-                  data-search-preset="openapi"
-                  aria-selected="false"
-                >
-                  配置 OpenAPI
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  class="lp-seg-btn"
-                  data-search-preset="mcp"
-                  aria-selected="false"
-                >
-                  接入远程 MCP
-                </button>
+              <div class="lp-search-controls">
+                <div class="lp-segmented lp-search-presets" role="radiogroup" aria-label="快捷筛选搜索示例">
+                  <button type="button" role="radio" class="lp-seg-btn" data-search-preset="" aria-checked="true">全部</button>
+                  <button type="button" role="radio" class="lp-seg-btn" data-search-preset="OpenAPI" aria-checked="false">OpenAPI</button>
+                  <button type="button" role="radio" class="lp-seg-btn" data-search-preset="MCP" aria-checked="false">MCP</button>
+                </div>
+
+                <div class="lp-version-toggle">
+                  <span class="lp-version-label" data-version-label>隐藏已弃用 v1</span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked="true"
+                    aria-label="切换是否隐藏已弃用的 v1 版本结果"
+                    class="lp-switch lp-switch-light"
+                    data-version-switch
+                  >
+                    <span class="lp-switch-thumb" aria-hidden="true"></span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div class="lp-search-results" data-search-results>
-              <a class="lp-search-result-row" href="/migrate/">
+            <div class="lp-search-results" data-sandbox-results>
+              <div class="lp-search-result-row">
                 <div class="lp-search-result-main">
-                  <strong data-result-title-0>迁移到 Nimbus</strong>
-                  <span data-result-desc-0>
-                    保留所有原有 URL、frontmatter、导航结构与组件，支持编码智能体一键迁移或七步手动完成。
-                  </span>
+                  <strong>迁移到 Nimbus</strong>
+                  <span>保留所有原有 URL、frontmatter、导航结构与组件，支持编码智能体一键迁移或七步手动完成。</span>
                 </div>
-                <code data-result-url-0>/migrate/</code>
-              </a>
+                <code>/migrate/ · 当前版本</code>
+              </div>
 
-              <a class="lp-search-result-row" href="/navigation/redirects/">
+              <div class="lp-search-result-row">
                 <div class="lp-search-result-main">
-                  <strong data-result-title-1>配置路径重定向</strong>
-                  <span data-result-desc-1>
-                    在 astro.config.ts 中声明 redirects 映射，兼容静态构建与边缘适配器。
-                  </span>
+                  <strong>OpenAPI 远程规范与转换</strong>
+                  <span>声明带 integrity 校验的 URL 来源，并在渲染前使用 transform 函数预处理解析后的规范。</span>
                 </div>
-                <code data-result-url-1>/navigation/redirects/</code>
-              </a>
+                <code>/api-reference/openapi/spec-sources/ · 当前版本</code>
+              </div>
+
+              <div class="lp-search-result-row">
+                <div class="lp-search-result-main">
+                  <strong>远程 MCP 服务器</strong>
+                  <span>把站内文档与 API 坐标封装为智能体可调用的工具端点，支持身份校验与按需查询。</span>
+                </div>
+                <code>/ai/remote-mcp/ · 当前版本</code>
+              </div>
+            </div>
+
+            <div class="lp-search-bench-foot" data-sandbox-count>
+              当前命中 3 条结果 · 已过滤 1 条已弃用 v1 文档
             </div>
           </div>
         </div>
       </section>
 
       <!-- Band 6: Hairline Crosshair Component Matrix -->
-      <section class="lp-section lp-section-alt">
+      <section class="lp-section lp-section-alt" id="components">
         <div class="lp-container">
-          <div class="lp-section-head lp-section-head-split">
-            <div>
-              <h2 class="lp-h2">组件直接落在你的源码里</h2>
-              <p class="lp-section-sub">
-                提示框、步骤条、选项卡与包管理器命令均由本地组件文件渲染，随时按品牌风格调整。
-              </p>
-            </div>
-            <a class="lp-text-link" href="/components/">
-              <span>浏览全部组件</span>
-              <Icon name="ph:arrow-right" class="h-4 w-4 lp-arrow" />
-            </a>
+          <div class="lp-section-head">
+            <h2 class="lp-h2">组件直接落在你的源码里</h2>
+            <p class="lp-section-sub">
+              提示框、步骤条、选项卡与包管理器命令均由本地组件文件渲染，随时按品牌风格调整。
+            </p>
           </div>
 
           <div class="lp-crosshair-grid">
@@ -816,7 +847,7 @@ description: 每小时更新的城市气象数据。
       </section>
 
       <!-- Band 7: Editorial FAQ -->
-      <section class="lp-section" aria-labelledby="faq-heading">
+      <section class="lp-section" id="faq" aria-labelledby="faq-heading">
         <div class="lp-container lp-faq-grid">
           <div class="lp-faq-aside">
             <h2 id="faq-heading" class="lp-h2">开始前的常见问题</h2>
@@ -932,27 +963,18 @@ description: 每小时更新的城市气象数据。
           </div>
 
           <div class="lp-footer-col">
-            <h3>产品</h3>
-            <a href="/quickstart/">快速开始</a>
-            <a href="/migrate/">迁移到 Nimbus</a>
-            <a href="/components/">组件</a>
-            <a href="/registry/">注册表</a>
-            <a href="/cli/">CLI</a>
+            <h3>本页导览</h3>
+            <a href="#workflow">工作流</a>
+            <a href="#ownership">源码所有权</a>
+            <a href="#capabilities">核心能力</a>
+            <a href="#search">即时搜索</a>
+            <a href="#components">源码组件</a>
+            <a href="#faq">常见问题</a>
           </div>
 
           <div class="lp-footer-col">
-            <h3>文档</h3>
-            <a href="/writing/">写作指南</a>
-            <a href="/reference/configuration/">配置参考</a>
-            <a href="/navigation/sidebar/">导航与搜索</a>
-            <a href="/api-reference/">API 参考</a>
-          </div>
-
-          <div class="lp-footer-col">
-            <h3>资源</h3>
-            <a href="/why-nimbus/">为什么选择 Nimbus</a>
-            <a href="/ai/">面向智能体</a>
-            <a href="/deploy/">部署指南</a>
+            <h3>快速入口</h3>
+            <a href="/quickstart/">文档中心</a>
             <a href="/llms.txt">llms.txt</a>
             <a href="https://github.com/cloudflare/nimbus" target="_blank" rel="noopener">GitHub</a>
           </div>
@@ -1615,105 +1637,263 @@ npx @cloudflare/nimbus-docs add migrate
       };
       themeOptions.forEach((opt) => opt.addEventListener("click", onThemeOptionClick));
 
-      // Band 5: 搜索栏平台快捷键、真实搜索唤起与示例词切换
+      // Band 4: OpenAPI 试调展台交互
+      const apiStage = root.querySelector<HTMLElement>("[data-api-stage]");
+      const apiEpButtons = Array.from(
+        apiStage?.querySelectorAll<HTMLButtonElement>("[data-api-endpoint]") ?? [],
+      );
+      const apiLangButtons = Array.from(
+        apiStage?.querySelectorAll<HTMLButtonElement>("[data-api-lang]") ?? [],
+      );
+      const apiOpIdEl = apiStage?.querySelector<HTMLElement>("[data-api-op-id]");
+      const apiReqEl = apiStage?.querySelector<HTMLElement>("[data-api-request]");
+      const apiResEl = apiStage?.querySelector<HTMLElement>("[data-api-response]");
+      const apiStatusEl = apiStage?.querySelector<HTMLElement>("[data-api-status]");
+      const apiSendBtn = apiStage?.querySelector<HTMLButtonElement>("[data-api-send]");
+
+      const apiSpecs: Record<
+        string,
+        {
+          opId: string;
+          statusText: string;
+          samples: Record<string, string>;
+          response: string;
+        }
+      > = {
+        forecast: {
+          opId: "operationId: getForecast",
+          statusText: "200 OK · 18 ms",
+          samples: {
+            curl: `curl -X GET "https://api.weather.example/v2/forecast?city=shanghai" \\\n  -H "Authorization: Bearer nb_live_94f2a8c" \\\n  -H "Accept: application/json"`,
+            ts: `const res = await fetch("https://api.weather.example/v2/forecast?city=shanghai", {\n  headers: { Authorization: "Bearer nb_live_94f2a8c" },\n});\nconst data = await res.json();`,
+            py: `import httpx\n\nres = httpx.get(\n  "https://api.weather.example/v2/forecast",\n  params={"city": "shanghai"},\n  headers={"Authorization": "Bearer nb_live_94f2a8c"},\n)`,
+          },
+          response: `{\n  "city": "Shanghai",\n  "temperature_c": 26,\n  "condition": "Clear",\n  "updated_at": "2026-11-25T15:00:00Z"\n}`,
+        },
+        alerts: {
+          opId: "operationId: createAlertRule",
+          statusText: "201 Created · 24 ms",
+          samples: {
+            curl: `curl -X POST "https://api.weather.example/v2/alerts" \\\n  -H "Authorization: Bearer nb_live_94f2a8c" \\\n  -H "Content-Type: application/json" \\\n  -d '{"city":"Beijing","threshold_c":35}'`,
+            ts: `const res = await fetch("https://api.weather.example/v2/alerts", {\n  method: "POST",\n  headers: { Authorization: "Bearer nb_live_94f2a8c", "Content-Type": "application/json" },\n  body: JSON.stringify({ city: "Beijing", threshold_c: 35 }),\n});`,
+            py: `import httpx\n\nres = httpx.post(\n  "https://api.weather.example/v2/alerts",\n  headers={"Authorization": "Bearer nb_live_94f2a8c"},\n  json={"city": "Beijing", "threshold_c": 35},\n)`,
+          },
+          response: `{\n  "id": "alrt_01jf9x2k",\n  "city": "Beijing",\n  "threshold_c": 35,\n  "active": true\n}`,
+        },
+      };
+
+      let currentEndpoint = "forecast";
+      let currentLang = "curl";
+
+      const renderApiStage = (sent = false) => {
+        const spec = apiSpecs[currentEndpoint];
+        if (!spec) return;
+        if (apiOpIdEl) apiOpIdEl.textContent = spec.opId;
+        if (apiReqEl) {
+          const code = apiReqEl.querySelector("code") ?? apiReqEl;
+          code.textContent = spec.samples[currentLang] ?? "";
+        }
+        if (apiResEl) {
+          const code = apiResEl.querySelector("code") ?? apiResEl;
+          code.textContent = spec.response;
+          if (sent) {
+            apiResEl.classList.remove("is-pulsing");
+            void apiResEl.offsetWidth;
+            apiResEl.classList.add("is-pulsing");
+          }
+        }
+        if (apiStatusEl) {
+          apiStatusEl.textContent = sent ? spec.statusText : "待发送 · 点击按钮试调";
+          apiStatusEl.classList.toggle("is-sent", sent);
+        }
+      };
+
+      const onApiEndpointClick = (e: Event) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        const ep = btn.dataset.apiEndpoint;
+        if (!ep || !apiSpecs[ep]) return;
+        currentEndpoint = ep;
+        for (const item of apiEpButtons) {
+          item.setAttribute("aria-checked", String(item === btn));
+        }
+        renderApiStage(false);
+      };
+
+      const onApiLangClick = (e: Event) => {
+        const btn = e.currentTarget as HTMLButtonElement;
+        const lang = btn.dataset.apiLang;
+        if (!lang) return;
+        currentLang = lang;
+        for (const item of apiLangButtons) {
+          const active = item === btn;
+          item.setAttribute("aria-selected", String(active));
+          item.tabIndex = active ? 0 : -1;
+        }
+        renderApiStage(false);
+      };
+
+      const onApiSendClick = () => renderApiStage(true);
+
+      apiEpButtons.forEach((btn) => btn.addEventListener("click", onApiEndpointClick));
+      apiLangButtons.forEach((btn) => btn.addEventListener("click", onApiLangClick));
+      apiSendBtn?.addEventListener("click", onApiSendClick);
+
+      // Band 5: 本地即时搜索沙盒（支持关键词输入、高亮与版本过滤）
       const kbd = root.querySelector<HTMLElement>("[data-search-kbd]");
       if (kbd) {
         const isApple = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
         kbd.textContent = isApple ? "⌘K" : "Ctrl K";
       }
 
-      const demoSearchBtn = root.querySelector<HTMLButtonElement>("[data-open-search]");
-      const onOpenSearch = () => {
-        const headerTrigger = document.querySelector<HTMLButtonElement>("[data-search-trigger]");
-        headerTrigger?.click();
-      };
-      demoSearchBtn?.addEventListener("click", onOpenSearch);
+      interface SandboxDoc {
+        title: string;
+        desc: string;
+        meta: string;
+        deprecated: boolean;
+      }
 
-      const searchPresets: Record<
-        string,
+      const sandboxCorpus: SandboxDoc[] = [
         {
-          query: string;
-          items: Array<{ title: string; desc: string; url: string }>;
-        }
-      > = {
-        migrate: {
-          query: "如何把现有文档站迁移到 Nimbus？",
-          items: [
-            {
-              title: "迁移到 Nimbus",
-              desc: "保留所有原有 URL、frontmatter、导航结构与组件，支持编码智能体一键迁移或七步手动完成。",
-              url: "/migrate/",
-            },
-            {
-              title: "配置路径重定向",
-              desc: "在 astro.config.ts 中声明 redirects 映射，兼容静态构建与边缘适配器。",
-              url: "/navigation/redirects/",
-            },
-          ],
+          title: "迁移到 Nimbus",
+          desc: "保留所有原有 URL、frontmatter、导航结构与组件，支持编码智能体一键迁移或七步手动完成。",
+          meta: "/migrate/ · 当前版本",
+          deprecated: false,
         },
-        openapi: {
-          query: "如何从远程 URL 读取并转换 OpenAPI 规范？",
-          items: [
-            {
-              title: "从 URL 读取规范与转换",
-              desc: "声明带 integrity 校验的 URL 来源，并在渲染前使用 transform 函数修改解析后的规范。",
-              url: "/api-reference/openapi/spec-sources/",
-            },
-            {
-              title: "OpenAPI 选项",
-              desc: "查看 api 条目、多版本配置、publishCoordinates 与按请求渲染的全部参数说明。",
-              url: "/api-reference/openapi/options/",
-            },
-          ],
+        {
+          title: "OpenAPI 远程规范与转换",
+          desc: "声明带 integrity 校验的 URL 来源，并在渲染前使用 transform 函数预处理解析后的规范。",
+          meta: "/api-reference/openapi/spec-sources/ · 当前版本",
+          deprecated: false,
         },
-        mcp: {
-          query: "如何为 AI 智能体提供远程 MCP 工具？",
-          items: [
-            {
-              title: "远程 MCP 服务器",
-              desc: "把站内文档与 API 坐标封装为智能体可调用的工具端点，支持身份校验与按需查询。",
-              url: "/ai/remote-mcp/",
-            },
-            {
-              title: "面向智能体的文档",
-              desc: "了解页面 Markdown 协商、llms.txt、Agent Skills 与 WebMCP 的协同方式。",
-              url: "/ai/",
-            },
-          ],
+        {
+          title: "远程 MCP 服务器",
+          desc: "把站内文档与 API 坐标封装为智能体可调用的工具端点，支持身份校验与按需查询。",
+          meta: "/ai/remote-mcp/ · 当前版本",
+          deprecated: false,
         },
-      };
+        {
+          title: "旧版路由配置（v1）",
+          desc: "v1 版本的路径映射说明，仅在开启已弃用版本检索时展示用于历史项目查阅。",
+          meta: "/v1/routes/ · 已弃用 v1",
+          deprecated: true,
+        },
+      ];
 
+      const sandboxInput = root.querySelector<HTMLInputElement>("[data-sandbox-input]");
+      const sandboxResults = root.querySelector<HTMLElement>("[data-sandbox-results]");
+      const sandboxCount = root.querySelector<HTMLElement>("[data-sandbox-count]");
+      const versionSwitch = root.querySelector<HTMLButtonElement>("[data-version-switch]");
       const presetButtons = Array.from(
         root.querySelectorAll<HTMLButtonElement>("[data-search-preset]"),
       );
-      const queryEl = root.querySelector<HTMLElement>("[data-search-query]");
-      const resultRows = Array.from(root.querySelectorAll<HTMLAnchorElement>(".lp-search-result-row"));
 
-      const selectSearchPreset = (key: string) => {
-        const preset = searchPresets[key];
-        if (!preset) return;
-        for (const btn of presetButtons) {
-          btn.setAttribute("aria-selected", String(btn.dataset.searchPreset === key));
+      let hideDeprecated = true;
+
+      const appendHighlightedText = (parent: HTMLElement, text: string, query: string) => {
+        if (!query) {
+          parent.textContent = text;
+          return;
         }
-        if (queryEl) queryEl.textContent = preset.query;
-        preset.items.forEach((item, idx) => {
-          const row = resultRows[idx];
-          if (!row) return;
-          row.href = item.url;
-          const titleEl = row.querySelector<HTMLElement>(`[data-result-title-${idx}]`);
-          const descEl = row.querySelector<HTMLElement>(`[data-result-desc-${idx}]`);
-          const urlEl = row.querySelector<HTMLElement>(`[data-result-url-${idx}]`);
-          if (titleEl) titleEl.textContent = item.title;
-          if (descEl) descEl.textContent = item.desc;
-          if (urlEl) urlEl.textContent = item.url;
+        const lowerText = text.toLowerCase();
+        const lowerQuery = query.toLowerCase();
+        let start = 0;
+        let idx = lowerText.indexOf(lowerQuery, start);
+        while (idx !== -1) {
+          if (idx > start) {
+            parent.appendChild(document.createTextNode(text.slice(start, idx)));
+          }
+          const mark = document.createElement("mark");
+          mark.className = "lp-search-mark";
+          mark.textContent = text.slice(idx, idx + query.length);
+          parent.appendChild(mark);
+          start = idx + query.length;
+          idx = lowerText.indexOf(lowerQuery, start);
+        }
+        if (start < text.length) {
+          parent.appendChild(document.createTextNode(text.slice(start)));
+        }
+      };
+
+      const renderSearchSandbox = () => {
+        if (!sandboxResults) return;
+        const query = (sandboxInput?.value ?? "").trim();
+        const qLower = query.toLowerCase();
+
+        const visible = sandboxCorpus.filter((doc) => {
+          if (hideDeprecated && doc.deprecated) return false;
+          if (!qLower) return true;
+          return (
+            doc.title.toLowerCase().includes(qLower) ||
+            doc.desc.toLowerCase().includes(qLower) ||
+            doc.meta.toLowerCase().includes(qLower)
+          );
         });
+
+        sandboxResults.replaceChildren();
+        if (visible.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "lp-search-empty";
+          empty.textContent = hideDeprecated
+            ? "当前版本未命中结果，可尝试关闭右上角“隐藏已弃用 v1”开关或更换关键词。"
+            : "未找到匹配条目，请尝试搜索 迁移、OpenAPI、MCP 或 v1。";
+          sandboxResults.appendChild(empty);
+        } else {
+          for (const doc of visible.slice(0, 4)) {
+            const row = document.createElement("div");
+            row.className = doc.deprecated ? "lp-search-result-row is-deprecated" : "lp-search-result-row";
+            const main = document.createElement("div");
+            main.className = "lp-search-result-main";
+            const strong = document.createElement("strong");
+            appendHighlightedText(strong, doc.title, query);
+            const span = document.createElement("span");
+            appendHighlightedText(span, doc.desc, query);
+            main.append(strong, span);
+            const code = document.createElement("code");
+            appendHighlightedText(code, doc.meta, query);
+            row.append(main, code);
+            sandboxResults.appendChild(row);
+          }
+        }
+
+        if (sandboxCount) {
+          const hiddenCount = hideDeprecated
+            ? sandboxCorpus.filter((d) => d.deprecated).length
+            : 0;
+          sandboxCount.textContent = hideDeprecated
+            ? `当前命中 ${visible.length} 条结果 · 已过滤 ${hiddenCount} 条已弃用 v1 文档`
+            : `当前命中 ${visible.length} 条结果 · 包含历史已弃用版本`;
+        }
+      };
+
+      const onSandboxInput = () => {
+        const val = (sandboxInput?.value ?? "").trim();
+        for (const btn of presetButtons) {
+          btn.setAttribute("aria-checked", String((btn.dataset.searchPreset ?? "") === val));
+        }
+        renderSearchSandbox();
       };
 
       const onPresetClick = (e: Event) => {
         const btn = e.currentTarget as HTMLButtonElement;
-        if (btn.dataset.searchPreset) selectSearchPreset(btn.dataset.searchPreset);
+        const preset = btn.dataset.searchPreset ?? "";
+        if (sandboxInput) sandboxInput.value = preset;
+        for (const item of presetButtons) {
+          item.setAttribute("aria-checked", String(item === btn));
+        }
+        renderSearchSandbox();
       };
+
+      const onVersionToggle = () => {
+        if (!versionSwitch) return;
+        hideDeprecated = versionSwitch.getAttribute("aria-checked") !== "true";
+        versionSwitch.setAttribute("aria-checked", String(hideDeprecated));
+        renderSearchSandbox();
+      };
+
+      sandboxInput?.addEventListener("input", onSandboxInput);
       presetButtons.forEach((btn) => btn.addEventListener("click", onPresetClick));
+      versionSwitch?.addEventListener("click", onVersionToggle);
+      renderSearchSandbox();
 
       // 次级区块的克制滚动显现
       const revealTargets = Array.from(
@@ -1784,8 +1964,12 @@ npx @cloudflare/nimbus-docs add migrate
         });
         reviewSwitch?.removeEventListener("click", onReviewToggle);
         themeOptions.forEach((opt) => opt.removeEventListener("click", onThemeOptionClick));
-        demoSearchBtn?.removeEventListener("click", onOpenSearch);
+        apiEpButtons.forEach((btn) => btn.removeEventListener("click", onApiEndpointClick));
+        apiLangButtons.forEach((btn) => btn.removeEventListener("click", onApiLangClick));
+        apiSendBtn?.removeEventListener("click", onApiSendClick);
+        sandboxInput?.removeEventListener("input", onSandboxInput);
         presetButtons.forEach((btn) => btn.removeEventListener("click", onPresetClick));
+        versionSwitch?.removeEventListener("click", onVersionToggle);
         revealObserver?.disconnect();
         window.removeEventListener("scroll", syncVisible);
         window.removeEventListener("hashchange", syncVisible);
@@ -3156,68 +3340,99 @@ npx @cloudflare/nimbus-docs add migrate
       border-radius 220ms var(--lp-ease);
   }
 
-  /* ---- Band 4: Architectural Spec Directory ---- */
-  .lp-directory {
+  /* ---- Band 4: OpenAPI Interactive Playground & Capabilities ---- */
+  .lp-api-stage {
+    border: 1px solid var(--lp-line);
+    border-radius: 0.875rem;
+    background: var(--lp-surface-elevated);
+    box-shadow: var(--lp-stage-shadow);
+    overflow: hidden;
+  }
+
+  .lp-api-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+
+  .lp-api-req {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border-inline-end: 1px solid var(--lp-line);
+  }
+
+  .lp-api-res {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .lp-api-res-bar {
+    padding-block: 0.5rem;
+  }
+
+  .lp-api-status.is-sent {
+    color: var(--nb-success);
+    font-weight: 600;
+  }
+
+  .lp-api-json {
+    color: var(--lp-ink);
+    transition: opacity 160ms var(--lp-ease);
+  }
+
+  .lp-api-json.is-pulsing {
+    animation: lp-pulse-in 220ms var(--lp-ease);
+  }
+
+  @keyframes lp-pulse-in {
+    from {
+      opacity: 0.35;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .lp-cap-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: clamp(2rem, 4vw, 3rem);
     border-top: 1px solid var(--lp-line);
   }
 
-  .lp-directory-item {
+  .lp-cap-item {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     padding: 1.75rem 1.5rem;
     border-bottom: 1px solid var(--lp-line);
-    color: inherit;
-    text-decoration: none;
-    transition: background-color 180ms var(--lp-ease);
   }
 
-  .lp-directory-item:nth-child(odd) {
+  .lp-cap-item:nth-child(odd) {
     padding-inline-start: 0;
     border-inline-end: 1px solid var(--lp-line);
   }
 
-  .lp-directory-item:nth-child(even) {
+  .lp-cap-item:nth-child(even) {
     padding-inline-end: 0;
   }
 
-  .lp-directory-item:hover {
-    background: color-mix(in srgb, var(--lp-surface-elevated) 65%, transparent);
-  }
-
-  .lp-directory-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-  }
-
-  .lp-directory-head h3 {
+  .lp-cap-item h3 {
     color: var(--lp-ink);
     font-size: var(--lp-text-body);
     font-weight: 600;
     line-height: 1.5;
   }
 
-  .lp-directory-head :global(svg) {
-    flex: none;
-    color: var(--lp-muted-ink);
-  }
-
-  .lp-directory-item:hover .lp-directory-head :global(svg) {
-    color: var(--lp-accent);
-  }
-
-  .lp-directory-item p {
+  .lp-cap-item p {
     max-width: 48ch;
     color: var(--lp-muted-ink);
     font-size: var(--lp-text-body);
     line-height: 1.6;
   }
 
-  /* ---- Band 5: Interactive Search Workbench ---- */
+  /* ---- Band 5: Interactive Search Sandbox ---- */
   .lp-search-grid {
     display: grid;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -3242,42 +3457,45 @@ npx @cloudflare/nimbus-docs add migrate
     background: var(--lp-surface-alt);
   }
 
-  .lp-search-trigger-bar {
+  .lp-search-input-wrap {
     display: flex;
     align-items: center;
     gap: 0.625rem;
     width: 100%;
-    padding: 0.625rem 0.875rem;
+    padding: 0.5rem 0.875rem;
     border: 1px solid var(--lp-line);
     border-radius: 0.5rem;
     background: var(--lp-surface-elevated);
     color: var(--lp-ink);
-    cursor: pointer;
-    font-family: var(--nb-font-sans);
-    font-size: var(--lp-text-body);
-    line-height: 1.5;
-    text-align: start;
     transition: border-color 180ms var(--lp-ease);
   }
 
-  .lp-search-trigger-bar:hover {
-    border-color: var(--lp-line-strong);
+  .lp-search-input-wrap:focus-within {
+    border-color: var(--lp-ink);
   }
 
-  .lp-search-trigger-bar :global(svg) {
+  .lp-search-input-wrap :global(svg) {
     flex: none;
     color: var(--lp-muted-ink);
   }
 
-  .lp-search-trigger-bar span {
+  .lp-search-input {
     flex: 1;
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    border: 0;
+    background: transparent;
+    color: var(--lp-ink);
+    font-family: var(--nb-font-sans);
+    font-size: var(--lp-text-body);
+    line-height: 1.5;
+    outline: none;
   }
 
-  .lp-search-trigger-bar kbd {
+  .lp-search-input::placeholder {
+    color: var(--lp-muted-ink);
+  }
+
+  .lp-search-input-wrap kbd {
     flex: none;
     padding: 0.125rem 0.4375rem;
     border: 1px solid var(--lp-line);
@@ -3289,8 +3507,39 @@ npx @cloudflare/nimbus-docs add migrate
     line-height: 1.25rem;
   }
 
-  .lp-search-presets {
-    align-self: flex-start;
+  .lp-search-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .lp-version-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .lp-version-label {
+    color: var(--lp-muted-ink);
+    font-size: var(--lp-text-sm);
+    font-weight: 500;
+    line-height: 1.25rem;
+  }
+
+  .lp-switch-light {
+    border-color: var(--lp-line-strong);
+    background: var(--lp-line-strong);
+  }
+
+  .lp-switch-light[aria-checked="true"] {
+    border-color: var(--lp-accent);
+    background: var(--lp-accent);
+  }
+
+  .lp-switch-light[aria-checked="true"] .lp-switch-thumb {
+    background: var(--lp-accent-ink);
   }
 
   .lp-search-results {
@@ -3298,26 +3547,23 @@ npx @cloudflare/nimbus-docs add migrate
     flex-direction: column;
   }
 
-  .lp-search-result-row {
+  .lp-search-results :global(.lp-search-result-row) {
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
     padding: 1.125rem 1.25rem;
     border-bottom: 1px solid var(--lp-line);
-    color: inherit;
-    text-decoration: none;
-    transition: background-color 180ms var(--lp-ease);
   }
 
-  .lp-search-result-row:last-child {
+  .lp-search-results :global(.lp-search-result-row:last-child) {
     border-bottom: 0;
   }
 
-  .lp-search-result-row:hover {
-    background: var(--lp-surface-alt);
+  .lp-search-results :global(.lp-search-result-row.is-deprecated) {
+    background: color-mix(in srgb, var(--lp-surface-alt) 60%, transparent);
   }
 
-  .lp-search-result-main strong {
+  .lp-search-results :global(.lp-search-result-main strong) {
     display: block;
     color: var(--lp-ink);
     font-size: var(--lp-text-body);
@@ -3325,7 +3571,7 @@ npx @cloudflare/nimbus-docs add migrate
     line-height: 1.5;
   }
 
-  .lp-search-result-main span {
+  .lp-search-results :global(.lp-search-result-main span) {
     display: block;
     margin-top: 0.25rem;
     color: var(--lp-muted-ink);
@@ -3333,10 +3579,35 @@ npx @cloudflare/nimbus-docs add migrate
     line-height: 1.55;
   }
 
-  .lp-search-result-row code {
-    color: var(--lp-accent);
+  .lp-search-results :global(.lp-search-result-row code) {
+    color: var(--lp-muted-ink);
     font-family: var(--nb-font-mono);
     font-size: var(--lp-text-sm);
+    line-height: 1.4;
+  }
+
+  .lp-search-results :global(.lp-search-mark) {
+    padding: 0 0.1875rem;
+    border-radius: 0.1875rem;
+    background: var(--lp-accent);
+    color: var(--lp-accent-ink);
+  }
+
+  .lp-search-results :global(.lp-search-empty) {
+    padding: 1.5rem 1.25rem;
+    color: var(--lp-muted-ink);
+    font-size: var(--lp-text-sm);
+    line-height: 1.6;
+  }
+
+  .lp-search-bench-foot {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid var(--lp-line);
+    background: var(--lp-surface-alt);
+    color: var(--lp-muted-ink);
+    font-family: var(--nb-font-mono);
+    font-size: var(--lp-text-sm);
+    font-variant-numeric: tabular-nums;
     line-height: 1.4;
   }
 
@@ -3503,7 +3774,7 @@ npx @cloudflare/nimbus-docs add migrate
 
   .lp-footer-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.8fr) repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.8fr) repeat(2, minmax(0, 1fr));
     gap: 2.5rem;
   }
 
@@ -3606,14 +3877,16 @@ npx @cloudflare/nimbus-docs add migrate
   /* ---- Responsive ---- */
   @media (max-width: 1024px) {
     .lp-stage-split,
+    .lp-api-split,
     .lp-workflow-strip,
     .lp-atelier-grid,
     .lp-search-grid,
     .lp-faq-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
-    .lp-stage-source {
+    .lp-stage-source,
+    .lp-api-req {
       border-inline-end: 0;
       border-bottom: 1px solid var(--lp-line);
     }
@@ -3714,16 +3987,21 @@ npx @cloudflare/nimbus-docs add migrate
     }
 
     .lp-stage-checks,
-    .lp-directory,
+    .lp-cap-grid,
     .lp-crosshair-grid {
       grid-template-columns: 1fr;
     }
 
-    .lp-directory-item,
-    .lp-directory-item:nth-child(odd),
-    .lp-directory-item:nth-child(even) {
+    .lp-cap-item,
+    .lp-cap-item:nth-child(odd),
+    .lp-cap-item:nth-child(even) {
       padding-inline: 0;
       border-inline-end: 0;
+    }
+
+    .lp-footer-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem 1rem;
     }
 
     .lp-crosshair-cell:nth-child(odd) {
@@ -3753,11 +4031,6 @@ npx @cloudflare/nimbus-docs add migrate
       padding: 3rem 0 1.5rem;
     }
 
-    .lp-footer-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1.5rem 1rem;
-    }
-
     .lp-footer-brand {
       grid-column: 1 / -1;
     }
@@ -3777,6 +4050,10 @@ npx @cloudflare/nimbus-docs add migrate
   @media (prefers-reduced-motion: reduce) {
     .lp-page {
       scroll-behavior: auto;
+    }
+
+    .lp-api-json.is-pulsing {
+      animation: none;
     }
   }
 </style>
